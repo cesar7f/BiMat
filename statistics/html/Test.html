@@ -1,0 +1,979 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Test</title><meta name="generator" content="MATLAB 7.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-04-14"><meta name="DC.source" content="Test.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% Test Statistical analysis class for a bipartite object in terms of</span>
+<span class="comment">% modularity and nestedness</span>
+<span class="comment">%</span>
+<span class="comment">% Test Properties:</span>
+<span class="comment">%     bipweb - A bipartite network object in which the analysis will be done</span>
+<span class="comment">%     nulls - A set of random matrices used as null model</span>
+<span class="comment">%     tempvals - Results for the NTC value</span>
+<span class="comment">%     eigvals - Results for the espectral Radius algorithm value</span>
+<span class="comment">%     nestvals - Results for the NODF algorithm value</span>
+<span class="comment">%     nestvals_rows - Results for the NODF algorithm in rows</span>
+<span class="comment">%     nestvals_cols - Results for the NODF algorithm in columns</span>
+<span class="comment">%     qb_vals - Results for the standard modularity value</span>
+<span class="comment">%     qr_vals - Results for the ratio of interactions inside modules</span>
+<span class="comment">%     nest_row_contrib - Row NODF contributions</span>
+<span class="comment">%     nest_col_contrib - Column Nodf Contributions</span>
+<span class="comment">%     model - Null Model that will be used for creating the random networks nulls</span>
+<span class="comment">%     replicates - Number of random networks used for the null model</span>
+<span class="comment">%     modul_done - The analysis in modularity was performed</span>
+<span class="comment">%     nest_done - The analysis in NODF was performed</span>
+<span class="comment">%     temp_done - The analysis in NTC was performed</span>
+<span class="comment">%     eig_done - The analysis en expectral radius was performed</span>
+<span class="comment">%     nest_contrib_done - The analysis on nestedness contribution was performed</span>
+<span class="comment">%     print_output - Flag to print output</span>
+<span class="comment">%</span>
+<span class="comment">% Test Methods:</span>
+<span class="comment">%     Test - Main Constructor</span>
+<span class="comment">%     DoNulls - Create random matrices for the statistical analysis</span>
+<span class="comment">%     DoCompleteAnalysis - Perform the entire modularity and nestedness analysis</span>
+<span class="comment">%     Nestedness - Perform the NODF Statistical Analysis</span>
+<span class="comment">%     Temperature - Perform the NTC Statistical Analysis</span>
+<span class="comment">%     MaxEigenvalue - Perform the spectral radius Statistical Analysis</span>
+<span class="comment">%     Modularity - Perform the Modularity Statistical Analysis</span>
+<span class="comment">%     NestednessContributions - Perform the nestedness contribution Statistical Analysis</span>
+<span class="comment">%     GET_DEV_MODUL - Perform a Modularity Statistical Analysis</span>
+<span class="comment">%     GET_DEV_NEST - Perform a NODF Statistical Analysis</span>
+<span class="comment">%     GET_DEV_TEMP - Perform a NTC Statistical Analysis</span>
+<span class="comment">%     GET_DEV_EIG - Perform a spectral radius Statistical Analysis</span>
+<span class="comment">%     GET_NEST_CONTRIBUTIONS - Get NODF nestedness contributions of a</span>
+<span class="comment">%</span>
+<span class="comment">% See also:</span>
+<span class="comment">%     BipartiteModularity, NODF, NestednessBINMATNEST</span>
+<span class="keyword">classdef</span> Test &lt; handle
+
+    <span class="keyword">properties</span>(GetAccess = <span class="string">'public'</span>, SetAccess = <span class="string">'public'</span>)
+        bipweb       = {};     <span class="comment">% A bipartite network object in which the analysis will be done</span>
+        nulls        = {};     <span class="comment">% A set of random matrices used as null model</span>
+        tempvals      = [];    <span class="comment">% Results for the NTC value</span>
+        eigvals       = [];    <span class="comment">% Results for the espectral Radius algorithm value</span>
+        nestvals      = [];    <span class="comment">% Results for the NODF algorithm value</span>
+        nestvals_rows = [];    <span class="comment">% Results for the NODF algorithm in rows</span>
+        nestvals_cols = [];    <span class="comment">% Results for the NODF algorithm in columns</span>
+        qb_vals       = [];    <span class="comment">% Results for the standard modularity value</span>
+        qr_vals       = [];    <span class="comment">% Results for the ratio of interactions inside modules</span>
+        nest_row_contrib = []; <span class="comment">% Row NODF contributions</span>
+        nest_col_contrib = []; <span class="comment">% Column Nodf Contributions</span>
+        model        = {};     <span class="comment">% Null Model that will be used for creating the random networks nulls</span>
+        replicates   = 100;    <span class="comment">% Number of random networks used for the null model</span>
+        modul_done   = 0;      <span class="comment">% The analysis in modularity was performed</span>
+        nest_done    = 0;      <span class="comment">% The analysis in NODF was performed</span>
+        temp_done    = 0;      <span class="comment">% The analysis in NTC was performed</span>
+        eig_done     = 0;      <span class="comment">% The analysis en expectral radius was performed</span>
+        nest_contrib_done = 0; <span class="comment">% The analysis on nestedness contribution was performed</span>
+        print_output = 1;      <span class="comment">% Flag to print output</span>
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = Test(webbip)
+        <span class="comment">% Test - Main Constructor</span>
+        <span class="comment">%   obj = TEST(webbip) Create a Test object that makes</span>
+        <span class="comment">%   reference to the Bipartite object webbip</span>
+
+            obj.bipweb = webbip;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> obj = DoNulls(obj,nullmodel,replic)
+        <span class="comment">% DoNulls - Create random matrices for the statistical analysis</span>
+        <span class="comment">%   obj = DoNulls(obj) Create 100 random matrices using the</span>
+        <span class="comment">%   EQUIPROBABLE null model.</span>
+        <span class="comment">%</span>
+        <span class="comment">%   obj = DoNulls(obj,nullmodel) Create 100 random matrices using the</span>
+        <span class="comment">%   indicated Null Model</span>
+        <span class="comment">%</span>
+        <span class="comment">%   obj = DoNulls(obj,nullmodel,replic) Create replic random</span>
+        <span class="comment">%   matrices using the null model indicated in the variable</span>
+        <span class="comment">%   nullmodel</span>
+
+            obj.modul_done = 0;
+            obj.nest_done = 0;
+
+            <span class="keyword">if</span>(nargin == 1)
+                obj.model = @NullModels.EQUIPROBABLE;
+                obj.replicates = 100;
+            <span class="keyword">elseif</span>(nargin == 2)
+                obj.model = nullmodel;
+                obj.replicates = 100;
+            <span class="keyword">else</span>
+                obj.model = nullmodel;
+                obj.replicates = replic;
+            <span class="keyword">end</span>
+
+            obj.nulls = NullModels.NULL_MODEL(obj.bipweb.adjacency,obj.model,obj.replicates);
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> obj = DoCompleteAnalysis(obj, replic, nullmodel)
+        <span class="comment">% DoCompleteAnalysis - Perform the entire modularity and nestedness analysis</span>
+        <span class="comment">%   obj = DoCompleteAnalysis(obj) Perform the entire analysis for</span>
+        <span class="comment">%   nestedness and modularity using the EQUIPROBABLE null model and 100 random matrices.</span>
+        <span class="comment">%</span>
+        <span class="comment">%   obj = DoCompleteAnalysis(obj,replic) Perform the entire analysis for</span>
+        <span class="comment">%   nestedness and modularity using the EQUIPROBABLE null model and a total of replic random matrices.</span>
+        <span class="comment">%</span>
+        <span class="comment">%   obj = DoCompleteAnalysis(obj,replic,nullmodel) Perform the entire analysis for</span>
+        <span class="comment">%   nestedness and modularity using the the specified Null model</span>
+        <span class="comment">%   and a total of replic random matrices</span>
+
+
+            <span class="keyword">if</span>(nargin == 1)
+                nullmodel= @NullModels.EQUIPROBABLE;
+                replic = 100;
+            <span class="keyword">elseif</span>(nargin == 2)
+                nullmodel= @NullModels.EQUIPROBABLE;
+            <span class="keyword">end</span>
+
+            obj.DoNulls(nullmodel,replic);
+            obj.Nestedness();
+            obj.Modularity();
+            obj.Temperature();
+            <span class="comment">%obj.MaxEigenvalue();</span>
+
+            <span class="keyword">if</span>(obj.print_output == 1)
+                fprintf(<span class="string">'Null Model: %s\n'</span>, func2str(obj.model));
+                fprintf(<span class="string">'Trials: %i\n'</span>, replic);
+                fprintf(<span class="string">'Modularity\n'</span>);
+                fprintf(<span class="string">'\tQb: %f\n'</span>, obj.qb_vals.value);
+                fprintf(<span class="string">'\tz-score: %f\n'</span>, obj.qb_vals.zscore);
+                fprintf(<span class="string">'\tpercentage: %f\n'</span>, obj.qb_vals.percent);
+                fprintf(<span class="string">'Nestedness\n'</span>);
+                fprintf(<span class="string">'\tNodf: %f\n'</span>, obj.nestvals.value);
+                fprintf(<span class="string">'\tz-score: %f\n'</span>, obj.nestvals.zscore);
+                fprintf(<span class="string">'\tpercentage: %f\n'</span>, obj.nestvals.percent);
+                fprintf(<span class="string">'Temperature\n'</span>);
+                fprintf(<span class="string">'\tNTC: %f\n'</span>, obj.tempvals.ntc);
+                fprintf(<span class="string">'\tz-score: %f\n'</span>, obj.tempvals.zscore);
+                fprintf(<span class="string">'\tpercentage: %f\n'</span>, obj.tempvals.percent);
+                <span class="comment">%fprintf('Eigenvalue Nestedness\n');</span>
+                <span class="comment">%fprintf('\tMax Eigenvalue: %f\n', obj.eigvals.maxe);</span>
+                <span class="comment">%fprintf('\tz-score: %f\n', obj.eigvals.zscore);</span>
+                <span class="comment">%fprintf('\tpercentage: %f\n', obj.eigvals.percent);</span>
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> obj = Nestedness(obj)
+        <span class="comment">% Nestedness - Perform the NODF Statistical Analysis</span>
+        <span class="comment">%   obj = Nestedness(obj) Perform the entire NODF analsysis. Be</span>
+        <span class="comment">%   sure to create the random matrices before calling this</span>
+        <span class="comment">%   function. Otherwise only 100 equiprobable random matrices will</span>
+        <span class="comment">%   be used for the analysis</span>
+
+            <span class="keyword">if</span>(isempty(obj.nulls))
+                obj.DoNulls();
+            <span class="keyword">end</span>
+            [obj.nestvals obj.nestvals_rows obj.nestvals_cols] = Test.GET_DEV_NEST(obj.bipweb,obj.nulls);
+            obj.nest_done = 1;
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> obj = Temperature(obj)
+        <span class="comment">% Temperature - Perform the NTC Statistical Analysis</span>
+        <span class="comment">%   obj = Temperature(obj) Perform the NTC Statistical analsysis. Be</span>
+        <span class="comment">%   sure to create the random matrices before calling this</span>
+        <span class="comment">%   function. Otherwise only 100 equiprobable random matrices will</span>
+        <span class="comment">%   be used for the analysis</span>
+
+            <span class="keyword">if</span>(isempty(obj.nulls))
+                obj.DoNulls();
+            <span class="keyword">end</span>
+            [obj.tempvals] = Test.GET_DEV_TEMP(obj.bipweb,obj.nulls);
+            obj.temp_done = 1;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> obj = MaxEigenvalue(obj)
+        <span class="comment">% MaxEigenvalue - Perform the spectral radius Statistical Analysis</span>
+        <span class="comment">%   obj = MaxEigenvalue(obj) Perform the NTC Statistical analsysis. Be</span>
+        <span class="comment">%   sure to create the random matrices before calling this</span>
+        <span class="comment">%   function. Otherwise only 100 equiprobable random matrices will</span>
+        <span class="comment">%   be used for the analysis</span>
+
+            <span class="keyword">if</span>(isempty(obj.nulls))
+                obj.DoNulls();
+            <span class="keyword">end</span>
+
+            [obj.eigvals] = Test.GET_DEV_EIG(obj.bipweb,obj.nulls);
+
+            obj.eig_done = 1;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> obj = Modularity(obj)
+        <span class="comment">% Modularity - Perform the Modularity Statistical Analysis</span>
+        <span class="comment">%   obj = Temperature(obj) Perform the NTC Statistical analsysis. Be</span>
+        <span class="comment">%   sure to create the random matrices before calling this</span>
+        <span class="comment">%   function. Otherwise only 100 equiprobable random matrices will</span>
+        <span class="comment">%   be used for the analysis</span>
+
+            <span class="keyword">if</span>(isempty(obj.nulls))
+                obj.DoNulls();
+            <span class="keyword">end</span>
+
+            <span class="comment">%Calculate the modularity of the Bipartite object</span>
+            <span class="keyword">if</span>(obj.bipweb.modules.done == 0)
+                obj.bipweb.modules.Detect(100);
+            <span class="keyword">end</span>
+
+            [obj.qb_vals obj.qr_vals] = Test.GET_DEV_MODUL(obj.bipweb, obj.nulls);
+            obj.modul_done = 1;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> obj = NestednessContributions(obj)
+        <span class="comment">% NestednessContributions - Perform the nestedness contribution Statistical Analysis</span>
+        <span class="comment">%   obj = NestednessContributions(obj) Perform the nestedness contribution Statistical analsysis. Be</span>
+        <span class="comment">%   sure to create the random matrices before calling this</span>
+        <span class="comment">%   function. Otherwise only 100 equiprobable random matrices will</span>
+        <span class="comment">%   be used for the analysis</span>
+
+            <span class="keyword">if</span>(isempty(obj.nulls))
+                obj.DoNulls();
+            <span class="keyword">end</span>
+            [obj.nest_row_contrib obj.nest_col_contrib] = Test.GET_NEST_CONTRIBUTIONS(obj.bipweb.adjacency,obj.nulls);
+            obj.nest_contrib_done = 1;
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>(Static)
+
+        <span class="keyword">function</span> [out_b out_r] = GET_DEV_MODUL(webbip,rmatrices)
+        <span class="comment">% GET_DEV_MODUL - Perform a Modularity Statistical Analysis</span>
+        <span class="comment">%   [out_b out_r] =  GET_DEV_MODUL(webbip,rmatrices) Perform t-test and</span>
+        <span class="comment">%   z-test in the modularity value of the bipartite object webbip using</span>
+        <span class="comment">%   the ser of random matrices rmatrices. Return an</span>
+        <span class="comment">%   structure for both Qb (standard modularity definition) and Qr</span>
+        <span class="comment">%   (ratio of inside module vs total interactions). These</span>
+        <span class="comment">%   structures contain the next values:</span>
+        <span class="comment">%      value   - The value in the empirical matrix</span>
+        <span class="comment">%      p       - p-value of the performed t-test</span>
+        <span class="comment">%      ci      - Confidence interval of the performet t-test</span>
+        <span class="comment">%      percent - The percent of random networks for which  the</span>
+        <span class="comment">%                empirical value is bigger than the value of the random</span>
+        <span class="comment">%                networks</span>
+        <span class="comment">%      z       - z-score of the empirical value</span>
+
+            wQr = webbip.modules.Qr;
+            wQb = webbip.modules.Qb;
+            n = length(rmatrices);
+
+            Qb_random = zeros(n,1);
+            Qr_random = zeros(n,1);
+
+            modul_class = str2func(class(webbip.modules));
+            n_trials = webbip.modules.trials;
+            <span class="keyword">for</span> i = 1:n
+                modularity = modul_class(rmatrices{i});
+                modularity.trials = n_trials;
+                modularity.Detect(10);
+                Qb_random(i) = modularity.Qb;
+                Qr_random(i) = modularity.Qr;
+                <span class="comment">%fprintf('Trial %i:\n', i);</span>
+            <span class="keyword">end</span>
+
+            [hb pb cib] = ttest(Qb_random, wQb);
+            [hr pr cir] = ttest(Qr_random, wQr);
+
+            cib = [sum(cib)/2; cib];
+            cir = [sum(cir)/2; cir];
+
+            z_qb = (webbip.modules.Qb - mean(Qb_random))/std(Qb_random);
+            z_qr = (webbip.modules.Qr - mean(Qr_random))/std(Qr_random);
+
+            percent_qb = sum(webbip.modules.Qb&gt;Qb_random)/n;
+            percent_qr = sum(webbip.modules.Qr&gt;Qr_random)/n;
+
+
+            out_b.value = wQb; out_b.p = pb; out_b.ci = cib; out_b.zscore = z_qb; out_b.percent = percent_qb;
+            out_r.value = wQr; out_r.p = pr; out_r.ci = cir; out_r.zscore = z_qr; out_r.percent = percent_qr;
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [out out_row out_col] = GET_DEV_NEST(webbip,rmatrices)
+        <span class="comment">% GET_DEV_NEST - Perform a NODF Statistical Analysis</span>
+        <span class="comment">%   [out out_row out_col] =  GET_DEV_NEST(webbip,rmatrices) Perform t-test and</span>
+        <span class="comment">%   z-test in the NODF value of the bipartite object webbip using</span>
+        <span class="comment">%   the ser of random matrices rmatrices. Return a</span>
+        <span class="comment">%   structure for nodf values in the entire matrix(out), rows (out_row)</span>
+        <span class="comment">%   and columns (out_col) with the next elements:</span>
+        <span class="comment">%      value   - The value in the empirical matrix</span>
+        <span class="comment">%      p       - p-value of the performed t-test</span>
+        <span class="comment">%      ci      - Confidence interval of the performet t-test</span>
+        <span class="comment">%      percent - The percent of random networks for which  the</span>
+        <span class="comment">%                empirical value is bigger than the value of the random</span>
+        <span class="comment">%                networks</span>
+        <span class="comment">%      z       - z-score of the empirical value</span>
+            n = length(rmatrices);
+            expect = zeros(n,1);
+            expect_row = zeros(n,1);
+            expect_col = zeros(n,1);
+
+            <span class="keyword">for</span> i = 1:n
+                Nodf = NODF(rmatrices{i});
+                expect(i) = Nodf.nodf;
+                expect_row(i) = Nodf.nodf_rows;
+                expect_col(i) = Nodf.nodf_cols;
+            <span class="keyword">end</span>
+
+            [h p ci] = ttest(expect, webbip.nodf.nodf);
+            [h p_row ci_row] = ttest(expect_row, webbip.nodf.nodf_rows);
+            [h p_col ci_col] = ttest(expect_col, webbip.nodf.nodf_cols);
+
+
+            ci = [sum(ci)/2; ci];
+            ci_row = [sum(ci_row)/2; ci_row];
+            ci_col = [sum(ci_col)/2; ci_col];
+            z_nest = (webbip.nodf.nodf - mean(expect))/std(expect);
+            z_nest_row = (webbip.nodf.nodf_rows - mean(expect_row))/std(expect_row);
+            z_nest_col = (webbip.nodf.nodf_cols - mean(expect_col))/std(expect_col);
+            percent = sum(webbip.nodf.nodf&gt;expect)/n;
+            percent_row = sum(webbip.nodf.nodf&gt;expect_row)/n;
+            percent_col = sum(webbip.nodf.nodf&gt;expect_col)/n;
+
+            out.value = webbip.nodf.nodf; out.p = p; out.ci = ci; out.zscore = z_nest; out.percent = percent;
+            out_row.value = webbip.nodf.nodf_rows; out_row.p = p_row; out_row.ci = ci_row; out_row.zscore = z_nest_row; out_row.percent = percent_row;
+            out_col.value = webbip.nodf.nodf_cols; out_col.p = p_col; out_col.ci = ci_col; out_col.zscore = z_nest_col; out_col.percent = percent_col;
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [out] = GET_DEV_TEMP(webbip,rmatrices)
+        <span class="comment">% GET_DEV_TEMP - Perform a NTC Statistical Analysis</span>
+        <span class="comment">%   [out out_row out_col] =  GET_DEV_TEMP(webbip,rmatrices) Perform t-test and</span>
+        <span class="comment">%   z-test in the NTC value of the bipartite object webbip using</span>
+        <span class="comment">%   the ser of random matrices rmatrices. Return a</span>
+        <span class="comment">%   structure for NTC statistical values in the entire matrix(out)</span>
+        <span class="comment">%   with the next elements:</span>
+        <span class="comment">%      value   - The value in the empirical matrix</span>
+        <span class="comment">%      p       - p-value of the performed t-test</span>
+        <span class="comment">%      ci      - Confidence interval of the performet t-test</span>
+        <span class="comment">%      percent - The percent of random networks for which  the</span>
+        <span class="comment">%                empirical value is bigger than the value of the random</span>
+        <span class="comment">%                networks</span>
+        <span class="comment">%      z       - z-score of the empirical value</span>
+            n = length(rmatrices);
+            nestedness = NestednessBINMATNEST(webbip.webmatrix&gt;0);
+            nestedness.CalculateNestedness();
+            ntc = nestedness.N;
+
+            expect = zeros(n,1);
+
+            <span class="keyword">for</span> i = 1:n
+                nestedness.SetMatrix(rmatrices{i});
+                nestedness.DoGeometry = 0;
+                nestedness.CalculateNestedness();
+                expect(i) = nestedness.N;
+                <span class="comment">%fprintf('Trial %i:\n', i);</span>
+            <span class="keyword">end</span>
+
+            [h p ci] = ttest(expect, webbip.ntc.N);
+
+            ci = [sum(ci)/2; ci];
+            z_nest = (ntc - mean(expect))/std(expect);
+            percent = sum(ntc&gt;expect)/n;
+
+            out.ntc = ntc; out.p = p; out.ci = ci; out.zscore = z_nest; out.percent = percent;
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [out] = GET_DEV_EIG(webbip,rmatrices)
+        <span class="comment">% GET_DEV_EIG - Perform a spectral radius Statistical Analysis</span>
+        <span class="comment">%   [out out_row out_col] =  GET_DEV_EIG(webbip,rmatrices) Perform t-test and</span>
+        <span class="comment">%   z-test in the NTC value of the bipartite object webbip using</span>
+        <span class="comment">%   the ser of random matrices rmatrices. Return a</span>
+        <span class="comment">%   structure for NTC statistical values in the entire matrix(out)</span>
+        <span class="comment">%   with the next elements:</span>
+        <span class="comment">%      value   - The value in the empirical matrix</span>
+        <span class="comment">%      p       - p-value of the performed t-test</span>
+        <span class="comment">%      ci      - Confidence interval of the performet t-test</span>
+        <span class="comment">%      percent - The percent of random networks for which  the</span>
+        <span class="comment">%                empirical value is bigger than the value of the random</span>
+        <span class="comment">%                networks</span>
+        <span class="comment">%      z       - z-score of the empirical value</span>
+            n = length(rmatrices);
+            expect = zeros(n,1);
+
+            out.maxe = MatrixNull.GetBiggestEigenvalue(webbip.adjacency);
+
+            <span class="keyword">for</span> i = 1:n
+                expect(i) = MatrixNull.GetBiggestEigenvalue(rmatrices{i});
+            <span class="keyword">end</span>
+
+            [h p ci] = ttest(expect, out.maxe);
+
+            ci = [sum(ci)/2; ci];
+            z_nest = (out.maxe - mean(expect))/std(expect);
+            percent = sum(out.maxe&gt;expect)/n;
+
+            out.p = p; out.ci = ci; out.zscore = z_nest; out.percent = percent;
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [c_rows c_cols] = GET_NEST_CONTRIBUTIONS(matrix, rmatrices)
+        <span class="comment">% GET_NEST_CONTRIBUTIONS - Get NODF nestedness contributions of a</span>
+        <span class="comment">% matrix</span>
+        <span class="comment">%   [c_rows c_cols] = GET_NEST_CONTRIBUTIONS(matrix, rmatrices) Get</span>
+        <span class="comment">%   the NODF contributions for both rows and columns. The</span>
+        <span class="comment">%   contribution is calculated as the z-score of each individually</span>
+        <span class="comment">%   randomly permuted row and columns</span>
+            nodf = NODF(matrix);
+            N = nodf.nodf;
+            [n_rows n_cols] = size(matrix);
+            nn = length(rmatrices);
+            row_contrib = zeros(nn,n_rows);
+            col_contrib = zeros(nn,n_cols);
+            orig_matrix = matrix;
+            <span class="keyword">for</span> i = 1:n_rows
+                temp_row = matrix(i,:);
+                <span class="keyword">for</span> j = 1:nn
+                    matrix(i,:) = rmatrices{j}(i,:);
+                    nodf = NODF(matrix,0);
+                    row_contrib(j,i) = nodf.nodf;
+                    <span class="keyword">if</span>(isnan(nodf.nodf))
+                        <span class="keyword">continue</span>;
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+                matrix(i,:) = temp_row;
+            <span class="keyword">end</span>
+
+            <span class="keyword">for</span> i = 1:n_cols
+                temp_col = matrix(:,i);
+                <span class="keyword">for</span> j = 1:nn
+                    matrix(:,i) = rmatrices{j}(:,i);
+                    nodf = NODF(matrix,0);
+                    col_contrib(j,i) = nodf.nodf;
+                <span class="keyword">end</span>
+                matrix(:,i) = temp_col;
+            <span class="keyword">end</span>
+            std_rows = std(row_contrib);
+            std_cols = std(col_contrib);
+            mean_rows = mean(row_contrib);
+            mean_cols = mean(col_contrib);
+
+            c_rows = (N - mean_rows)./std_rows;
+            c_cols = (N - mean_cols)./std_cols;
+
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Error using Test (line 73)
+Not enough input arguments.
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.14<br></p></div><!--
+##### SOURCE BEGIN #####
+% Test Statistical analysis class for a bipartite object in terms of
+% modularity and nestedness
+%
+% Test Properties:
+%     bipweb - A bipartite network object in which the analysis will be done
+%     nulls - A set of random matrices used as null model
+%     tempvals - Results for the NTC value
+%     eigvals - Results for the espectral Radius algorithm value
+%     nestvals - Results for the NODF algorithm value
+%     nestvals_rows - Results for the NODF algorithm in rows
+%     nestvals_cols - Results for the NODF algorithm in columns
+%     qb_vals - Results for the standard modularity value
+%     qr_vals - Results for the ratio of interactions inside modules
+%     nest_row_contrib - Row NODF contributions
+%     nest_col_contrib - Column Nodf Contributions
+%     model - Null Model that will be used for creating the random networks nulls
+%     replicates - Number of random networks used for the null model
+%     modul_done - The analysis in modularity was performed
+%     nest_done - The analysis in NODF was performed
+%     temp_done - The analysis in NTC was performed
+%     eig_done - The analysis en expectral radius was performed
+%     nest_contrib_done - The analysis on nestedness contribution was performed
+%     print_output - Flag to print output       
+%
+% Test Methods:
+%     Test - Main Constructor
+%     DoNulls - Create random matrices for the statistical analysis
+%     DoCompleteAnalysis - Perform the entire modularity and nestedness analysis
+%     Nestedness - Perform the NODF Statistical Analysis
+%     Temperature - Perform the NTC Statistical Analysis
+%     MaxEigenvalue - Perform the spectral radius Statistical Analysis
+%     Modularity - Perform the Modularity Statistical Analysis
+%     NestednessContributions - Perform the nestedness contribution Statistical Analysis
+%     GET_DEV_MODUL - Perform a Modularity Statistical Analysis
+%     GET_DEV_NEST - Perform a NODF Statistical Analysis
+%     GET_DEV_TEMP - Perform a NTC Statistical Analysis
+%     GET_DEV_EIG - Perform a spectral radius Statistical Analysis
+%     GET_NEST_CONTRIBUTIONS - Get NODF nestedness contributions of a
+%
+% See also:
+%     BipartiteModularity, NODF, NestednessBINMATNEST
+classdef Test < handle
+
+    properties(GetAccess = 'public', SetAccess = 'public')
+        bipweb       = {};     % A bipartite network object in which the analysis will be done
+        nulls        = {};     % A set of random matrices used as null model
+        tempvals      = [];    % Results for the NTC value
+        eigvals       = [];    % Results for the espectral Radius algorithm value
+        nestvals      = [];    % Results for the NODF algorithm value
+        nestvals_rows = [];    % Results for the NODF algorithm in rows
+        nestvals_cols = [];    % Results for the NODF algorithm in columns
+        qb_vals       = [];    % Results for the standard modularity value
+        qr_vals       = [];    % Results for the ratio of interactions inside modules
+        nest_row_contrib = []; % Row NODF contributions
+        nest_col_contrib = []; % Column Nodf Contributions
+        model        = {};     % Null Model that will be used for creating the random networks nulls
+        replicates   = 100;    % Number of random networks used for the null model
+        modul_done   = 0;      % The analysis in modularity was performed
+        nest_done    = 0;      % The analysis in NODF was performed
+        temp_done    = 0;      % The analysis in NTC was performed
+        eig_done     = 0;      % The analysis en expectral radius was performed
+        nest_contrib_done = 0; % The analysis on nestedness contribution was performed
+        print_output = 1;      % Flag to print output
+    end
+    
+    methods
+
+        function obj = Test(webbip)
+        % Test - Main Constructor
+        %   obj = TEST(webbip) Create a Test object that makes
+        %   reference to the Bipartite object webbip
+        
+            obj.bipweb = webbip;
+        end
+        
+        function obj = DoNulls(obj,nullmodel,replic)
+        % DoNulls - Create random matrices for the statistical analysis
+        %   obj = DoNulls(obj) Create 100 random matrices using the
+        %   EQUIPROBABLE null model.
+        %
+        %   obj = DoNulls(obj,nullmodel) Create 100 random matrices using the
+        %   indicated Null Model
+        %
+        %   obj = DoNulls(obj,nullmodel,replic) Create replic random
+        %   matrices using the null model indicated in the variable
+        %   nullmodel
+        
+            obj.modul_done = 0;
+            obj.nest_done = 0;
+            
+            if(nargin == 1)
+                obj.model = @NullModels.EQUIPROBABLE;
+                obj.replicates = 100;
+            elseif(nargin == 2)
+                obj.model = nullmodel;
+                obj.replicates = 100;
+            else
+                obj.model = nullmodel;
+                obj.replicates = replic;
+            end
+            
+            obj.nulls = NullModels.NULL_MODEL(obj.bipweb.adjacency,obj.model,obj.replicates);
+            
+        end
+        
+        function obj = DoCompleteAnalysis(obj, replic, nullmodel)
+        % DoCompleteAnalysis - Perform the entire modularity and nestedness analysis
+        %   obj = DoCompleteAnalysis(obj) Perform the entire analysis for
+        %   nestedness and modularity using the EQUIPROBABLE null model and 100 random matrices.
+        %
+        %   obj = DoCompleteAnalysis(obj,replic) Perform the entire analysis for
+        %   nestedness and modularity using the EQUIPROBABLE null model and a total of replic random matrices.
+        %
+        %   obj = DoCompleteAnalysis(obj,replic,nullmodel) Perform the entire analysis for
+        %   nestedness and modularity using the the specified Null model
+        %   and a total of replic random matrices
+        
+            
+            if(nargin == 1)
+                nullmodel= @NullModels.EQUIPROBABLE;
+                replic = 100;
+            elseif(nargin == 2)
+                nullmodel= @NullModels.EQUIPROBABLE;
+            end
+            
+            obj.DoNulls(nullmodel,replic);
+            obj.Nestedness();
+            obj.Modularity();
+            obj.Temperature();
+            %obj.MaxEigenvalue();
+            
+            if(obj.print_output == 1)
+                fprintf('Null Model: %s\n', func2str(obj.model));
+                fprintf('Trials: %i\n', replic);
+                fprintf('Modularity\n');
+                fprintf('\tQb: %f\n', obj.qb_vals.value);
+                fprintf('\tz-score: %f\n', obj.qb_vals.zscore);
+                fprintf('\tpercentage: %f\n', obj.qb_vals.percent);
+                fprintf('Nestedness\n');
+                fprintf('\tNodf: %f\n', obj.nestvals.value);
+                fprintf('\tz-score: %f\n', obj.nestvals.zscore);
+                fprintf('\tpercentage: %f\n', obj.nestvals.percent);
+                fprintf('Temperature\n');
+                fprintf('\tNTC: %f\n', obj.tempvals.ntc);
+                fprintf('\tz-score: %f\n', obj.tempvals.zscore);
+                fprintf('\tpercentage: %f\n', obj.tempvals.percent);
+                %fprintf('Eigenvalue Nestedness\n');
+                %fprintf('\tMax Eigenvalue: %f\n', obj.eigvals.maxe);
+                %fprintf('\tz-score: %f\n', obj.eigvals.zscore);
+                %fprintf('\tpercentage: %f\n', obj.eigvals.percent);
+            end
+            
+        end
+        
+        function obj = Nestedness(obj)
+        % Nestedness - Perform the NODF Statistical Analysis
+        %   obj = Nestedness(obj) Perform the entire NODF analsysis. Be
+        %   sure to create the random matrices before calling this
+        %   function. Otherwise only 100 equiprobable random matrices will
+        %   be used for the analysis
+        
+            if(isempty(obj.nulls))
+                obj.DoNulls();
+            end
+            [obj.nestvals obj.nestvals_rows obj.nestvals_cols] = Test.GET_DEV_NEST(obj.bipweb,obj.nulls);
+            obj.nest_done = 1;
+            
+        end
+        
+        function obj = Temperature(obj)
+        % Temperature - Perform the NTC Statistical Analysis
+        %   obj = Temperature(obj) Perform the NTC Statistical analsysis. Be
+        %   sure to create the random matrices before calling this
+        %   function. Otherwise only 100 equiprobable random matrices will
+        %   be used for the analysis
+        
+            if(isempty(obj.nulls))
+                obj.DoNulls();
+            end
+            [obj.tempvals] = Test.GET_DEV_TEMP(obj.bipweb,obj.nulls);
+            obj.temp_done = 1;
+        end
+        
+        function obj = MaxEigenvalue(obj)
+        % MaxEigenvalue - Perform the spectral radius Statistical Analysis
+        %   obj = MaxEigenvalue(obj) Perform the NTC Statistical analsysis. Be
+        %   sure to create the random matrices before calling this
+        %   function. Otherwise only 100 equiprobable random matrices will
+        %   be used for the analysis
+            
+            if(isempty(obj.nulls))
+                obj.DoNulls();
+            end
+            
+            [obj.eigvals] = Test.GET_DEV_EIG(obj.bipweb,obj.nulls);
+            
+            obj.eig_done = 1;
+        end
+        
+        function obj = Modularity(obj)
+        % Modularity - Perform the Modularity Statistical Analysis
+        %   obj = Temperature(obj) Perform the NTC Statistical analsysis. Be
+        %   sure to create the random matrices before calling this
+        %   function. Otherwise only 100 equiprobable random matrices will
+        %   be used for the analysis
+        
+            if(isempty(obj.nulls))
+                obj.DoNulls();
+            end
+            
+            %Calculate the modularity of the Bipartite object
+            if(obj.bipweb.modules.done == 0)
+                obj.bipweb.modules.Detect(100);
+            end
+            
+            [obj.qb_vals obj.qr_vals] = Test.GET_DEV_MODUL(obj.bipweb, obj.nulls);
+            obj.modul_done = 1;
+        end
+        
+        function obj = NestednessContributions(obj)
+        % NestednessContributions - Perform the nestedness contribution Statistical Analysis
+        %   obj = NestednessContributions(obj) Perform the nestedness contribution Statistical analsysis. Be
+        %   sure to create the random matrices before calling this
+        %   function. Otherwise only 100 equiprobable random matrices will
+        %   be used for the analysis
+        
+            if(isempty(obj.nulls))
+                obj.DoNulls();
+            end
+            [obj.nest_row_contrib obj.nest_col_contrib] = Test.GET_NEST_CONTRIBUTIONS(obj.bipweb.adjacency,obj.nulls);
+            obj.nest_contrib_done = 1;
+        end
+        
+    end
+    
+    methods(Static)
+        
+        function [out_b out_r] = GET_DEV_MODUL(webbip,rmatrices)
+        % GET_DEV_MODUL - Perform a Modularity Statistical Analysis
+        %   [out_b out_r] =  GET_DEV_MODUL(webbip,rmatrices) Perform t-test and
+        %   z-test in the modularity value of the bipartite object webbip using
+        %   the ser of random matrices rmatrices. Return an
+        %   structure for both Qb (standard modularity definition) and Qr
+        %   (ratio of inside module vs total interactions). These
+        %   structures contain the next values:
+        %      value   - The value in the empirical matrix
+        %      p       - p-value of the performed t-test
+        %      ci      - Confidence interval of the performet t-test
+        %      percent - The percent of random networks for which  the
+        %                empirical value is bigger than the value of the random
+        %                networks
+        %      z       - z-score of the empirical value
+        
+            wQr = webbip.modules.Qr;
+            wQb = webbip.modules.Qb;
+            n = length(rmatrices);
+            
+            Qb_random = zeros(n,1);
+            Qr_random = zeros(n,1);
+            
+            modul_class = str2func(class(webbip.modules));
+            n_trials = webbip.modules.trials;
+            for i = 1:n
+                modularity = modul_class(rmatrices{i});
+                modularity.trials = n_trials;
+                modularity.Detect(10);
+                Qb_random(i) = modularity.Qb;
+                Qr_random(i) = modularity.Qr; 
+                %fprintf('Trial %i:\n', i);
+            end
+            
+            [hb pb cib] = ttest(Qb_random, wQb);
+            [hr pr cir] = ttest(Qr_random, wQr);
+            
+            cib = [sum(cib)/2; cib];
+            cir = [sum(cir)/2; cir];
+            
+            z_qb = (webbip.modules.Qb - mean(Qb_random))/std(Qb_random);
+            z_qr = (webbip.modules.Qr - mean(Qr_random))/std(Qr_random);
+            
+            percent_qb = sum(webbip.modules.Qb>Qb_random)/n;
+            percent_qr = sum(webbip.modules.Qr>Qr_random)/n;
+            
+            
+            out_b.value = wQb; out_b.p = pb; out_b.ci = cib; out_b.zscore = z_qb; out_b.percent = percent_qb;
+            out_r.value = wQr; out_r.p = pr; out_r.ci = cir; out_r.zscore = z_qr; out_r.percent = percent_qr;
+            
+        end
+        
+        function [out out_row out_col] = GET_DEV_NEST(webbip,rmatrices) 
+        % GET_DEV_NEST - Perform a NODF Statistical Analysis
+        %   [out out_row out_col] =  GET_DEV_NEST(webbip,rmatrices) Perform t-test and
+        %   z-test in the NODF value of the bipartite object webbip using
+        %   the ser of random matrices rmatrices. Return a
+        %   structure for nodf values in the entire matrix(out), rows (out_row)
+        %   and columns (out_col) with the next elements:
+        %      value   - The value in the empirical matrix
+        %      p       - p-value of the performed t-test
+        %      ci      - Confidence interval of the performet t-test
+        %      percent - The percent of random networks for which  the
+        %                empirical value is bigger than the value of the random
+        %                networks
+        %      z       - z-score of the empirical value    
+            n = length(rmatrices);
+            expect = zeros(n,1);
+            expect_row = zeros(n,1);
+            expect_col = zeros(n,1);
+            
+            for i = 1:n
+                Nodf = NODF(rmatrices{i});
+                expect(i) = Nodf.nodf;
+                expect_row(i) = Nodf.nodf_rows;
+                expect_col(i) = Nodf.nodf_cols;
+            end
+            
+            [h p ci] = ttest(expect, webbip.nodf.nodf);
+            [h p_row ci_row] = ttest(expect_row, webbip.nodf.nodf_rows);
+            [h p_col ci_col] = ttest(expect_col, webbip.nodf.nodf_cols);
+            
+            
+            ci = [sum(ci)/2; ci];
+            ci_row = [sum(ci_row)/2; ci_row];
+            ci_col = [sum(ci_col)/2; ci_col];
+            z_nest = (webbip.nodf.nodf - mean(expect))/std(expect);
+            z_nest_row = (webbip.nodf.nodf_rows - mean(expect_row))/std(expect_row);
+            z_nest_col = (webbip.nodf.nodf_cols - mean(expect_col))/std(expect_col);
+            percent = sum(webbip.nodf.nodf>expect)/n;
+            percent_row = sum(webbip.nodf.nodf>expect_row)/n;
+            percent_col = sum(webbip.nodf.nodf>expect_col)/n;
+            
+            out.value = webbip.nodf.nodf; out.p = p; out.ci = ci; out.zscore = z_nest; out.percent = percent;
+            out_row.value = webbip.nodf.nodf_rows; out_row.p = p_row; out_row.ci = ci_row; out_row.zscore = z_nest_row; out_row.percent = percent_row;
+            out_col.value = webbip.nodf.nodf_cols; out_col.p = p_col; out_col.ci = ci_col; out_col.zscore = z_nest_col; out_col.percent = percent_col;
+            
+        end
+        
+        function [out] = GET_DEV_TEMP(webbip,rmatrices)
+        % GET_DEV_TEMP - Perform a NTC Statistical Analysis
+        %   [out out_row out_col] =  GET_DEV_TEMP(webbip,rmatrices) Perform t-test and
+        %   z-test in the NTC value of the bipartite object webbip using
+        %   the ser of random matrices rmatrices. Return a
+        %   structure for NTC statistical values in the entire matrix(out)
+        %   with the next elements:
+        %      value   - The value in the empirical matrix
+        %      p       - p-value of the performed t-test
+        %      ci      - Confidence interval of the performet t-test
+        %      percent - The percent of random networks for which  the
+        %                empirical value is bigger than the value of the random
+        %                networks
+        %      z       - z-score of the empirical value                 
+            n = length(rmatrices);
+            nestedness = NestednessBINMATNEST(webbip.webmatrix>0);
+            nestedness.CalculateNestedness();
+            ntc = nestedness.N;
+            
+            expect = zeros(n,1);
+            
+            for i = 1:n
+                nestedness.SetMatrix(rmatrices{i});
+                nestedness.DoGeometry = 0;
+                nestedness.CalculateNestedness();
+                expect(i) = nestedness.N;
+                %fprintf('Trial %i:\n', i);
+            end
+            
+            [h p ci] = ttest(expect, webbip.ntc.N);
+            
+            ci = [sum(ci)/2; ci];
+            z_nest = (ntc - mean(expect))/std(expect);
+            percent = sum(ntc>expect)/n;
+            
+            out.ntc = ntc; out.p = p; out.ci = ci; out.zscore = z_nest; out.percent = percent;
+            
+        end
+        
+        function [out] = GET_DEV_EIG(webbip,rmatrices)
+        % GET_DEV_EIG - Perform a spectral radius Statistical Analysis
+        %   [out out_row out_col] =  GET_DEV_EIG(webbip,rmatrices) Perform t-test and
+        %   z-test in the NTC value of the bipartite object webbip using
+        %   the ser of random matrices rmatrices. Return a
+        %   structure for NTC statistical values in the entire matrix(out)
+        %   with the next elements:
+        %      value   - The value in the empirical matrix
+        %      p       - p-value of the performed t-test
+        %      ci      - Confidence interval of the performet t-test
+        %      percent - The percent of random networks for which  the
+        %                empirical value is bigger than the value of the random
+        %                networks
+        %      z       - z-score of the empirical value      
+            n = length(rmatrices);
+            expect = zeros(n,1);
+            
+            out.maxe = MatrixNull.GetBiggestEigenvalue(webbip.adjacency);
+            
+            for i = 1:n
+                expect(i) = MatrixNull.GetBiggestEigenvalue(rmatrices{i});
+            end
+            
+            [h p ci] = ttest(expect, out.maxe);
+            
+            ci = [sum(ci)/2; ci];
+            z_nest = (out.maxe - mean(expect))/std(expect);
+            percent = sum(out.maxe>expect)/n;
+            
+            out.p = p; out.ci = ci; out.zscore = z_nest; out.percent = percent;
+            
+        end
+        
+        function [c_rows c_cols] = GET_NEST_CONTRIBUTIONS(matrix, rmatrices)
+        % GET_NEST_CONTRIBUTIONS - Get NODF nestedness contributions of a
+        % matrix
+        %   [c_rows c_cols] = GET_NEST_CONTRIBUTIONS(matrix, rmatrices) Get
+        %   the NODF contributions for both rows and columns. The
+        %   contribution is calculated as the z-score of each individually
+        %   randomly permuted row and columns
+            nodf = NODF(matrix);
+            N = nodf.nodf;
+            [n_rows n_cols] = size(matrix);
+            nn = length(rmatrices);
+            row_contrib = zeros(nn,n_rows);
+            col_contrib = zeros(nn,n_cols);
+            orig_matrix = matrix;
+            for i = 1:n_rows
+                temp_row = matrix(i,:);
+                for j = 1:nn
+                    matrix(i,:) = rmatrices{j}(i,:);
+                    nodf = NODF(matrix,0);
+                    row_contrib(j,i) = nodf.nodf;
+                    if(isnan(nodf.nodf))
+                        continue;
+                    end
+                end
+                matrix(i,:) = temp_row;
+            end
+            
+            for i = 1:n_cols
+                temp_col = matrix(:,i);
+                for j = 1:nn
+                    matrix(:,i) = rmatrices{j}(:,i);
+                    nodf = NODF(matrix,0);
+                    col_contrib(j,i) = nodf.nodf;
+                end
+                matrix(:,i) = temp_col;
+            end
+            std_rows = std(row_contrib);
+            std_cols = std(col_contrib);
+            mean_rows = mean(row_contrib);
+            mean_cols = mean(col_contrib);
+            
+            c_rows = (N - mean_rows)./std_rows;
+            c_cols = (N - mean_cols)./std_cols;
+            
+        end
+        
+    end
+
+end
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,144 @@
+classdef Bipartite < handle
+    % Bipartite Main code class. 
+    % This class is the main part of the code and
+    % is used as bridge between all the algorithms and funtionalities of
+    % this software.
+    %
+    % Bipartite Properties:
+    %    webmatrix - Interaction matrix (not neccesearly a binary matrix).
+    %    adjacency - Adjacency matrix (binary matrix)
+    %    modules - Instance of the modularity algorithm
+    %    nestedness - Instance of a nestedness algorithm
+    %    num_edges - Number of edges
+    %    connectance - Fill of the webmatrix
+    %    n_rows - Number of rows
+    %    n_cols - Number of columns
+    %    size_webmatrix - Size of the matrix (n_rows times n_cols);
+    %    row_degrees - Degrees of each row node.
+    %    col_degrees - Degrees of each col node.
+    %    name - Name of the network
+    %    tests - Object of the statistical analysis class (TEST).
+    %    row_labels - Labels for row nodes.
+    %    col_labels - Labels for col nodes.
+    %    printer - Object of the class Print.m for output.
+    %    plotter - Instance of the class PlotWebs.m for plotting matrices and graphs.
+    %    rows_idx - Id's of the row nodes
+    %    cols_idx - Id's of the col nodes.
+    %    testmodule - Instance of the class TestModules.m for multi-scale analysis.
+    %
+    % Bipartite Methods:
+    %    Bipartite - Main constructor
+    properties
+        webmatrix             = []; % Interaction matrix (not neccesearly a binary matrix).
+        adjacency             = []; % Adjacency matrix (binary matrix)
+        % Instance of the modularity algorithm. 
+        % See also AdaptiveBrim, NewmanModularity, and LPBrim
+        modules               = {}; 
+        nodf                  = {}; % Instance of a NODF nestedness algorithm
+        ntc                   = {}; % Instance of a NTC nestedness algorithm
+        num_edges             = 0;  % Number of edges
+        connectance           = 0;  % Fill of the webmatrix
+        n_rows                = 0;  % Number of rows
+        n_cols                = 0;  % Number of columns
+        size_webmatrix        = 0;  % Size of the matrix (n_rows times n_cols);
+        row_degrees           = []; % Degrees of each row node.
+        col_degrees           = []; % Degrees of each col node.
+        name                  = {}; % Name of the network
+        tests                 = {}; % Object of the statistical analysis class (TEST).
+        row_labels            = {}; % Labels for row nodes.
+        col_labels            = {}; % Labels for col nodes.
+        printer               = {}; % Object of the class Print.m for output.
+        plotter               = {}; % Instance of the class PlotWebs.m for plotting matrices and graphs.
+        row_ids               = []; % Id's of the row nodes
+        col_ids               = []; % Id's of the col nodes.
+        testmodule            = {}; % Instance of the class TestModules.m for multi-scale analysis.
+    end
+    
+    methods
+        
+        function obj = Bipartite(web,namebip)
+            % Bipartite - Main Constructor
+            %   bp = BIPARTITE(web) Create a bipartite object using a
+            %   quatitative matrix web
+            %   bp = BIPARTITE(web,namebip) Create a bipartite instance using a
+            %   quatitative matrix web and name the object with namebip.
+            
+            if(nargin == 0)
+               error('You need to specify a double matrix or a txt file in matrix format');
+            end
+            
+            if(nargin == 1 && (isa(web,'double')||isa(web,'logical'))); namebip = 'No name'; end;
+            
+            if(nargin == 1 && isa(web,'char'))
+                [~, namefile, ~] = fileparts(web);
+                namebip = namefile;
+                web = dlmread(web,' ');
+            end
+            web = 1.0*web;
+            
+            obj.name = namebip;
+            obj.webmatrix = web;
+            
+            %General Properties
+            [obj.n_rows obj.n_cols] = size(web);
+            if(obj.n_rows == 0 || obj.n_cols == 0)
+                return;
+            end;
+            obj.size_webmatrix = obj.n_rows * obj.n_cols;
+            obj.adjacency = 1.0*(obj.webmatrix > 0);
+            obj.num_edges = sum(obj.adjacency(:));
+            obj.connectance = sum(obj.adjacency(:))/numel(obj.adjacency);
+            
+            %Degree
+            obj.row_degrees = sum(obj.adjacency,2);
+            obj.col_degrees = sum(obj.adjacency,1)';
+            
+            %Nestedness
+            obj.nodf = NODF(obj.adjacency);
+            obj.ntc = NestednessBINMATNEST(obj.adjacency);
+            
+            %Modularity
+            %obj.modules = LPBrim(obj.webmatrix);NewmanAlgorithm
+            %obj.modules = NewmanModularity(obj.webmatrix);
+            obj.modules = AdaptiveBrim(obj.webmatrix);
+            
+            %Statistical tests
+            obj.tests = Test(obj);
+            
+            %Output
+            obj.printer = Printer(obj);
+            
+            %Matrix and graph layouts
+            obj.plotter = PlotWebs(obj);
+            
+            %Multi-scale analysis
+            obj.testmodule = TestModules(obj);
+            
+            %Default labels
+            for i = 1:obj.n_rows; obj.row_labels{i} = sprintf('row%03i',i); end;
+            for i = 1:obj.n_cols; obj.col_labels{i} = sprintf('col%03i',i); end;
+            
+        end
+        
+        function Print(obj,filename)
+            
+            str = 'General Properties\n';
+            str = [str, '\t Number of species:       \t', sprintf('%5i',obj.n_rows+obj.n_cols), '\n'];
+            str = [str, '\t Number of row species:   \t', sprintf('%5i',obj.n_rows), '\n'];
+            str = [str, '\t Number of column species:\t', sprintf('%5i',obj.n_cols), '\n'];
+            str = [str, '\t Number of Interactions:  \t', sprintf('%5i',obj.num_edges), '\n'];
+            str = [str, '\t Size:                    \t', sprintf('%5i',obj.n_cols), '\n'];
+            str = [str, '\t Connectance or fill:     \t', sprintf('%5i',obj.n_cols), '\n'];
+            
+            
+            
+            fprintf(str);
+            
+            
+            
+        end
+
+    end
+       
+end
+
