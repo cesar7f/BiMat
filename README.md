@@ -1,6 +1,6 @@
 # BiMat
 
-\bimat is a \matlab library whose main function is the analysis of modularity
+BiMat is a MATLAB library whose main function is the analysis of modularity
 and nestedness in bipartite ecological networks. Its main features are:
 
 * Modularity and nestedness calculation.
@@ -13,19 +13,11 @@ and nestedness in bipartite ecological networks. Its main features are:
 * Plotting in matrix or graph layouts.
 
 
-
-
 ### Authors
 
 This project has been developed by:
 
-* `biweb-ml`: [César Flores](mailto:cesar.flores@gatech.edu)
+* [César Flores](mailto:cesar.flores@gatech.edu)
 
-In addition it got 
-
-is a collaboration between members of the [Weitz research group](http://ecotheory.biology.gatech.edu) and members of the [Gravel research group](http://chaire-eec.uqar.qc.ca/dom-fr.php). If you detect a bug or simply would like to give us feedback, please contact:
-
-* `biweb-py`: [Timothée Poisot](http://timotheepoisot.fr/)
-
-
-This project received contributions of Sergi Valverde, Joshua S Weitz & Philippe Desjardins-Proulx
+This project received contributions of Sergi Valverde, Joshua S Weitz & Timothée Poisot (http://timotheepoisot.fr/). For a Python version that contains
+some of the BiMat features you may want to check: https://github.com/tpoisot/BiWeb
