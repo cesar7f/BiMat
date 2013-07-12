@@ -58,7 +58,7 @@ classdef BipartiteModularity < handle
         bb                   = [];  %Original - Null (matrix - kidj/num_edges)
         index_rows           = [];  %Register of the swaps in Rows.
         index_cols           = [];  %Register of the swaps in Cols.
-        trials               = 100; %Number of trials to find the best modularity configuration
+        trials               = Options.TRIALS_MODULARITY; %Number of trials to find the best modularity configuration
         Qb                   = 0;   %Standard Modularity function (1/num_edges) * Trace(rr' * bb * tt)
         Qr                   = 0;   %Percentage of interactions inside modules
         N                    = 0;   %Number of modules

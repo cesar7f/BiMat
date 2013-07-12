@@ -3,7 +3,8 @@
 % BiMat software.
 
 %% Add the source to the matlab path
-g = genpath('matlab'); addpath(g);
+%Assuming that you run this script from examples directory
+g = genpath('../'); addpath(g);
 close all;
 
 %% Bipartite class and main input

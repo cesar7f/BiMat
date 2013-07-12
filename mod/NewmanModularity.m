@@ -163,7 +163,10 @@ classdef NewmanModularity < BipartiteModularity
             %Calculate the modularity of a two module local network.
             nn = length(ss);
             ss_states = cell(nn+1,1);
-            qglobal = obj.ModularityTwo(ss,blocal);
+            num_edges = obj.n_edges;
+            %qglobal = obj.ModularityTwo(ss,blocal);
+            
+            qglobal = modul_two(ss,blocal,num_edges);
             
             qinc = 1;
             
@@ -175,16 +178,20 @@ classdef NewmanModularity < BipartiteModularity
                 q_values = zeros(nn,1);
                 moved = zeros(nn,1);
                 
+                %Move all the nodes at least one time
                 for i = 1:nn   
 
                     sslocal = ss_states{i};
+                    ssbb = sslocal'*blocal;
                     qloc = -10;
+                    %Move the node that has not been moved and has the biggest Q increase
                     for j = 1:nn
 
                         if(moved(j) == 1); continue; end;
 
                         sslocal(j)  = sslocal(j) * -1;
-                        newq = obj.ModularityTwo(sslocal,blocal);
+                        %newq = (sslocal'*blocal*sslocal) / (4*num_edges);
+                        newq = (ssbb + 2*sslocal(j)*blocal(j,:))*sslocal / (4*num_edges);
 
                         if(newq > qloc)
                             qindex = j;
@@ -199,8 +206,10 @@ classdef NewmanModularity < BipartiteModularity
                     q_values(i) = qloc; 
                 end
                 
+                %Find the intermidiate state with the biggest Q
                 [max_q max_state] = max(q_values);
                 
+                %Check if increase in global Q is detected
                 if(max_q > qglobal)
                     qglobal = max_q;
                     ss = ss_states{max_state+1};
@@ -210,16 +219,12 @@ classdef NewmanModularity < BipartiteModularity
             
             ssnew = ss;
             
+            function qq = modul_two(ss,bb,num_edges)
+            %Nested function (faster than callin an outsider function)
+                qq = (ss'*bb*ss) / (4*num_edges);
+            end
         end
         
-        function qq = ModularityTwo(obj,ss,bb)
-        %qq = ModularityTwo(obj,ss,bb) gives the modularity value of a two
-        %module unipartite network where ss is the module index using 1 and
-        %-1 to distinwish between the two modules and bb is the modular
-        %matrix.
-            %qq = (ss'*bb*ss) / (4*obj.n_edges_component);
-            qq = (ss'*bb*ss) / (4*obj.n_edges);
-        end
         
         function qq = Modularity(obj,ss,bb)
         %qq = Modularity(obj,ss,bb) Get the modularity of a unipartite
@@ -234,6 +239,8 @@ classdef NewmanModularity < BipartiteModularity
             qq = trace(S'*bb*S) / (2*obj.n_edges);
         end
         
+        
     end
+    
     
 end

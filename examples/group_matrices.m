@@ -8,7 +8,8 @@
 % We will perform an analysis of modularity and nestedness in the entire set.
 %
 %% Add the source to the matlab path
-g = genpath('matlab'); addpath(g);
+%Assuming that you run this script from examples directory
+g = genpath('../'); addpath(g);
 close all; %close all open figures
 %%%
 % We need also to load the data from which we will be working on

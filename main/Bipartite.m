@@ -114,7 +114,7 @@ classdef Bipartite < handle
             obj.printer = Printer(obj);
             
             %Matrix and graph layouts
-            obj.plotter = PlotWebs(obj);
+            %obj.plotter = PlotWebs(obj);
             
             %Multi-scale analysis
             obj.internal_statistics = InternalStatistics(obj);
@@ -129,8 +129,17 @@ classdef Bipartite < handle
             
             
         end
-
+    
+        function value = get.plotter(obj)
+            %The plotter is created the first time than is called
+            if(isempty(obj.plotter))
+                obj.plotter = PlotWebs(obj);
+            end
+            value = obj.plotter;
+        end
+        
     end
        
+    
 end
 

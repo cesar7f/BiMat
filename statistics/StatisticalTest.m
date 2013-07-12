@@ -430,6 +430,20 @@ classdef StatisticalTest < handle
         end
         
         function out = GET_STATISTICAL_VALUES(real_value, random_values)
+        % GET_STATISTICAL_VALUES - Get some statistics of the real value
+        % with respect to random values
+        %   out = GET_STATISTICAL_VALUES(real_value, random_values) Get
+        %   some statistics for real_value using the vector random_values. It returns
+        %   an structure out with the folloging variables:
+        %     value: Just real_value
+        %     mean: mean(random_values)
+        %     std: std(random_values)
+        %     p: p-value of a t-test of real_value belonging to the
+        %     distribution of random_values
+        %     ci: confidence intervals of the t-test.
+        %     zscore: the z-score of real_value in the distribution of
+        %     random_values: the sorted version of random_values
+        %     
             [~, p ci] = ttest(random_values, real_value);
             n = length(random_values);
             me = mean(random_values);

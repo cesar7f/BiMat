@@ -1,9 +1,0 @@
-- Add component variables to newman_modularity
-+ Add literature sources to code
-- Check the newman algorithm
-+ Add mean to statistical values
-- Check output in NODF
-- Unify variable names
-- Check properties (protected, private, public, etc . . . )
-- File with the constant variables (do not forget the delete_empty_rows_or_columns)
-- Decidir que hacer con row_modules/col_modules
