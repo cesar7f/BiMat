@@ -326,7 +326,7 @@ classdef StatisticalTest < handle
             expect_row = zeros(n,1);
             expect_col = zeros(n,1);
             
-            for i = 1:n
+            parfor i = 1:n
                 Nodf = NODF(rmatrices{i});
                 expect(i) = Nodf.nodf;
                 expect_row(i) = Nodf.nodf_rows;

@@ -219,7 +219,7 @@ classdef NullModels < handle
             
             rmatrices = cell(1,replicates);
             
-            parfor i = 1:replicates
+            for i = 1:replicates
                 %fprintf('iteration %i\n',i);
                 switch nullmodel
                     case 1
