@@ -306,15 +306,16 @@ classdef BipartiteModularity < handle
             
             %obj.row_modules = obj.row_modules(row_global);
             %obj.col_modules = obj.col_modules(col_global);
-            [a b] = ind2sub(size(obj.rr_sorted), find(obj.rr_sorted));
-            [~, sortv] = sort(a);
-            obj.row_modules = b(sortv);
-            
-            [a b] = ind2sub(size(obj.tt_sorted), find(obj.tt_sorted));
-            [~, sortv] = sort(a);
-            obj.col_modules = b(sortv);
-            
-            
+%             [a b] = ind2sub(size(obj.rr_sorted), find(obj.rr_sorted));
+%             [~, sortv] = sort(a);
+%             obj.row_modules = b(sortv);
+%             
+%             [a b] = ind2sub(size(obj.tt_sorted), find(obj.tt_sorted));
+%             [~, sortv] = sort(a);
+%             obj.col_modules = b(sortv);
+%             
+            [row,col] = find(obj.rr);[~,ix] = sort(row);obj.row_modules = col(ix);
+            [row,col] = find(obj.tt);[~,ix] = sort(row);obj.col_modules = col(ix);
             
         end
         

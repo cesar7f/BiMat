@@ -45,9 +45,9 @@
 % PlotWebs Methods:
 %     PlotWebs - Main Constructor
 %     FillPositions - Fill positions
-%     PlotBMatrix - Plot a original sorting graph layout
-%     PlotBNestedMatrix - Plot a nested sorting graph layout
-%     PlotBModularMatrix - Plot a modular sorting graph layout
+%     PlotGraph - Plot a original sorting graph layout
+%     PlotNestedGraph - Plot a nested sorting graph layout
+%     PlotModularGraph - Plot a modular sorting graph layout
 %     DrawLine - Draw and edge for graph layouts
 %     DrawCircle - Draw a node for graph layouts
 %     PlotMatrix - Plot a original sorting matrix layout
@@ -85,13 +85,14 @@ classdef PlotWebs < handle;
         matrix               = [];       % Adjacency matrix in boolean version
         webmatrix            = [];       % Adjacency matrix with edge weight information
         use_type_interaction = 0;        % Flag to color cells according to weight (only if discrete)
-        use_row_sections     = 0;        % Flag to color sections
+        use_row_sections     = 0;        % Flag to color row sections
+        use_col_sections     = 0;        % Flag to color columns sections
         use_module_format    = 1;        % Flag to give appropiate color format to modules
         biweb                = {};       % Bipartite object that an object of the class will reference to
         row_labels           = {};       % Text labels for row nodes
         col_labels           = {};       % Text labels fof column nodes
         use_labels           = 1;        % Flag that indicate the use of text labels
-        FontSize             = 5;        % Font size for text labels. Change according to number of rows and columns.
+        font_size            = 5;        % Font size for text labels. Change according to number of rows and columns.
         index_rows           = [];       % Index position of rows after modular or nested sorting
         index_cols           = [];       % Index position of columns after modular or nested sorting.
         colors               = [];       % Colors used for draw modules.
@@ -145,9 +146,13 @@ classdef PlotWebs < handle;
                 obj.use_type_interaction = 1;
             end
             
-            if(length(unique(obj.biweb.row_class))>1)
-                obj.use_row_sections = 1;
-            end
+            %if(length(unique(obj.biweb.row_class))>1)
+            %    obj.use_row_sections = 1;
+            %end
+            
+            %if(length(unique(obj.biweb.col_class))>1)
+            %    obj.use_col_sections = 1;
+            %end
             
             %Delete This section thereafter--------------------------
             obj.color_interactions(1,:) = [255 0 0]/255;
@@ -179,9 +184,9 @@ classdef PlotWebs < handle;
             
         end
         
-        function PlotBMatrix(obj)
-        % PlotBMatrix - Plot a original sorting graph layout
-        % obj = PlotBMatrix(obj) - Plot a graph layout using the original sorting of nodes.
+        function PlotGraph(obj)
+        % PlotGraph - Plot a original sorting graph layout
+        % obj = PlotGraph(obj) - Plot a graph layout using the original sorting of nodes.
             cla;
             maxd = max(obj.n_rows,obj.n_cols);
             x1 = 1; x2 = 1+maxd*obj.horizontal_proportion;
@@ -215,9 +220,9 @@ classdef PlotWebs < handle;
             
         end
         
-        function PlotBNestedMatrix(obj)
-        % PlotBNestedMatrix - Plot a nested sorting graph layout
-        % obj = PlotBNestedMatrix(obj) - Plot a graph layout where nodes
+        function PlotNestedGraph(obj)
+        % PlotNestedGraph - Plot a nested sorting graph layout
+        % obj = PlotNestedGraph(obj) - Plot a graph layout where nodes
         % are sorted such that the nestedness pattern is more visible
             
             cla;
@@ -250,9 +255,9 @@ classdef PlotWebs < handle;
             obj.ApplyBasicBFormat();
         end
         
-        function PlotBModularMatrix(obj)
-        % PlotBModularMatrix - Plot a modular sorting graph layout
-        % obj = PlotBModularMatrix(obj) - Plot a graph layout where nodes
+        function PlotModularGraph(obj)
+        % PlotModularGraph - Plot a modular sorting graph layout
+        % obj = PlotModularGraph(obj) - Plot a graph layout where nodes
         % are sorted such that the modular pattern is more visible            
             cla;
             maxd = max(obj.n_rows,obj.n_cols);
@@ -268,8 +273,8 @@ classdef PlotWebs < handle;
             obj.index_rows = obj.biweb.modules.index_rows;
             obj.index_cols = flipud(obj.biweb.modules.index_cols);
             
-            row_mod = obj.biweb.modules.row_modules;
-            col_mod = flipud(obj.biweb.modules.col_modules);
+            row_mod = obj.biweb.modules.row_modules(obj.index_rows);
+            col_mod = obj.biweb.modules.col_modules(obj.index_cols);
             
             local_matrix = obj.matrix(obj.index_rows,obj.index_cols);
             n_col = length(obj.colors);
@@ -331,13 +336,25 @@ classdef PlotWebs < handle;
             obj.index_cols = 1:obj.n_cols;
             
             if(obj.use_row_sections)
-                row_section = obj.biweb.rows_idx;
+                row_section = obj.biweb.row_class;
                 row_section_unique = unique(row_section);
                 for i = 1:length(row_section_unique)
                     if(mod(i,2)==1)
                         x = find(row_section==row_section_unique(i));
                         %MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor)
-                        obj.MakeDivision(x(end),1,length(x),obj.n_cols,obj.color_section,obj.color_section);
+                        obj.MakeDivision(x(end),1,length(x),obj.n_cols,obj.color_section,obj.color_section,0.6);
+                    end
+                end
+            end
+            
+            if(obj.use_col_sections)
+                col_section = obj.biweb.col_class;
+                col_section_unique = unique(col_section);
+                for i = 1:length(col_section_unique)
+                    if(mod(i,2)==1)
+                        x = find(col_section==col_section_unique(i));
+                        %MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor)
+                        obj.MakeDivision(obj.n_rows,x(1),obj.n_rows,length(x),obj.color_section,obj.color_section,0.6);
                     end
                 end
             end
@@ -405,8 +422,8 @@ classdef PlotWebs < handle;
             obj.index_rows = obj.biweb.modules.index_rows;
             obj.index_cols = obj.biweb.modules.index_cols;
             
-            row_mod = obj.biweb.modules.row_modules;
-            col_mod = obj.biweb.modules.col_modules;
+            row_mod = obj.biweb.modules.row_modules(obj.index_rows);
+            col_mod = obj.biweb.modules.col_modules(obj.index_cols);
             
             local_matrix = obj.webmatrix(obj.index_rows,obj.index_cols);
             n_col = length(obj.colors);
@@ -503,7 +520,7 @@ classdef PlotWebs < handle;
         %obj.FillLabels();
             
  %           idx_rows = obj.index_rows;
-%            idx_type = obj.biweb.rows_idx;
+%            idx_type = obj.biweb.row_class;
  %           idx_type = idx_type(idx_rows);
             
             if(obj.use_labels)
@@ -516,13 +533,13 @@ classdef PlotWebs < handle;
                 
                 for i = 1:obj.n_rows
                     %if(idx_type(i) == 2)
-                        text(0,obj.pos_y(i,1),obj.row_labels{i},'HorizontalAlignment','right','FontSize',obj.FontSize,'interpreter',obj.interpreter);
+                        text(0,obj.pos_y(i,1),obj.row_labels{i},'HorizontalAlignment','right','FontSize',obj.font_size,'interpreter',obj.interpreter);
                     %else
-                    %    text(0,obj.pos_y(i,1),obj.row_labels{i},'HorizontalAlignment','right','FontSize',obj.FontSize,'interpreter',obj.interpreter,'Color',[0 128 0]/255,'FontAngle','italic');
+                    %    text(0,obj.pos_y(i,1),obj.row_labels{i},'HorizontalAlignment','right','FontSize',obj.font_size,'interpreter',obj.interpreter,'Color',[0 128 0]/255,'FontAngle','italic');
                     %end
                 end
                 for j = 1:obj.n_cols
-                    text(obj.pos_x(1,j),0,obj.col_labels{j},'HorizontalAlignment','right','Rotation',90,'FontSize',obj.FontSize,'interpreter',obj.interpreter);
+                    text(obj.pos_x(1,j),0,obj.col_labels{j},'HorizontalAlignment','right','Rotation',90,'FontSize',obj.font_size,'interpreter',obj.interpreter);
                 end
             else
                 set(gca,'xticklabel',[]);
@@ -562,10 +579,10 @@ classdef PlotWebs < handle;
                 obj.FillLabels();
                 
                 for i = 1:obj.n_rows
-                    text(x1-obj.radius,obj.row_pos(i),obj.row_labels{i},'HorizontalAlignment','right','FontSize',obj.FontSize,'interpreter',obj.interpreter);
+                    text(x1-obj.radius,obj.row_pos(i),obj.row_labels{i},'HorizontalAlignment','right','FontSize',obj.font_size,'interpreter',obj.interpreter);
                 end
                 for j = 1:obj.n_cols
-                    text(x2+obj.radius,obj.col_pos(j),obj.col_labels{j},'HorizontalAlignment','left','FontSize',obj.FontSize,'interpreter',obj.interpreter);
+                    text(x2+obj.radius,obj.col_pos(j),obj.col_labels{j},'HorizontalAlignment','left','FontSize',obj.font_size,'interpreter',obj.interpreter);
                 end
                 
             end
@@ -622,27 +639,51 @@ classdef PlotWebs < handle;
         % obj = DrawCell(obj, i, j, color) - Draw a cell in position i,j
         % (in integer units) using color as color. This function is used
         % only for matrix layouts.
-        
-            rec = rectangle('Position',[obj.pos_x(i,j)-0.5+obj.margin,obj.pos_y(i,j)-0.5+obj.margin,1-2*obj.margin,1-2*obj.margin]);
-            set(rec,'FaceColor',color);
-            set(rec,'EdgeColor','none');
-
+            
+            %x1 = obj.pos_x(i,j)-0.5+obj.margin;
+            %x2 = x1 + 1-2*obj.margin;
+            %y1 = obj.pos_y(i,j)-0.5+obj.margin;
+            %y2 = y1 + 1-2*obj.margin;
+            rec1 = rectangle('Position',[obj.pos_x(i,j)-0.5+obj.margin,obj.pos_y(i,j)-0.5+obj.margin,1-2*obj.margin,1-2*obj.margin]);
+            %rec1 = patch([x1,x2,x2,x1],[y1,y1,y2,y2],'r');
+            set(rec1,'FaceColor',color);
+            set(rec1,'EdgeColor','none');
+%            set(rec1,'facealpha',1.0);
         end
         
-        function obj = MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor)
+        function obj = MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor,alpha_value)
         % MakeDivision - Make a module division.
         % obj = MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor) -
         % Make a module division starting in cell positioned at i,j of size
         % nrow by ncol cells. bordercolor and backcolor are used for border
         % and back color, respectivally.
+        
+        %TODO: alpha_value. This will be use for doing transparencies.
+        %However it doest not work currently
             
-             rec = rectangle('Position',[obj.pos_x(i,j)-0.5-obj.margin,obj.pos_y(i,j)-0.5-obj.margin, ncol+2*obj.margin, nrow+2*obj.margin],'LineWidth',1);
-             set(rec,'FaceColor',bordercolor);
-             set(rec,'EdgeColor','none');
+             rec1 = rectangle('Position',[obj.pos_x(i,j)-0.5-obj.margin,obj.pos_y(i,j)-0.5-obj.margin, ncol+2*obj.margin, nrow+2*obj.margin],'LineWidth',1);
+             %x1 = obj.pos_x(i,j)-0.5-obj.margin;
+             %x2 = x1+ncol+2*obj.margin;
+             %y1 = obj.pos_y(i,j)-0.5-obj.margin;
+             %y2 = y1+nrow+2*obj.margin;
+             %rec1 = patch([x1,x2,x2,x1],[y1,y1,y2,y2],'r','linewidth',1);
+             set(rec1,'FaceColor',bordercolor);
+             set(rec1,'EdgeColor','none');
+             
              %set(rec,'LineStyle','--');
-             rec = rectangle('Position',[obj.pos_x(i,j)-0.5+obj.margin,obj.pos_y(i,j)-0.5+obj.margin, ncol-2*obj.margin, nrow-2*obj.margin]);
-             set(rec,'FaceColor',backcolor);
-             set(rec,'EdgeColor','none');
+             %x1 = obj.pos_x(i,j)-0.5+obj.margin;
+             %x2 = x1 + ncol-2*obj.margin;
+             %y1 = obj.pos_y(i,j)-0.5+obj.margin;
+             %y2 = y1 + nrow-2*obj.margin;
+             rec2 = rectangle('Position',[obj.pos_x(i,j)-0.5+obj.margin,obj.pos_y(i,j)-0.5+obj.margin, ncol-2*obj.margin, nrow-2*obj.margin]);
+             %rec2 = patch([x1,x2,x2,x1],[y1,y1,y2,y2],'r');
+             set(rec2,'FaceColor',backcolor);
+             set(rec2,'EdgeColor','none');
+             
+%             if(nargin == 8)
+%                set(rec1,'facealpha',alpha_value);
+%                set(rec2,'facealpha',alpha_value);
+%             end
      
              %rec = rectangle('Position',[obj.PosX(i,j)-0.5,obj.PosY(i,j)-0.5, ncol, nrow]);
              %set(rec,'FaceColor',obj.CellColor);

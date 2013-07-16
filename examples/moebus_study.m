@@ -9,11 +9,16 @@
 %% Add the source to the matlab path
 %Assuming that you run this script from examples directory
 g = genpath('../'); addpath(g);
-close all;
+close all; %Close any open figure
 %%%
 % We need also to load the data from which we will be working on
 load moebus_use_case.mat;
-
+%%
+% The loaded data contains the bipartite adjacency matrix of the Moebus and
+% Nattkemper study, where 1's and 2's in the matrix represent either clear
+% or turbid lysis spots. It also contains the labels for both bacteria and
+% phages and their geographical location from which they were isolated 
+% across the Atlantic Ocean.
 %% Creating the Bipartite network object
 bp = Bipartite(moebus.weight_matrix);    % Create the main object
 bp.row_labels = moebus.bacteria_labels;  % Updating node labels
@@ -29,25 +34,31 @@ bp.printer.PrintGeneralProperties();
 %
 % # Adaptive BRIM (|AdaptiveBrim.m|)
 % # LP&BRIM (|LPBrim.m|)
-% # Newman Algorithm (|NewmanAlgorithm.m|)
+% # Leading Eigenvector (|NewmanAlgorithm.m|)
 %
-% Adaptive BRIM algorithm is assigned by default during the creation of the
-% Bipartite object. However, we can assign another algorithm dinamically.
-% For example to change to Newman Algorithm:
+% Each algorithm optimizes the same modularity equation (Barber 2007) for
+% bipartite networks using different approaches. Only the Newman algorithm
+% may return the same result. The other two perform at some point random 
+% module pre-assigments, and by consequence they may return the same result
+% in each call. The default algorithm is 
+% specified on |Options.MODULARITY_ALGORITHM|. However, we can assign 
+% another algorithm dynamically. Here we will use the Newman's algorithm
+% (leading eigenvector).
 bp.modules = NewmanModularity(bp.matrix);
-bp.modules.DoKernighanLinTunning = true; % This flag is exclusive of the Newman Algorithm.
-bp.modules = AdaptiveBrim(bp.matrix); % Return to the default algorithm
+% The next flag is exclusive of Newman Algorithm and what it does is to
+% performn a final tuning after each sub-division (see Newman 2006). 
+bp.modules.DoKernighanLinTunning = false; %Very slow, so we turn off.
 %%%
-% We need to calculate the modularity by calling:
+% We need to calculate the modularity explicitly by calling:
 bp.modules.Detect();
 %%
-% If we are interested only in node community indexes we can use
+% If we are interested only in node module indexes we can use
 % |bp.modules.row_modules| and |bp.modules.col_modules|. However for
 % modularity values we need to call |bp.modules.Qb| or |bp.modules.Qr| as
 % is:
 % the next lines of code:
 fprintf('The modularity value Qb is %f\n', bp.modules.Qb);
-fprintf('The fraction of interactions inside modules Qr is %f\n',bp.modules.Qr);
+fprintf('The fraction inside modules Qr is %f\n',bp.modules.Qr);
 %%
 % The value 0<=Qb<=1 is calculated using the standard bipartite modularity
 % function (introduced by Barber):
@@ -73,12 +84,15 @@ fprintf('The fraction of interactions inside modules Qr is %f\n',bp.modules.Qr);
 % algorithm explicitally:
 bp.ntc.CalculateNestedness();
 %%
-% Finally to show acces the values of the two algorithms you need to call:
-fprintf('The nestedness NODF value is %f\n', bp.nodf.nodf); %The same value will be printed all the times
-fprintf('The nestedness NTC value is %f\n', bp.ntc.N); %Because the value depends in the sorting of rows and columns, it may variate from trial to trial.
+% Finally to show the values of the two algorithms you need to call:
+% The same value will be printed all the times
+fprintf('The nestedness NODF value is %f\n', bp.nodf.nodf); 
+% Because the value depends in the sorting of rows and columns, it may
+% variate from trial to trial.
+fprintf('The nestedness NTC value is %f\n', bp.ntc.N);
 %%%
 % We can print all the values of structure values by just calling:
-bp.printer.PrintStructureValues
+bp.printer.PrintStructureValues();
 %% Plotting in Matrix Layout
 % You can print the layout of the original, nestedness and modular sorting.
 % If you matrix is weighted in a categorical way using integers
@@ -87,20 +101,24 @@ bp.printer.PrintStructureValues
 % need to assign a color for each interaction and specifically indicate
 % that you want a color for each interaction before calling the plot function:
 figure(1);
-set(gcf,'Position',[19    72   932   922]); % Matlab command to change the figure window;
-bp.plotter.FontSize = 2.5; %Change the font size of the rows and labels
-bp.plotter.use_type_interaction = true; % I want to use different color for each kind of interaction
+% Matlab command to change the figure window;
+set(gcf,'Position',[19    72   932   922]); 
+bp.plotter.font_size = 2.0; %Change the font size of the rows and labels
+% Use different color for each kind of interaction
+bp.plotter.use_type_interaction = true; % 
 bp.plotter.color_interactions(1,:) = [1 0 0]; %Red color for clear lysis
 bp.plotter.color_interactions(2,:) = [0 0 1]; %Blue color for turbid spots
 bp.plotter.back_color = 'white';
-bp.plotter.PlotMatrix(); %After changing all the format we finally can call the plotting function.
+% After changing all the format we finally can call the plotting function.
+bp.plotter.PlotMatrix(); 
 %%
 % For plotting the nestedness matrix you may decide to use or not an
 % iscoline. The nestedness pattern is just the matrix sorted in decreasing
 % degree for row and column nodes.
 figure(2);
-set(gcf,'Position',[19+200    72   932   922]); % Matlab command to change the figure window;
-bp.plotter.use_isocline = true; % The isocline is used in the NTC algorithm.
+% Matlab command to change the figure window;
+set(gcf,'Position',[19+200    72   932   922]); 
+bp.plotter.use_isocline = true; %The isocline is used in the NTC algorithm.
 bp.plotter.isocline_color = 'red'; %Decide the color of the isocline.
 bp.plotter.PlotNestedMatrix();
 %%
@@ -108,9 +126,20 @@ bp.plotter.PlotNestedMatrix();
 % modularity (call |bp.modules.Detect()|) if you have not previouslly call
 % it. 
 figure(3);
-set(gcf,'Position',[19+400    72   932   922]); % Matlab command to change the figure window;
-bp.plotter.plot_iso_modules = true; %This will plot isoclines inside modules.
-bp.plotter.PlotModularMatrix();
+% Matlab command to change the figure window;
+set(gcf,'Position',[19+400    72   932   922]); 
+% This will plot isoclines inside modules.
+bp.plotter.plot_iso_modules = true; 
+bp.plotter.PlotModularMatrix(); 
+%% Plotting in graph layout
+% Plotting in graph layout use the same three functions than matrix layout.
+% You just need to replace the part |Matrix| in the function name by
+% |Graph|. For example, for plotting the graph layout of modularity we will
+% need to type:
+figure(4);
+% Matlab command to change the figure window;
+set(gcf,'Position',[19+600    72   932   922]); 
+bp.plotter.PlotModularGraph(); 
 
 %% Statistical analysis in the entire network
 % We can perform an statistical analysis in the entire network for
@@ -119,13 +148,34 @@ bp.plotter.PlotModularMatrix();
 % and what null model is more convenient for what we need. File
 % |NullModels.m| contain all the availaible null models, while file
 % |StatisticalTest.m| contains all the functions required for performing this
-% analysis. We can perfom the analysis in all the structure values by the
-% use of a single function call the required functions for nestedness and
-% modularity analysis:
-bp.statistics.print_output = 0; % Do not show outputs
-bp.statistics.DoCompleteAnalysis(10, @NullModels.EQUIPROBABLE); %Bernoulli
-bp.statistics.DoCompleteAnalysis(10, @NullModels.AVERAGE); %Probability degree
+% analysis. The current null models are:
+%
+% * |NullModels.EQUIPROBABLE|: A random matrix in which all the
+% interactions are uniformelly permuted. Another common name for this
+% matrix is Bernoulli Matrix.
+% * |NullModels.AVERAGE|: A random matrix in which each element has an
+% interaction with probability that depends on the sum of both the row and
+% column to which the cell belongs to.
+% * |NullModels.AVERAGE_ROWS|: A random matrix in which each element has an
+% interaction with probability that depends on the sum of the row to which
+% the cell belongs to.
+% * |NullModels.AVERAGE_ROWS|: A random matrix in which each element has an
+% interaction with probability that depends on the sum of the row to which
+% the cell belongs to.
+%
+% To perform the statistical analysis of all the structure values we can
+% just type |bp.statistics.DoCompleteAnalysis()|, which will perform an
+% analysis using a default number of random matrices (|Options.REPLICATES|)
+% and the default null model (|Options.DEFAULT_NULL_MODEL|). However, here
+% we will specify directly those parameters.
+% Do an analysis of modularity, nodf, and ntc values using 100 random
+% matrices and the EQUIPROBABLE (Bernoulli) null model.
+bp.statistics.DoCompleteAnalysis(100, @NullModels.EQUIPROBABLE);
+%%
+% The last function call will printed information about the current status of the
+% simulation. For printing the results we need to call:
 bp.printer.PrintStructureStatistics(); %Print the statistical values
+
 %%
 % All structure statistics calculate the next numbers:
 %
@@ -150,7 +200,10 @@ bp.printer.PrintStructureStatistics(); %Print the statistical values
 % All the functions for performing this kind of analysis is encoded in file
 % |InternalStatistics.m|. For calculating the the statistical structure of the
 % internal modules we just need to call:
-bp.internal_statistics.TestInternalModules(20,@NullModels.EQUIPROBABLE); %100 replicates and Bernoulli as null model
+% 100 random matrices using the EQUIPROBABLE null model.
+bp.internal_statistics.TestInternalModules(100,@NullModels.EQUIPROBABLE); 
+%%
+% Finally, to print the results we just need to call.
 bp.printer.PrintStructureStatisticsOfModules(); % Print the results
 %%
 % We can also study if a correlation exist between the the row labeling and
@@ -163,6 +216,10 @@ bp.printer.PrintStructureStatisticsOfModules(); % Print the results
 % Flores et al 2012. Given the labeling this method calculates the
 % diversity index of the labeling inside each module and compare it with
 % random permutations of the labeling across the matrix.
-bp.internal_statistics.TestDiversityRows(1000); %Using the labeling of bp and 1000 random permutations
-bp.internal_statistics.TestDiversityColumns(1000,moebus.phage_stations,@Diversity.SHANNON_INDEX); % Using specific labeling and Shannon index
-bp.printer.PrintColumnModuleDiversity(); %Print the information of column diversity
+%Using the labeling of bp and 1000 random permutations
+bp.internal_statistics.TestDiversityRows(1000); 
+% Using specific labeling and Shannon index
+bp.internal_statistics.TestDiversityColumns( ...
+    1000,moebus.phage_stations,@Diversity.SHANNON_INDEX); 
+%Print the information of column diversity
+bp.printer.PrintColumnModuleDiversity(); 

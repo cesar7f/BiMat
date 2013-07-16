@@ -91,13 +91,9 @@ classdef GroupStatistics < handle
                 
                 fprintf('Testing Matrix: %i . . .\n', i);
                 
-                if(i == 14)
-                    display(3);
-                end
-                
-                if(isempty(net{i}.webmatrix))
-                    continue;
-                end
+                %if(isempty(net{i}.webmatrix))
+                %    continue;
+                %end
                 
                 net{i}.statistics.DoNulls(obj.null_model,obj.replicates);
                 net{i}.statistics.print_output = 0;

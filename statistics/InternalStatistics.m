@@ -173,11 +173,11 @@ classdef InternalStatistics < handle
             RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
             
             
-            if(nargin == 2)
+            if(nargin == 1)
                 n_trials = Options.REPLICATES;
                 col_class = obj.bipweb.col_class;
                 index_function = @Diversity.SIMPSON_INDEX;
-            elseif(nargin==3)
+            elseif(nargin==2)
                 col_class = obj.bipweb.col_class;
                 index_function = @Diversity.SIMPSON_INDEX;
             end

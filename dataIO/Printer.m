@@ -378,14 +378,14 @@ classdef Printer < handle
             end
             
             str = 'Modularity\n';
-            str = [str, '\t Used algorithm:             \t', sprintf('%16s',class(obj.bipweb.modules)), '\n'];
-            str = [str, '\t N (Number of modules):      \t', sprintf('%16i',obj.bipweb.modules.N), '\n'];
-            str = [str, '\t Qb (Standard metric):       \t', sprintf('%16.4f',obj.bipweb.modules.Qb), '\n'];
-            str = [str, '\t Qr (Ratio of int/ext inter):\t', sprintf('%16.4f',obj.bipweb.modules.Qr), '\n'];
+            str = [str, '\tUsed algorithm:             \t', sprintf('%16s',class(obj.bipweb.modules)), '\n'];
+            str = [str, '\tN (Number of modules):      \t', sprintf('%16i',obj.bipweb.modules.N), '\n'];
+            str = [str, '\tQb (Standard metric):       \t', sprintf('%16.4f',obj.bipweb.modules.Qb), '\n'];
+            str = [str, '\tQr (Ratio of int/ext inter):\t', sprintf('%16.4f',obj.bipweb.modules.Qr), '\n'];
             
             str = [str, 'Nestedness\n'];
-            str = [str, '\tNODF metric value:           \t', sprintf('%16.4f',obj.bipweb.nodf.nodf), '\n'];
-            str = [str, '\tNTC metric value:            \t', sprintf('%16.4f',obj.bipweb.ntc.N), '\n'];
+            str = [str, '\tNODF metric value:          \t', sprintf('%16.4f',obj.bipweb.nodf.nodf), '\n'];
+            str = [str, '\tNTC metric value:           \t', sprintf('%16.4f',obj.bipweb.ntc.N), '\n'];
            
             fprintf(str);  
             
@@ -427,7 +427,7 @@ classdef Printer < handle
             str = [str, 'NTC Nestedness\n'];
             str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.tempvals.model)), '\n'];
             str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.tempvals.replicates), '\n'];
-            str = [str, '\t NODF value:    \t', sprintf('%30.4f',obj.bipweb.statistics.tempvals.value), '\n'];
+            str = [str, '\t NTC value:     \t', sprintf('%30.4f',obj.bipweb.statistics.tempvals.value), '\n'];
             str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.tempvals.zscore), '\n'];
             str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.tempvals.percent), '\n'];
 

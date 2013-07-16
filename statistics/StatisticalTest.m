@@ -123,32 +123,36 @@ classdef StatisticalTest < handle
                 nullmodel = Options.DEFAULT_NULL_MODEL;
             end
             
+            fprintf('Creating %i null random matrices...\n', replic);
             obj.DoNulls(nullmodel,replic);
+            fprintf('Performing NODF statistical analysis...\n');
             obj.Nestedness();
+            fprintf('Performing Modularity statistical analysis...\n');
             obj.Modularity();
+            fprintf('Performing NTC statistical analysis...\n');
             obj.Temperature();
             %obj.MaxEigenvalue();
             
-            if(obj.print_output == 1)
-                fprintf('Null Model: %s\n', func2str(obj.model));
-                fprintf('Trials: %i\n', replic);
-                fprintf('Modularity\n');
-                fprintf('\tQb: %f\n', obj.qb_vals.value);
-                fprintf('\tz-score: %f\n', obj.qb_vals.zscore);
-                fprintf('\tpercentage: %f\n', obj.qb_vals.percent);
-                fprintf('Nestedness\n');
-                fprintf('\tNodf: %f\n', obj.nestvals.value);
-                fprintf('\tz-score: %f\n', obj.nestvals.zscore);
-                fprintf('\tpercentage: %f\n', obj.nestvals.percent);
-                fprintf('Temperature\n');
-                fprintf('\tNTC: %f\n', obj.tempvals.value);
-                fprintf('\tz-score: %f\n', obj.tempvals.zscore);
-                fprintf('\tpercentage: %f\n', obj.tempvals.percent);
-                %fprintf('Eigenvalue Nestedness\n');
-                %fprintf('\tMax Eigenvalue: %f\n', obj.eigvals.maxe);
-                %fprintf('\tz-score: %f\n', obj.eigvals.zscore);
-                %fprintf('\tpercentage: %f\n', obj.eigvals.percent);
-            end
+%             if(obj.print_output == 1)
+%                 fprintf('Null Model: %s\n', func2str(obj.model));
+%                 fprintf('Trials: %i\n', replic);
+%                 fprintf('Modularity\n');
+%                 fprintf('\tQb: %f\n', obj.qb_vals.value);
+%                 fprintf('\tz-score: %f\n', obj.qb_vals.zscore);
+%                 fprintf('\tpercentage: %f\n', obj.qb_vals.percent);
+%                 fprintf('Nestedness\n');
+%                 fprintf('\tNodf: %f\n', obj.nestvals.value);
+%                 fprintf('\tz-score: %f\n', obj.nestvals.zscore);
+%                 fprintf('\tpercentage: %f\n', obj.nestvals.percent);
+%                 fprintf('Temperature\n');
+%                 fprintf('\tNTC: %f\n', obj.tempvals.value);
+%                 fprintf('\tz-score: %f\n', obj.tempvals.zscore);
+%                 fprintf('\tpercentage: %f\n', obj.tempvals.percent);
+%                 %fprintf('Eigenvalue Nestedness\n');
+%                 %fprintf('\tMax Eigenvalue: %f\n', obj.eigvals.maxe);
+%                 %fprintf('\tz-score: %f\n', obj.eigvals.zscore);
+%                 %fprintf('\tpercentage: %f\n', obj.eigvals.percent);
+%             end
             
         end
         
@@ -207,7 +211,7 @@ classdef StatisticalTest < handle
         
         function obj = Modularity(obj)
         % Modularity - Perform the Modularity Statistical Analysis
-        %   obj = Temperature(obj) Perform the NTC Statistical analsysis. Be
+        %   obj = Temperature(obj) Perform the Modularity Statistical analsysis. Be
         %   sure to create the random matrices before calling this
         %   function. Otherwise only Options.REPLICATES equiprobable random matrices will
         %   be used for the analysis
@@ -276,11 +280,22 @@ classdef StatisticalTest < handle
             Qb_random = zeros(n,1);
             Qr_random = zeros(n,1);
             
+            if(isprop(webbip.modules,'DoKernighanLinTunning'))
+                exist_kernig = 1;
+                do_kernig = webbip.modules.DoKernighanLinTunning;
+            else
+                exist_kernig = 0;
+                do_kernig = 0;
+            end
+            
             modul_class = str2func(class(webbip.modules));
             n_trials = webbip.modules.trials;
             parfor i = 1:n
                 modularity = feval(modul_class,rmatrices{i});
                 modularity.trials = n_trials;
+                if(exist_kernig == 1)
+                    modularity.DoKernighanLinTunning = do_kernig;
+                end
                 modularity.Detect(10);
                 Qb_random(i) = modularity.Qb;
                 Qr_random(i) = modularity.Qr; 

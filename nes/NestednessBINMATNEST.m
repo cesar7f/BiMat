@@ -231,6 +231,7 @@ classdef NestednessBINMATNEST < Nestedness
            obj.T = globalMinimalT;
            obj.N = (100-obj.T)/100;
             
+           obj.done = 1;
            %obj.PrintOutput();
             
         end

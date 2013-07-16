@@ -86,9 +86,9 @@ classdef Bipartite < handle
             
             %General Properties
             [obj.n_rows obj.n_cols] = size(web);
-            if(obj.n_rows == 0 || obj.n_cols == 0)
-                return;
-            end;
+            %if(obj.n_rows == 0 || obj.n_cols == 0)
+            %    return;
+            %end;
             obj.size_webmatrix = obj.n_rows * obj.n_cols;
             obj.matrix = 1.0*(obj.webmatrix > 0);
             obj.n_edges = sum(obj.matrix(:));
@@ -103,9 +103,7 @@ classdef Bipartite < handle
             obj.ntc = NestednessBINMATNEST(obj.matrix);
             
             %Modularity
-            %obj.modules = LPBrim(obj.webmatrix);
-            %obj.modules = NewmanModularity(obj.webmatrix);
-            obj.modules = AdaptiveBrim(obj.webmatrix);
+            obj.modules = Options.MODULARITY_ALGORITHM(obj.webmatrix);
             
             %Statistical tests
             obj.statistics = StatisticalTest(obj);

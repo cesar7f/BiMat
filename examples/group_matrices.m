@@ -33,8 +33,8 @@ gp.modul_class = @AdaptiveBrim; %Algorithm for modularity.
 gp.do_temp = 1; % Perform NTC analysis (default)
 gp.do_modul = 1; % Perform Modularity analysis (default)
 gp.do_nest = 0; % Do not perform NODF analysis
-gp.DoGroupTesting(); % Perform the analysis.
 gp.names = grouptesting.name;
+gp.DoGroupTesting(); % Perform the analysis.
 %%
 % Notice that |DoGroupTesting| method prints informatino about the current
 % networks that is being analyzed, such that the user will know at every
@@ -46,6 +46,8 @@ gp.names = grouptesting.name;
 fprintf('Number of nested matrices: %i\n',sum(gp.tempvals.percent >= 97.5));
 fprintf('Number of modular matrices: %i\n',sum(gp.qb_vals.percent >= 97.5));
 %%
+% Because we only did 100 random matrices you may get different results. For
+% a more accurate result you may try 1.000 or even 10,000.
 % We can also show the entire set of results by calling:
 gp.PrintResults();
 
@@ -63,12 +65,12 @@ figure(1);
 for i = 1:gp.n_networks
     subplot(n_rows, n_cols, i);
     gp.networks{i}.plotter.use_labels = 0; %Do not show row/column labels
-    gp.networks{i}.plotter.use_isocline = 0; %No isocline inside modules
+    gp.networks{i}.plotter.plot_iso_modules = 0;%No isocline inside modules
     gp.networks{i}.plotter.PlotModularMatrix();
     col = 'black'; % Color for not significance
     if(modular_indices(i) == 1) % Color for significant modularity
         col = 'red';
-    elseif(no_modular_indices(i) == 1) % Color for significant antimodularity
+    elseif(no_modular_indices(i) == 1)%Color for significant antimodularity 
         col = 'blue';
     end
     title(gp.names{i},'Color',col, 'FontSize',10);
@@ -97,8 +99,9 @@ figure(2);
 plot(1:gp.n_networks, ntc_vals,'o','MarkerFaceColor','red','MarkerEdgeColor','red');
 hold on;
 %Plot the data of the random values
-errorbar(1:gp.n_networks, mean_random_vals, mean_random_vals - low_bound, ...,
-    sup_bound - mean_random_vals, 'o','MarkerFaceColor','white','MarkerEdgeColor','black');
+errorbar(1:gp.n_networks, mean_random_vals, ... 
+    mean_random_vals - low_bound, sup_bound - mean_random_vals, ...
+    'o','MarkerFaceColor','white','MarkerEdgeColor','black');
 hold off;
 
 %Write the labels
