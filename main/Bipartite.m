@@ -28,6 +28,7 @@ classdef Bipartite < handle
     %
     % Bipartite Methods:
     %    Bipartite - Main constructor
+
     properties
         webmatrix             = []; % Interaction matrix (not neccesearly a binary matrix).
         matrix                = []; % Adjacency matrix (binary matrix)
@@ -99,7 +100,7 @@ classdef Bipartite < handle
             obj.col_degrees = sum(obj.matrix,1)';
             
             %Nestedness
-            obj.nodf = NODF(obj.matrix);
+            %obj.nodf = NODF(obj.matrix);
             obj.ntc = NestednessBINMATNEST(obj.matrix);
             
             %Modularity

@@ -200,18 +200,18 @@ classdef PlotWebs < handle;
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
                     if(local_matrix(i,j)==1)
-                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'black');
+                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'black','LineWidth',1.5);
                     end
                 end
             end
             hold off;
             
             for i = 1:obj.n_rows
-                obj.DrawCircle(x1,obj.row_pos(i),'black');
+                obj.DrawCircle(x1,obj.row_pos(i),'red');
             end
             
             for j = 1:obj.n_cols
-                obj.DrawCircle(x2,obj.col_pos(j),'black');
+                obj.DrawCircle(x2,obj.col_pos(j),'blue');
             end
             
             
@@ -245,11 +245,11 @@ classdef PlotWebs < handle;
             hold off;
             
             for i = 1:obj.n_rows
-                obj.DrawCircle(x1,obj.row_pos(i),obj.bead_color);
+                obj.DrawCircle(x1,obj.row_pos(i),'red');
             end
             
             for j = 1:obj.n_cols
-                obj.DrawCircle(x2,obj.col_pos(j),obj.bead_color);
+                obj.DrawCircle(x2,obj.col_pos(j),'blue');
             end
             
             obj.ApplyBasicBFormat();

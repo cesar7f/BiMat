@@ -55,7 +55,7 @@ classdef AdaptiveBrim < BipartiteModularity
             
             sol_mid = sol_inf;
             
-            n_max = max(n_rows,n_cols);
+            n_max = 2;%max(n_rows,n_cols);
             sol_global.Q = -0.5;
             
             for i = 1:obj.trials

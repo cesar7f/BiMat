@@ -240,7 +240,29 @@ classdef NewmanModularity < BipartiteModularity
         end
         
         
+        
     end
     
+    
+    methods(Static)
+        
+        function bb_matrix = CALCULATE_UNIPARTITE_MODULARITY_MATRIX(matrix)
+            
+            KK = sum(matrix,2);
+            n_edges =  sum(KK)/2;
+            
+            %If there is no interaction, the modular matrix is the same
+            %than the adjacency matrix
+            if all(all(matrix == 0))
+                bb_matrix = matrix;
+            %otherwise calculate the modular matrix using the unipartite
+            %version equation
+            else
+                %obj.bb_component = obj.adjacency - (obj.kk*obj.kk')/(2*obj.n_edges_component);
+                bb_matrix = matrix - (KK*KK')/(2*n_edges);
+            end
+        end
+        
+    end
     
 end

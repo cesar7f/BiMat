@@ -194,5 +194,44 @@ classdef MatrixFunctions < handle
             matrix = blkdiag(matrix_1,matrix_2);
         end
         
+        function matrix = SWAP_COLUMNS(matrix,i,j)
+            matrix(:,[i j]) = matrix(:,[j i]);
+        end
+        
+        function matrix = SWAP_ROWS(matrix,i,j)
+            matrix([i j],:) = matrix([j i],:);
+        end
+        
+        function matrix = MOVE_COLUMNS(matrix,m)
+            
+            [~,n_cols] = size(matrix);
+            assert(m<=n_cols);
+            
+            temp = matrix(:,1:(n_cols-m));
+            matrix(:,1:m) = matrix(:,n_cols-m+1:n_cols);
+            matrix(:,m+1:n_cols) = temp;
+            
+        end
+        
+        function matrix = MOVE_ROWS(matrix,m)
+            
+            [n_rows,~] = size(matrix);
+            assert(m<=n_rows);
+            
+            temp = matrix(1:(n_rows-m),:);
+            matrix(1:m,:) = matrix(n_rows-m+1:n_rows,:);
+            matrix(m+1:n_rows,:) = temp;
+            
+        end
+        
+        function matrix = MAX_NESTED_MOTIFS(m)
+            assert(mod(m,4)==0);
+            
+            bs = m/4; %block size
+            
+            matrix = 0;%[zeros(bs,bs) ones(
+            
+        end
+        
     end
 end
