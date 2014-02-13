@@ -20,7 +20,6 @@
 % StatisticalTest Methods:
 %     StatisticalTest - Main Constructor
 %     DoNulls - Create random matrices for the statistical analysis
-%     CleanNulls - Function to delete the nulls (random matrices)
 %     DoCompleteAnalysis - Perform the entire modularity and nestedness analysis
 %     TestNODF - Perform the NODF Statistical Analysis
 %     TestNTC - Perform the NTC Statistical Analysis
@@ -64,7 +63,8 @@ classdef StatisticalTest < handle
             obj.bipweb = webbip;
         end
         
-
+        func
+        
         function obj = DoNulls(obj,replic,nullmodel)
         % DoNulls - Create random matrices for the statistical analysis
         %   obj = DoNulls(obj) Create Options.REPLICATES random matrices using the
@@ -97,14 +97,6 @@ classdef StatisticalTest < handle
             obj.nulls = NullModels.NULL_MODEL(obj.bipweb.matrix,obj.null_model,obj.replicates);
             
         end
-        
-        function obj = CleanNulls(obj)
-        % CleanNulls(obj) - Function to delete the nulls (random matrices)
-        % Useful when the user do not need to keep record of the created
-        % random matrices and hence, avoid saturing memory.
-            obj.nulls = {};
-        end
-        
         
         function obj = DoCompleteAnalysis(obj, replic, nullmodel)
         % DoCompleteAnalysis - Perform the entire modularity and nestedness analysis

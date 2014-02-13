@@ -120,16 +120,11 @@ classdef NestednessNTC < handle
         %   of geometry and distances. Therefore, the matrix must have the
         %   same size and similar connectance. Otherwise the results will
         %   be spurious.
-            
-            %Make sure that at least the size of the new matrix is the same
-            assert(sum(size(matrix) == size(obj.matrix))==2);
-            
             obj.matrix = matrix > 0; %Normalize the matrix
             [obj.n_rows, obj.n_cols] = size(matrix);
             obj.connectance = sum(sum(obj.matrix))/numel(obj.matrix);
             obj.index_rows = 1:obj.n_rows;
             obj.index_cols = 1:obj.n_cols;
-            obj.do_geometry = 0;
 
         end
 
@@ -202,8 +197,8 @@ classdef NestednessNTC < handle
                 
                 [matrix_permuted,new_row_index,new_col_index] = MatrixFunctions.RANDOM_SORT(obj.matrix);
                 obj.matrix = matrix_permuted;
-                obj.index_rows(new_row_index);
-                obj.index_cols(new_col_index);
+                obj.index_rows(new_row_index)
+                obj.index_cols(new_col_index)
 %                i = 1;
                 while(1)
                     %display(i);
@@ -555,5 +550,10 @@ classdef NestednessNTC < handle
         
     end
     
-
+    % SET/GET methods
+    methods
+        function set.do_geometry(obj, value)
+            obj.do_geometry=value;
+        end
+    end
 end

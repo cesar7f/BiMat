@@ -18,7 +18,7 @@ classdef LPBrim < BipartiteModularity
 % See also:
 %    BipartiteModularity, AdaptiveBrim, and LeadingEigenvector
     
-    properties%(GetAccess = 'private', SetAccess = 'private')
+    properties(GetAccess = 'public', SetAccess = 'protected')
         red_labels           = 0; %Works as module identifiers for rows
         blue_labels          = 0; %Works as module identifiers for columns
     end

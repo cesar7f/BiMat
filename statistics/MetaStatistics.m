@@ -7,21 +7,22 @@
 %   PNAS 2011
 %
 % MetaStatistics Properties:
-%     matrices             = {}; % The matrices that will be tested
-%     names                = {}; % The names of the matrix (no required)
-%     qb_values            = []; % Statistics for the modularity values
-%     qr_values            = []  % Statistics for the modularity interactions ratio values
-%     nodf_values          = []; % Statistics for the nodf values
-%     ntc_values           = []; % Statistics for the ntc values
-%     n_networks           = 0;  % Number of matrices (networks)
-%     do_modul             = 1;  % Flag to Perform the tests for modularity
-%     do_nodf              = 1;  % Flag to Perform the tests for nodf
-%     do_ntc               = 1;  % Flag to Perform the tests for temperature
-%     modularity_algorithm = Options.MODULARITY_ALGORITHM; %Algorithm for modularity
-%     replicates           = Options.REPLICATES; %Number of replicates for the tests
-%     null_model           = Options.DEFAULT_NULL_MODEL; %Null model that will be used during the tests
-%     networks             = {}; % A cell that will contain the Bipartite objects
-%     clean_nulls          = 1; % Clean the random matrices (nulls) after performing each test. Useful for not saturating memory
+%     matrices - The matrices that will be tested
+%     names - The names of the matrix (no required)
+%     qb_values - Statistics for the modularity values
+%     qr_values - Statistics for the modularity interactions ratio values
+%     nodf_values - Statistics for the nodf values
+%     ntc_values - Statistics for the ntc values
+%     n_networks - Number of matrices (networks)
+%     do_modul - Flag to Perform the tests for modularity
+%     do_nodf - Flag to Perform the tests for nodf
+%     do_ntc - Flag to Perform the tests for temperature
+%     modularity_algorithm - Algorithm for modularity
+%     replicates - Number of replicates for the tests
+%     null_model - Null model that will be used during the tests
+%     networks - A cell that will contain the Bipartite objects
+%     clean_nulls - Clean the random matrices (nulls) after performing each test. Useful for not saturating memory
+%     plotter - An instance of MetaStatisticsPlotter for plotting
 %
 % MetaStatistics Methods:
 %     MetaStatistics - Main Constructor
@@ -48,6 +49,7 @@ classdef MetaStatistics < handle
         null_model           = Options.DEFAULT_NULL_MODEL; %Null model that will be used during the tests
         networks             = {}; % A cell that will contain the Bipartite objects
         clean_nulls          = 1; % Clean the random matrices (nulls) after performing each test. Useful for not saturating memory
+        plotter              = {}; % An instance of MetaStatisticsPlotter for plotting
     end
     
     methods
@@ -138,7 +140,6 @@ classdef MetaStatistics < handle
                 %end
                 
                 net{i}.statistics.DoNulls(obj.replicates,obj.null_model);
-                net{i}.statistics.print_output = 0;
                 net{i}.statistics.print_status = 0;
                 
                 if(obj.do_nodf == 1)
@@ -153,7 +154,7 @@ classdef MetaStatistics < handle
                     
                 if(obj.do_modul == 1)
                     net{i}.modules = obj.modularity_algorithm(net{i}.matrix);
-                    net{i}.statistics.Modularity();
+                    net{i}.statistics.TestCommunityStructure();
                     
                     qb.value(i,1) = net{i}.statistics.qb_values.value;
                     qb.mean(i,1) = net{i}.statistics.qb_values.mean;
@@ -183,7 +184,7 @@ classdef MetaStatistics < handle
                 
                 %Avoid memory overflow
                 if(obj.clean_nulls == 1)
-                    net{i}.statistics.nulls = {};
+                    net{i}.statistics.CleanNulls();
                 end
             end
             
@@ -263,10 +264,10 @@ classdef MetaStatistics < handle
                 columns = [columns obj.qb_values.zscore];
                 columns = [columns obj.qb_values.percentile];
                 
-                headers{i} = 'Qr';
-                headers{i+1} = 'Qr mean';
-                headers{i+2} = 'Qr z-score';
-                headers{i+3} = 'Qr percent';
+                headers{i+4} = 'Qr';
+                headers{i+5} = 'Qr mean';
+                headers{i+6} = 'Qr z-score';
+                headers{i+7} = 'Qr percent';
                 columns = [columns obj.qr_values.value];
                 columns = [columns obj.qr_values.mean];
                 columns = [columns obj.qr_values.zscore];

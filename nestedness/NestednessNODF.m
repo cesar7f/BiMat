@@ -7,6 +7,7 @@
 %   Oikos 2008
 %
 % NestednessNTC Properties:
+%     matrix - Bipartite adjacency matrix where the NODF will be applied
 %     N - NODF value 
 %     N_rows - NODF value for rows
 %     N_cols - NODF value for columns
@@ -19,9 +20,10 @@
 %
 % See also:
 %    NestednessNTC
-classdef NestednessNODF < Nestedness
+classdef NestednessNODF < handle
 
-    properties(GetAccess = 'public', SetAccess = 'private')
+    properties(GetAccess = 'public', SetAccess = 'protected')
+        matrix   = []; % Bipartite adjacency matrix where the NODF will be applied
         N        = 0; % NODF value 
         N_rows   = 0; % NODF value for rows
         N_cols   = 0; % NODF value for columns

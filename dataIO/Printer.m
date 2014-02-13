@@ -185,7 +185,7 @@ classdef Printer < handle
             str = [str, '\tQr (Ratio of int/ext inter):\t', sprintf('%16.4f',obj.bipweb.modules.Qr), '\n'];
             
             str = [str, 'Nestedness\n'];
-            str = [str, '\tNODF metric value:          \t', sprintf('%16.4f',obj.bipweb.nodf.nodf), '\n'];
+            str = [str, '\tNODF metric value:          \t', sprintf('%16.4f',obj.bipweb.nodf.N), '\n'];
             str = [str, '\tNTC metric value:           \t', sprintf('%16.4f',obj.bipweb.ntc.N), '\n'];
            
             fprintf(str);  

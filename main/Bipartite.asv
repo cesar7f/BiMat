@@ -22,8 +22,8 @@ classdef Bipartite < handle
     %    col_labels - Labels for col nodes.
     %    printer - Object of the class Print.m for output.
     %    plotter - Instance of the class PlotWebs.m for plotting matrices and graphs.
-    %    row_class - Id's of the row classes
-    %    col_class - Id's of the col classes.
+    %    row_class - Id's of the row nodes
+    %    cols_idx - Id's of the col nodes.
     %    internal_statistics - Instance of the class InternalStatistics.m for multi-scale analysis.
     %
     % Bipartite Methods:

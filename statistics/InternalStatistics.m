@@ -227,7 +227,7 @@ classdef InternalStatistics < handle
             end
             
             module = obj.bipweb.modules;
-            obj.module_networks = module.ExtractCommunityIndexes();
+            obj.module_networks = module.ExtractCommunityModules();
             
             gp = MetaStatistics(obj.module_networks);
             gp.replicates = n_trials;

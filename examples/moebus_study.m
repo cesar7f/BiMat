@@ -86,7 +86,7 @@ bp.ntc.Detect();
 %%
 % Finally to show the values of the two algorithms you need to call:
 % The same value will be printed all the times
-fprintf('The nestedness NODF value is %f\n', bp.nodf.nodf); 
+fprintf('The nestedness NODF value is %f\n', bp.nodf.N); 
 % Because the value depends in the sorting of rows and columns, it may
 % variate from trial to trial.
 fprintf('The nestedness NTC value is %f\n', bp.ntc.N);
@@ -102,7 +102,7 @@ bp.printer.PrintStructureValues();
 % that you want a color for each interaction before calling the plot function:
 figure(1);
 % Matlab command to change the figure window;
-set(gcf,'Position',[19    72   932   922]); 
+set(gcf,'Position',[0   72   932   922]); 
 bp.plotter.font_size = 2.0; %Change the font size of the rows and labels
 % Use different color for each kind of interaction
 bp.plotter.use_type_interaction = true; % 
@@ -117,7 +117,7 @@ bp.plotter.PlotMatrix();
 % degree for row and column nodes.
 figure(2);
 % Matlab command to change the figure window;
-set(gcf,'Position',[19+200    72   932   922]); 
+set(gcf,'Position',[0+200    72   932   922]); 
 bp.plotter.use_isocline = true; %The isocline is used in the NTC algorithm.
 bp.plotter.isocline_color = 'red'; %Decide the color of the isocline.
 bp.plotter.PlotNestedMatrix();
@@ -127,7 +127,7 @@ bp.plotter.PlotNestedMatrix();
 % it. 
 figure(3);
 % Matlab command to change the figure window;
-set(gcf,'Position',[19+400    72   932   922]); 
+set(gcf,'Position',[0+400    72   932   922]); 
 % This will plot isoclines inside modules.
 bp.plotter.plot_iso_modules = true; 
 bp.plotter.PlotModularMatrix(); 
