@@ -19,7 +19,7 @@ load group_testing_data.mat;
 % If the number of random matrices and the null model are not assigned, 100 and
 % AVERAGE are used as default. Here we will use 100 random matrices with
 % the EQUIPROBABLE null model
-gp = GroupStatistics(grouptesting.matrices);    % Create the main object
+gp = MetaStatistics(grouptesting.matrices);    % Create the main object
 
 %% Perform an statististical analysis in the set of matrices
 % Suppose that we are interested in calculating the modularity and
@@ -29,28 +29,28 @@ gp = GroupStatistics(grouptesting.matrices);    % Create the main object
 % perform this analysis is by running the next lines:
 gp.replicates = 100; %How many random networks we want for each matrix
 gp.null_model = @NullModels.EQUIPROBABLE; %Our Null model
-gp.modul_class = @AdaptiveBrim; %Algorithm for modularity.
-gp.do_temp = 1; % Perform NTC analysis (default)
+gp.modularity_algorithm = @AdaptiveBrim; %Algorithm for modularity.
+gp.do_ntc = 1; % Perform NTC analysis (default)
 gp.do_modul = 1; % Perform Modularity analysis (default)
-gp.do_nest = 1; % Perform Modularity analysis (default)
+gp.do_nodf = 1; % Perform Modularity analysis (default)
 gp.names = grouptesting.name;
-gp.DoGroupTesting(); % Perform the analysis.
+gp.DoMetaAnalyisis(); % Perform the analysis.
 %%
-% Notice that |DoGroupTesting| method prints informatino about the current
+% Notice that |DoMetaAnalyisis| method prints informatino about the current
 % networks that is being analyzed, such that the user will know at every
 % moment the current status of the analysis.
 % After the analysis is finished a simple statistical measure to say that a
 % matrix is nested and/or modular is to chose a two tail p-value = 0.05 as
 % Flores et al 2011 did. Therefore, the next lines of code will show how
 % many matrices are found nested and/or modular
-fprintf('Number of NTC nested matrices: %i\n',sum(gp.ntc_stats_values.percent >= 97.5));
-fprintf('Number of NODF nested matrices: %i\n',sum(gp.nodf_vals.percent >= 97.5));
-fprintf('Number of modular matrices: %i\n',sum(gp.qb_vals.percent >= 97.5));
+fprintf('Number of NTC nested matrices: %i\n',sum(gp.ntc_values.percentile >= 97.5));
+fprintf('Number of NODF nested matrices: %i\n',sum(gp.nodf_values.percentile >= 97.5));
+fprintf('Number of modular matrices: %i\n',sum(gp.qb_values.percentile >= 97.5));
 %%
 % Because we only did 100 random matrices you may get different results. For
 % a more accurate result you may try 1.000 or even 10,000.
 % We can also show the entire set of results by calling:
-gp.PrintResults();
+gp.Print();
 
 %% Ploting results
 %The user can visualize the results of the last output in a graphical way. For example for visualizing

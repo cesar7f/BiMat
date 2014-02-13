@@ -1,4 +1,8 @@
 classdef Options
+% Options - Main default values for use in BiMat. Certain functions in
+% BiMat include optional arguments. When those optional arguments are
+% specified by the user, the values in this class are used instead.
+    
     %Statistical TEST
     properties(Constant)
         %These values are used for testing for significance
@@ -8,7 +12,8 @@ classdef Options
     
     %Null Models
     properties(Constant)
-        DEFAULT_NULL_MODEL = @NullModels.EQUIPROBABLE; %Default null model for creating random networks
+        %Default null model for creating random networks. See also: NullModels
+        DEFAULT_NULL_MODEL = @NullModels.EQUIPROBABLE; 
         ALLOW_ISOLATED_NODES = 1; %Create random networks that can or can not have empty rows or column nodes
         TRIALS_FOR_NON_EMPTY_NODES = 1000; %When ALLOW_ISOLATED_NODES = 0, this is the maximum number of random networks with empty rows/columns before giving up and relaxing that constraint
         INCLUDE_EMPTY_NODES = 1; %Keep  rows and columns from the matrix that are empty
@@ -18,7 +23,9 @@ classdef Options
     %Algorithms
     properties(Constant)
         OPTIMIZE_COMPONENTS = 0; %Optimize by components or entire matrix in modularity
-        MODULARITY_ALGORITHM = @AdaptiveBrim;
+        % Modularity default algorithm. See also: AdaptiveBrim,
+        % LPBrim, LeadingEigenvector
+        MODULARITY_ALGORITHM = @AdaptiveBrim; % Modularity default algorithm.
         TRIALS_MODULARITY = 20; %Number of random restarts for AdaptiveBrim and LPBrim algorithms. LeadingEigenvector is deterministic and therefore does not use this variable.
     end
 end

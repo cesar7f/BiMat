@@ -8,7 +8,7 @@
 %    NULL_MODEL - Create a cell of random matrices
 %
 % See also:
-%    StatisticalTest, TestModules
+%    StatisticalTest, InternalStatistics, MetaStatistics
 classdef NullModels < handle
     
     methods (Access = private)
@@ -22,6 +22,7 @@ classdef NullModels < handle
         
         function matrix = EQUIPROBABLE(MatrixOrSizeRows, n_cols, ones)
         % EQUIPROBABLE - Create a random matrix with equiprobable probabilities
+        %
         %   random_matrix = EQUIPROBABLE(matrix) Create a random matrix with
         %   the same number of interactions (ones) than matrix, but randomly
         %   distributed across the entire matrix
@@ -32,7 +33,7 @@ classdef NullModels < handle
         
             if(nargin == 1)
 
-                [n_rows n_cols] = size(MatrixOrSizeRows);
+                [n_rows, n_cols] = size(MatrixOrSizeRows);
                 ones = sum(sum(MatrixOrSizeRows>0));
 
             else 
@@ -63,6 +64,7 @@ classdef NullModels < handle
         function matrix = AVERAGE(n_rows, n_cols, probRows,probCols)
         % AVERAGE - Create a random matrix with average probability in rows
         % and columns.
+        %
         %   random_matrix = AVERAGE(matrix) Create a random matrix of the same size than matrix,
         %   such that cell i,j have a probability of having an interaction of:
         %
@@ -75,7 +77,7 @@ classdef NullModels < handle
             
             if(nargin ==1)
                 matrix = n_rows;
-                [n_rows n_cols] = size(matrix);
+                [n_rows, n_cols] = size(matrix);
                 probCols = sum(matrix)/n_rows;
                 probRows = sum(matrix,2)/n_cols;
             end
@@ -115,6 +117,7 @@ classdef NullModels < handle
         function matrix = AVERAGE_ROWS(n_rows, n_cols, probRows)
         % AVERAGE_ROWS - Create a random matrix with average probability in
         % rows
+        %
         %   random_matrix = AVERAGE_ROWS(matrix) Create a random matrix of 
         %   the same size than matrix, such that each cell i,j have a probability
         %   of having an interaction of:
@@ -128,7 +131,7 @@ classdef NullModels < handle
             
             if(nargin ==1)
                 matrix = n_rows;
-                [n_rows n_cols] = size(matrix);
+                [n_rows, n_cols] = size(matrix);
                 probRows = sum(matrix,2)/n_cols;
             end
             
@@ -156,6 +159,7 @@ classdef NullModels < handle
         function matrix = AVERAGE_COLS(n_rows, n_cols, probCols)
         % AVERAGE_COLS - Create a random matrix with average probability in
         % columns
+        %
         %   random_matrix = AVERAGE_COLS(matrix) Create a random matrix of 
         %   the same size than matrix, such that each cell i,j have a probability
         %   of having an interaction of:
@@ -168,7 +172,7 @@ classdef NullModels < handle
         %      p_ij = probRows(j)
             if(nargin ==1)
                 matrix = n_rows;
-                [n_rows n_cols] = size(matrix);
+                [n_rows, n_cols] = size(matrix);
                 probCols = sum(matrix)/n_rows;
             end
             
@@ -195,6 +199,7 @@ classdef NullModels < handle
         
         function rmatrices = NULL_MODEL(adjmatrix,model,replicates)
         % NULL_MODEL - Create a cell of random matrices
+        %
         %   rmatrices = NULL_MODEL(adjmatrix,model,replicates) Create a
         %   cell of random matrices using adjmatrix as empirical matrix
         %   from which the required properties will be extracted. model is
@@ -206,7 +211,7 @@ classdef NullModels < handle
             adjmatrix = adjmatrix ~= 0;
             
             n_edges = sum(adjmatrix(:));
-            [n_rows n_cols] = size(adjmatrix);
+            [n_rows, n_cols] = size(adjmatrix);
             p_cols = sum(adjmatrix,1)/n_rows;
             p_rows = sum(adjmatrix,2)/n_cols;
             %p = n_edges / (n_rows * n_cols);

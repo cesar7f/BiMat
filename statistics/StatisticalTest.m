@@ -1,63 +1,56 @@
-% StatisticalTest Statistical analysis class for a bipartite object in terms of
+% StatisticalTest - Statistical analysis class for a bipartite object in terms of
 % modularity and nestedness
 %
 % StatisticalTest Properties:
 %     bipweb - A bipartite network object in which the analysis will be done
 %     nulls - A set of random matrices used as null model
-%     tempvals - Results for the NTC value
-%     eigvals - Results for the espectral Radius algorithm value
-%     nodf_vals - Results for the NODF algorithm value
-%     nestvals_rows - Results for the NODF algorithm in rows
-%     nestvals_cols - Results for the NODF algorithm in columns
-%     qb_vals - Results for the standard modularity value
-%     qr_vals - Results for the ratio of interactions inside modules
-%     nest_row_contrib - Row NODF contributions
-%     nest_col_contrib - Column Nodf Contributions
-%     model - Null Model that will be used for creating the random networks nulls
+%     ntc_values - Results for the NTC value
+%     nodf_values - Results for the NODF algorithm value
+%     nodf_row_values - Results for the NODF algorithm in rows
+%     nodf_col_values - Results for the NODF algorithm in columns
+%     qb_values - Results for the standard modularity value
+%     qr_values - Results for the ratio of interactions inside modules
+%     null_model - Null Model that will be used for creating the random networks nulls
 %     replicates - Number of random networks used for the null model
-%     modul_done - The analysis in modularity was performed
-%     nest_done - The analysis in NODF was performed
-%     temp_done - The analysis in NTC was performed
-%     eig_done - The analysis en expectral radius was performed
-%     nest_contrib_done - The analysis on nestedness contribution was performed
-%     print_output - Flag to print output       
+%     community_done - The analysis in modularity was performed
+%     nodf_done - The analysis in NODF was performed
+%     ntc_done - The analysis in NTC was performed
+%     print_status - Print status of the statistical test (print the random matrix that is tested)
 %
 % StatisticalTest Methods:
 %     StatisticalTest - Main Constructor
 %     DoNulls - Create random matrices for the statistical analysis
 %     DoCompleteAnalysis - Perform the entire modularity and nestedness analysis
-%     Nestedness - Perform the NODF Statistical Analysis
-%     Temperature - Perform the NTC Statistical Analysis
-%     MaxEigenvalue - Perform the spectral radius Statistical Analysis
-%     Modularity - Perform the Modularity Statistical Analysis
-%     NestednessContributions - Perform the nestedness contribution Statistical Analysis
+%     TestNODF - Perform the NODF Statistical Analysis
+%     TestNTC - Perform the NTC Statistical Analysis
+%     TestCommunityStructure - Perform the Modularity Statistical Analysis
+%     GET_STATISTICAL_VALUES - Get the statistics of a value with respect to some random replicates
+%     TEST_COMMUNITY_STRUCTURE - Perform a test of the modularity in a        % bipartite matrix
+%     TEST_NODF - Perform a test of the modularity in a bipartite matrix
+%     TEST_NTC - Perform a test of the modularity in a bipartite matrix
 %
 % See also:
-%     BipartiteModularity, NODF, NestednessNTC
+%     MetaStatistics, NullModels, BipartiteModularity, NODF, NestednessNTC
 classdef StatisticalTest < handle
 
-    properties(GetAccess = 'public', SetAccess = 'public')
-        bipweb       = {};     % A bipartite network object in which the analysis will be done
-        nulls        = {};     % A set of random matrices used as null model
-        tempvals      = [];    % Results for the NTC value
-        eigvals       = [];    % Results for the espectral Radius algorithm value
-        nodf_vals      = [];    % Results for the NODF algorithm value
-        nestvals_rows = [];    % Results for the NODF algorithm in rows
-        nestvals_cols = [];    % Results for the NODF algorithm in columns
-        qb_vals       = [];    % Results for the standard modularity value
-        qr_vals       = [];    % Results for the ratio of interactions inside modules
-        nest_row_contrib = []; % Row NODF contributions
-        nest_col_contrib = []; % Column Nodf Contributions
-        model        = Options.DEFAULT_NULL_MODEL; % Null Model that will be used for creating the random networks nulls
-        replicates   = Options.REPLICATES;    % Number of random networks used for the null model
-        modul_done   = 0;      % The analysis in modularity was performed
-        nest_done    = 0;      % The analysis in NODF was performed
-        temp_done    = 0;      % The analysis in NTC was performed
-        eig_done     = 0;      % The analysis en expectral radius was performed
-        nest_contrib_done = 0; % The analysis on nestedness contribution was performed
-        print_output = 1;      % Flag to print output
-        print_status = 1;      % Print status of the statistical test (print the random matrix that is tested)
+    properties(GetAccess = 'public', SetAccess = 'private')
+        bipweb           = {};     % A bipartite network object in which the analysis will be done
+        nulls            = {};     % A set of random matrices used as null model
+        ntc_values       = [];     % Results for the NTC value
+        nodf_values      = [];     % Results for the NODF algorithm value
+        nodf_row_values  = [];     % Results for the NODF algorithm in rows
+        nodf_col_values  = [];     % Results for the NODF algorithm in columns
+        qb_values        = [];     % Results for the standard modularity value
+        qr_values        = [];     % Results for the ratio of interactions inside communities
+        null_model       = Options.DEFAULT_NULL_MODEL; % Null Model that will be used for creating the random networks nulls
+        replicates       = Options.REPLICATES;    % Number of random networks used for the null model
+        community_done   = 0;      % The analysis in modularity was performed
+        nodf_done        = 0;      % The analysis in NODF was performed
+        ntc_done         = 0;      % The analysis in NTC was performed
+        print_status     = 1;      % Print status of the statistical test (print the random matrix that is tested)
     end
+    
+
     
     methods
 
@@ -72,44 +65,54 @@ classdef StatisticalTest < handle
         function obj = DoNulls(obj,replic,nullmodel)
         % DoNulls - Create random matrices for the statistical analysis
         %   obj = DoNulls(obj) Create Options.REPLICATES random matrices using the
-        %   EQUIPROBABLE null model.
+        %   default null model (Options.DEFAULT_NULL_MODEL).
         %
-        %   obj = DoNulls(obj,nullmodel) Create Options.REPLICATES random matrices using the
-        %   indicated Null Model
+        %   obj = DoNulls(obj,replic) Create replic random matrices using
+        %   the default null model (Options.DEFAULT_NULL_MODEL).
         %
-        %   obj = DoNulls(obj,nullmodel,replic) Create replic random
+        %   obj = DoNulls(obj,replic,nullmodel) Create replic random
         %   matrices using the null model indicated in the variable
         %   nullmodel
+        %
+        % See also:
+        %   NullModels, Options.REPLICATES, Options.DEFAULT_NULL_MODEL
         
-            %obj.modul_done = 0;
-            %obj.nest_done = 0;
+            %obj.community_done = 0;
+            %obj.nodf_done = 0;
             
             if(nargin == 1)
-                obj.model = Options.DEFAULT_NULL_MODEL;
+                obj.null_model = Options.DEFAULT_NULL_MODEL;
                 obj.replicates = Options.REPLICATES;
             elseif(nargin == 2)
-                obj.model = Options.DEFAULT_NULL_MODEL;
+                obj.null_model = Options.DEFAULT_NULL_MODEL;
                 obj.replicates = replic;
             else
-                obj.model = nullmodel;
+                obj.null_model = nullmodel;
                 obj.replicates = replic;
             end
             
-            obj.nulls = NullModels.NULL_MODEL(obj.bipweb.matrix,obj.model,obj.replicates);
+            obj.nulls = NullModels.NULL_MODEL(obj.bipweb.matrix,obj.null_model,obj.replicates);
             
         end
         
         function obj = DoCompleteAnalysis(obj, replic, nullmodel)
         % DoCompleteAnalysis - Perform the entire modularity and nestedness analysis
+        %
         %   obj = DoCompleteAnalysis(obj) Perform the entire analysis for
-        %   nestedness and modularity using the EQUIPROBABLE null model and Options.REPLICATES random matrices.
+        %   nestedness and modularity using default values for null model
+        %   and number of replicates (Options.REPLICATES,
+        %   Options.DEFAULT_NULL_MODEL).
         %
         %   obj = DoCompleteAnalysis(obj,replic) Perform the entire analysis for
-        %   nestedness and modularity using the EQUIPROBABLE null model and a total of replic random matrices.
+        %   nestedness and modularity using Options.DEFAULT_NULL_MODEL for
+        %   creating replic random matrices
         %
         %   obj = DoCompleteAnalysis(obj,replic,nullmodel) Perform the entire analysis for
         %   nestedness and modularity using the the specified Null model
         %   and a total of replic random matrices
+        %
+        % See also:
+        %   NullModels, Options.REPLICATES, Options.DEFAULT_NULL_MODEL
         
             
             if(nargin == 1)
@@ -124,7 +127,7 @@ classdef StatisticalTest < handle
             fprintf('Performing NODF statistical analysis...\n');
             obj.TestNODF();
             fprintf('Performing Modularity statistical analysis...\n');
-            obj.TestModularity();
+            obj.TestCommunityStructure();
             fprintf('Performing NTC statistical analysis...\n');
             obj.TestNTC();
             %obj.MaxEigenvalue();
@@ -134,10 +137,13 @@ classdef StatisticalTest < handle
         function obj = TestNODF(obj)
         % TestNODF - Perform the NODF Statistical Analysis
         %
-        %   obj = Nestedness(obj) Perform the entire NODF analsysis. Be
+        %   obj = TestNODF(obj) Perform the entire NODF analsysis. Be
         %   sure to create the random matrices before calling this
-        %   function. Otherwise only Options.REPLICATES equiprobable random matrices will
-        %   be used for the analysis
+        %   function. Otherwise Options.REPLICATES and Options.DEFAULT_NULL_MODEL
+        %   will be used as number of rando matrices and null model.
+        %
+        % See also:
+        %   StatisticalTest.DoNulls
         
             if(isempty(obj.nulls))
                 obj.DoNulls();
@@ -166,24 +172,27 @@ classdef StatisticalTest < handle
                 expect_col(i) = Nodf.nodf_cols;
             end
             
-            obj.nodf_vals = StatisticalTest.GET_STATISTICAL_VALUES(nodf,expect);
-            obj.nestvals_rows = StatisticalTest.GET_STATISTICAL_VALUES(nodf_rows,expect_row);
-            obj.nestvals_cols = StatisticalTest.GET_STATISTICAL_VALUES(nodf_cols,expect_col);
+            obj.nodf_values = StatisticalTest.GET_STATISTICAL_VALUES(nodf,expect);
+            obj.nodf_row_values = StatisticalTest.GET_STATISTICAL_VALUES(nodf_rows,expect_row);
+            obj.nodf_col_values = StatisticalTest.GET_STATISTICAL_VALUES(nodf_cols,expect_col);
             
-            obj.nodf_vals.replicates = obj.replicates;
-            obj.nodf_vals.model = obj.model;
+            obj.nodf_values.replicates = obj.replicates;
+            obj.nodf_values.null_model = obj.null_model;
             
-            obj.nest_done = 1;
+            obj.nodf_done = 1;
             
         end
         
         function obj = TestNTC(obj)
         % TestNTC - Perform the NTC Statistical Analysis
         %
-        %   obj = Temperature(obj) Perform the NTC Statistical analsysis. Be
+        %   obj = TestNTC(obj) Perform the NTC Statistical analsysis. Be
         %   sure to create the random matrices before calling this
-        %   function. Otherwise only Options.REPLICATES equiprobable random matrices will
-        %   be used for the analysis
+        %   function. Otherwise Options.REPLICATES and Options.DEFAULT_NULL_MODEL
+        %   will be used as number of rando matrices and null model.
+        %
+        % See also:
+        %   StatisticalTest.DoNulls
         
             if(isempty(obj.nulls))
                 obj.DoNulls();
@@ -216,38 +225,25 @@ classdef StatisticalTest < handle
                 %fprintf('Trial %i:\n', i);
             end
                        
-            obj.tempvals = StatisticalTest.GET_STATISTICAL_VALUES(ntc,expect);
+            obj.ntc_values = StatisticalTest.GET_STATISTICAL_VALUES(ntc,expect);
             
-            obj.tempvals.replicates = obj.replicates;
-            obj.tempvals.model = obj.model;
+            obj.ntc_values.replicates = obj.replicates;
+            obj.ntc_values.null_model = obj.null_model;
             
-            obj.temp_done = 1;
+            obj.ntc_done = 1;
         end
         
-        function obj = MaxEigenvalue(obj)
-        % MaxEigenvalue - Perform the spectral radius Statistical Analysis
-        %
-        %   obj = MaxEigenvalue(obj) Perform the NTC Statistical analsysis. Be
-        %   sure to create the random matrices before calling this
-        %   function. Otherwise only Options.REPLICATES equiprobable random matrices will
-        %   be used for the analysis
-            
-            if(isempty(obj.nulls))
-                obj.DoNulls();
-            end
-            
-            [obj.eigvals] = StatisticalTest.GET_DEV_EIG(obj.bipweb,obj.nulls);
-            
-            obj.eig_done = 1;
-        end
         
-        function obj = TestModularity(obj)
-        % TestModularity - Perform the Modularity Statistical Analysis
+        function obj = TestCommunityStructure(obj)
+        % TestCommunityStructure - Perform the Modularity Statistical Analysis
         %
-        %   obj = TestModularity(obj) Perform the Modularity Statistical analsysis. Be
+        %   obj = TestCommunityStructure(obj) Perform the Modularity Statistical analsysis. Be
         %   sure to create the random matrices before calling this
-        %   function. Otherwise only Options.REPLICATES equiprobable random matrices will
-        %   be used for the analysis
+        %   function. Otherwise Options.REPLICATES and Options.DEFAULT_NULL_MODEL
+        %   will be used as number of rando matrices and null model.
+        %
+        % See also:
+        %   StatisticalTest.DoNulls
         
             if(isempty(obj.nulls))
                 obj.DoNulls();
@@ -294,78 +290,66 @@ classdef StatisticalTest < handle
                 Qr_random(i) = modularity.Qr; 
             end
             
-            obj.qb_vals = StatisticalTest.GET_STATISTICAL_VALUES(wQb,Qb_random);
-            obj.qr_vals = StatisticalTest.GET_STATISTICAL_VALUES(wQr,Qr_random);
+            obj.qb_values = StatisticalTest.GET_STATISTICAL_VALUES(wQb,Qb_random);
+            obj.qr_values = StatisticalTest.GET_STATISTICAL_VALUES(wQr,Qr_random);
             
-            obj.qb_vals.algorithm = class(obj.bipweb.modules);
-            obj.qb_vals.replicates = obj.replicates;
-            obj.qb_vals.model = obj.model;
-            obj.modul_done = 1;
+            obj.qb_values.algorithm = class(obj.bipweb.modules);
+            obj.qb_values.replicates = obj.replicates;
+            obj.qb_values.null_model = obj.null_model;
+            obj.community_done = 1;
         end
         
-        function obj = NestednessContributions(obj)
-        % NOT TESTED!!!!!!
-        % NestednessContributions - Perform the nestedness contribution Statistical Analysis
-        %
-        %   obj = NestednessContributions(obj) Perform the nestedness contribution Statistical analsysis. Be
-        %   sure to create the random matrices before calling this
-        %   function. Otherwise default number of replicates and null model
-        %   will be used (see main/Options.m)
         
-            if(isempty(obj.nulls))
-                obj.DoNulls();
-            end
-            [obj.nest_row_contrib,obj.nest_col_contrib] = StatisticalTest.GET_NEST_CONTRIBUTIONS(obj.bipweb.matrix,obj.nulls);
-            
-            obj.nest_row_contrib.replicates = obj.replicates;
-            obj.nest_row_contrib.model = obj.model;
-            
-            obj.nest_col_contrib.replicates = obj.replicates;
-            obj.nest_col_contrib.model = obj.model;
-            
-            obj.nest_contrib_done = 1;
-        end
         
         function obj = Print(obj,filename)
-        
+        % Print - Print all previouslly statistically tested values
+        %
+        %   STR = Print(obj) Print the statistical results to screen and
+        %   returns this information to the string STR
+        %
+        %   STR = Print(obj, FILE) Print the statistical resultss to screen and
+        %   text file FILE and return this information to the string STR   
+        %
+        % See also: 
+        %   Printer    
             str = '';
-            if(obj.modul_done == 1)
+            if(obj.community_done == 1)
                 str = 'Modularity\n';
-                str = [str, '\t Used algorithm:\t', sprintf('%30s',obj.qb_vals.algorithm), '\n'];
-                str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.qb_vals.model)), '\n'];
-                str = [str, '\t Replicates:    \t', sprintf('%30i',obj.qb_vals.replicates), '\n'];
-                str = [str, '\t Qb value:      \t', sprintf('%30.4f',obj.qb_vals.value), '\n'];
-                str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.qb_vals.mean), '\n'];
-                str = [str, '\t     std:       \t', sprintf('%30.4f',obj.qb_vals.std), '\n'];
-                str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.qb_vals.zscore), '\n'];
-                str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.qb_vals.percent), '\n'];
-                str = [str, '\t Qr value:      \t', sprintf('%30.4f',obj.qr_vals.value), '\n'];
-                str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.qr_vals.mean), '\n'];
-                str = [str, '\t     std:       \t', sprintf('%30.4f',obj.qr_vals.std), '\n'];
-                str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.qr_vals.zscore), '\n'];
-                str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.qr_vals.percent), '\n'];
+                str = [str, '\t Used algorithm:\t', sprintf('%30s',obj.qb_values.algorithm), '\n'];
+                str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.qb_values.null_model)), '\n'];
+                str = [str, '\t Replicates:    \t', sprintf('%30i',obj.qb_values.replicates), '\n'];
+                str = [str, '\t Qb value:      \t', sprintf('%30.4f',obj.qb_values.value), '\n'];
+                str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.qb_values.mean), '\n'];
+                str = [str, '\t     std:       \t', sprintf('%30.4f',obj.qb_values.std), '\n'];
+                str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.qb_values.zscore), '\n'];
+                str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.qb_values.percent), '\n'];
+                str = [str, '\t Qr value:      \t', sprintf('%30.4f',obj.qr_values.value), '\n'];
+                str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.qr_values.mean), '\n'];
+                str = [str, '\t     std:       \t', sprintf('%30.4f',obj.qr_values.std), '\n'];
+                str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.qr_values.zscore), '\n'];
+                str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.qr_values.percent), '\n'];
             end
             
-            if(obj.nest_done == 1)
+            if(obj.nodf_done == 1)
                 str = [str, 'NODF Nestedness\n'];
-                str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.nodf_vals.model)), '\n'];
-                str = [str, '\t Replicates:    \t', sprintf('%30i',obj.nodf_vals.replicates), '\n'];
-                str = [str, '\t NODF value:    \t', sprintf('%30.4f',obj.nodf_vals.value), '\n'];
-                str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.nodf_vals.mean), '\n'];
-                str = [str, '\t     std:       \t', sprintf('%30.4f',obj.nodf_vals.std), '\n'];
-                str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.nodf_vals.zscore), '\n'];
-                str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.nodf_vals.percent), '\n'];
+                str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.nodf_values.null_model)), '\n'];
+                str = [str, '\t Replicates:    \t', sprintf('%30i',obj.nodf_values.replicates), '\n'];
+                str = [str, '\t NODF value:    \t', sprintf('%30.4f',obj.nodf_values.value), '\n'];
+                str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.nodf_values.mean), '\n'];
+                str = [str, '\t     std:       \t', sprintf('%30.4f',obj.nodf_values.std), '\n'];
+                str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.nodf_values.zscore), '\n'];
+                str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.nodf_values.percent), '\n'];
             end
             
-            if(obj.temp_done == 1)
+            if(obj.ntc_done == 1)
                 str = [str, 'NTC Nestedness\n'];
-                str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.tempvals.model)), '\n'];
-                str = [str, '\t Replicates:    \t', sprintf('%30i',obj.tempvals.replicates), '\n'];
-                str = [str, '\t NTC value:     \t', sprintf('%30.4f',obj.tempvals.value), '\n'];
-                str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.tempvals.mean), '\n'];
-                str = [str, '\t     std:       \t', sprintf('%30.4f',obj.tempvals.std), '\n'];
-                str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.tempvals.zscore), '\n'];
-                str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.tempvals.percent), '\n'];
+                str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.ntc_values.null_model)), '\n'];
+                str = [str, '\t Replicates:    \t', sprintf('%30i',obj.ntc_values.replicates), '\n'];
+                str = [str, '\t NTC value:     \t', sprintf('%30.4f',obj.ntc_values.value), '\n'];
+                str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.ntc_values.mean), '\n'];
+                str = [str, '\t     std:       \t', sprintf('%30.4f',obj.ntc_values.std), '\n'];
+                str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.ntc_values.zscore), '\n'];
+                str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.ntc_values.percent), '\n'];
             end
             
             fprintf(str);  
@@ -378,97 +362,13 @@ classdef StatisticalTest < handle
         
     end
     
-    methods
-        
-               
-        
-       
-        
-        function [out] = GET_DEV_EIG(webbip,rmatrices)
-        % NOT TESTED!!!!!!
-        % GET_DEV_EIG - Perform a spectral radius Statistical Analysis
-        %
-        %   [out out_row out_col] =  GET_DEV_EIG(webbip,rmatrices) Perform t-test and
-        %   z-test in the NTC value of the bipartite object webbip using
-        %   the ser of random matrices rmatrices. Return a
-        %   structure for NTC statistical values in the entire matrix(out)
-        %   with the next elements:
-        %      value   - The value in the empirical matrix
-        %      p       - p-value of the performed t-test
-        %      ci      - Confidence interval of the performet t-test
-        %      percent - The percent of random networks for which  the
-        %                empirical value is bigger than the value of the random
-        %                networks
-        %      z       - z-score of the empirical value      
-            n = length(rmatrices);
-            expect = zeros(n,1);
-            
-            maxe = MatrixNull.GetBiggestEigenvalue(webbip.matrix);
-            
-            for i = 1:n
-                expect(i) = MatrixNull.GetBiggestEigenvalue(rmatrices{i});
-            end
-            
-            out = StatisticalTest.GET_STATISTICAL_VALUES(maxe,expect);
-            
-        end
-        
-        function [c_rows, c_cols] = GET_NEST_CONTRIBUTIONS(matrix, rmatrices)
-        % NOT TESTED!!!!!!
-        % GET_NEST_CONTRIBUTIONS - Get NODF nestedness contributions of a
-        % matrix
-        %
-        %   [c_rows c_cols] = GET_NEST_CONTRIBUTIONS(matrix, rmatrices) Get
-        %   the NODF contributions for both rows and columns. The
-        %   contribution is calculated as the z-score of each individually
-        %   randomly permuted row and columns
-            nodf = NODF(matrix);
-            N = nodf.nodf;
-            [n_rows, n_cols] = size(matrix);
-            nn = length(rmatrices);
-            row_contrib = zeros(nn,n_rows);
-            col_contrib = zeros(nn,n_cols);
-            %orig_matrix = matrix;
-            for i = 1:n_rows
-                temp_row = matrix(i,:);
-                for j = 1:nn
-                    matrix(i,:) = rmatrices{j}(i,:);
-                    nodf = NODF(matrix,0);
-                    row_contrib(j,i) = nodf.nodf;
-                    if(isnan(nodf.nodf))
-                        continue;
-                    end
-                end
-                matrix(i,:) = temp_row;
-            end
-            
-            for i = 1:n_cols
-                temp_col = matrix(:,i);
-                for j = 1:nn
-                    matrix(:,i) = rmatrices{j}(:,i);
-                    nodf = NODF(matrix,0);
-                    col_contrib(j,i) = nodf.nodf;
-                end
-                matrix(:,i) = temp_col;
-            end
-            std_rows = std(row_contrib);
-            std_cols = std(col_contrib);
-            mean_rows = mean(row_contrib);
-            mean_cols = mean(col_contrib);
-            
-            c_rows = (N - mean_rows)./std_rows;
-            c_cols = (N - mean_cols)./std_cols;
-            
-        end
-        
-        
-    end
-    
+
+
     methods(Static)
         
         function out = GET_STATISTICAL_VALUES(real_value, random_values)
-        % GET_STATISTICAL_VALUES - Get some statistics of the real value
-        % with respect to random values
+        % GET_STATISTICAL_VALUES - Get the statistics of a value with
+        % respect to some random replicates
         %
         %   out = GET_STATISTICAL_VALUES(real_value, random_values) Get
         %   some statistics for real_value using the vector random_values. It returns
@@ -477,8 +377,10 @@ classdef StatisticalTest < handle
         %     value: Just real_value
         %     mean: mean(random_values)
         %     std: std(random_values)
-        %     ci: confidence intervals of the t-test.
         %     zscore: the z-score of real_value in the distribution of
+        %             random_values
+        %     percentile: the percentile of real_value in the distribution
+        %                 of random_values
         %     random_values: the sorted version of random_values
         %     
             n = length(random_values);
@@ -488,16 +390,38 @@ classdef StatisticalTest < handle
             percent = 100.0*sum(real_value>random_values)/n;
             
             out.value = real_value; out.mean = me; out.std = stad;
-            %out.p = p; out.ci = ci; 
             out.zscore = zscore; out.percentil = percent;
             out.random_values = sort(random_values);
             
         end
         
-        function stest = MODULARITY(matrix,ntrials,null_model,modul_algorithm)
+        function stest = TEST_COMMUNITY_STRUCTURE(matrix,replicates,null_model,modul_algorithm)
+        % TEST_COMMUNITY_STRUCTURE - Perform a test of the modularity in a
+        % bipartite matrix
+        %
+        %   stest = TEST_COMMUNITY_STRUCTURE(MATRIX) Perform a statistical
+        %   analysis of modularity in MATRIX using default values for null
+        %   model, modularity algorithm, and replicates. It returns a
+        %   StatisticalTest object.
+        %
+        %   obj = TEST_COMMUNITY_STRUCTURE(MATRIX,REPLICATES) Perform a statistical
+        %   analysis of modularity in MATRIX using REPLICATES random matrices
+        %
+        %   obj = TEST_COMMUNITY_STRUCTURE(MATRIX,REPLICATES,NULL_MODEL)
+        %   Perform an statistical analysis of modularity in MATRIX unsing
+        %   NULL_MODEL as null model.
+        %   
+        %   stest = TEST_COMMUNITY_STRUCTURE(MATRIX,REPLICATES,NULL_MODEL,MODUL_ALGORITHM)
+        %   Perform an statistical analysis of modularity in MATRIX unsing
+        %   MODUL_ALGORITHM as modularity algorithm.
+        %
+        % See also:
+        %   NullModels, Options.REPLICATES, Options.DEFAULT_NULL_MODEL,
+        %   Options.MODULARITY_ALGORITHM
+        
             
             if(nargin==1)
-                ntrials = Options.REPLICATES;
+                replicates = Options.REPLICATES;
                 null_model = Options.DEFAULT_NULL_MODEL;
                 modul_algorithm = Options.MODULARITY_ALGORITHM;
             elseif(nargin==2)
@@ -508,16 +432,33 @@ classdef StatisticalTest < handle
             bp = Bipartite(matrix);
             bp.modules = modul_algorithm(bp.matrix);
             stest = StatisticalTest(bp);
-            stest.DoNulls(ntrials,null_model);
-            stest.TestModularity();
+            stest.DoNulls(replicates,null_model);
+            stest.TestCommunityStructure();
             
             stest.Print();
         end
         
-        function stest = NTC(matrix,ntrials,null_model)
+        function stest = TEST_NTC(matrix,replicates,null_model)
+        % TEST_NTC - Perform a test of the modularity in a
+        % bipartite matrix
+        %
+        %   stest = TEST_NTC(MATRIX) Perform a statistical
+        %   analysis of Nestedness NTC in MATRIX using default values for null
+        %   model, modularity algorithm, and replicates. It returns a
+        %   StatisticalTest object.
+        %
+        %   obj = TEST_NTC(MATRIX,REPLICATES) Perform a statistical
+        %   analysis of Nestedness NTC in MATRIX using REPLICATES random matrices
+        %
+        %   obj = TEST_NTC(MATRIX,REPLICATES,NULL_MODEL)
+        %   Perform an statistical analysis of Nestedness NTC in MATRIX unsing
+        %   NULL_MODEL as null model.
+        %
+        % See also:
+        %   NullModels, Options.REPLICATES, Options.DEFAULT_NULL_MODEL
             
             if(nargin==1)
-                ntrials = Options.REPLICATES;
+                replicates = Options.REPLICATES;
                 null_model = Options.DEFAULT_NULL_MODEL;
             elseif(nargin==2)
                 null_model = Options.DEFAULT_NULL_MODEL;
@@ -525,17 +466,33 @@ classdef StatisticalTest < handle
             
             bp = Bipartite(matrix);
             stest = StatisticalTest(bp);
-            stest.DoNulls(ntrials,null_model);
+            stest.DoNulls(replicates,null_model);
             stest.TestNTC();
             
             stest.Print();
             
         end
         
-        function stest = NODF(matrix,ntrials,null_model)
-            
+        function stest = TEST_NODF(matrix,replicates,null_model)
+        % TEST_NODF - Perform a test of the modularity in a
+        % bipartite matrix
+        %
+        %   stest = TEST_NODF(MATRIX) Perform a statistical
+        %   analysis of Nestedness NODF in MATRIX using default values for null
+        %   model, modularity algorithm, and replicates. It returns a
+        %   StatisticalTest object.
+        %
+        %   obj = TEST_NODF(MATRIX,REPLICATES) Perform a statistical
+        %   analysis of Nestedness NODF in MATRIX using REPLICATES random matrices
+        %
+        %   obj = TEST_NODF(MATRIX,REPLICATES,NULL_MODEL)
+        %   Perform an statistical analysis of Nestedness NODF in MATRIX unsing
+        %   NULL_MODEL as null model.
+        %
+        % See also:
+        %   NullModels, Options.REPLICATES, Options.DEFAULT_NULL_MODEL    
             if(nargin==1)
-                ntrials = Options.REPLICATES;
+                replicates = Options.REPLICATES;
                 null_model = Options.DEFAULT_NULL_MODEL;
             elseif(nargin==2)
                 null_model = Options.DEFAULT_NULL_MODEL;
@@ -543,7 +500,7 @@ classdef StatisticalTest < handle
             
             bp = Bipartite(matrix);
             stest = StatisticalTest(bp);
-            stest.DoNulls(ntrials,null_model);
+            stest.DoNulls(replicates,null_model);
             stest.TestNODF();
             
             stest.Print();
@@ -553,3 +510,147 @@ classdef StatisticalTest < handle
     end
 
 end
+
+%   NEXT COMMENTED CODE INCLUDES FUNCTIONS TO CALCULATE THE NODF
+%   CONTRIBUTION OF BOTH ROWS AND COLUMNS, AND THE MAXIUM EIGENVALUE NEW
+%   APPROACH TO EVALUATE NESTEDNESS IN A BIPARTITE MATRIX. THEY WERE
+%   COMMENTED BECAUSE NO EXAHUSTIVE TEST WAS PERFORMED IN THESE FUNCTIONS.
+%     properties(GetAccess = 'private', SetAccess = 'private')
+%     %Untested algorithms
+%         nodf_row_contrib = []; % Row NODF contributions
+%         nodf_col_contrib = []; % Column Nodf Contributions
+%         eigvals          = [];    % Results for the espectral Radius algorithm value
+%         nest_contrib_done= 0; % The analysis on nestedness contribution was performed
+%         eig_done         = 0;      % The analysis en expectral radius was performed
+%     end
+%     
+%     methods(Access = 'private')
+%         
+%         function obj = MaxEigenvalue(obj)
+%         %NOT TESTED!!!!!
+%         % MaxEigenvalue - Perform the spectral radius Statistical Analysis
+%         %
+%         %   obj = MaxEigenvalue(obj) Perform the NTC Statistical analsysis. Be
+%         %   sure to create the random matrices before calling this
+%         %   function. Otherwise only Options.REPLICATES equiprobable random matrices will
+%         %   be used for the analysis
+%             
+%             if(isempty(obj.nulls))
+%                 obj.DoNulls();
+%             end
+%             
+%             [obj.eigvals] = StatisticalTest.GET_DEV_EIG(obj.bipweb,obj.nulls);
+%             
+%             obj.eig_done = 1;
+%         end
+%         
+%     end
+%     
+
+% 
+%     methods
+%         
+%                
+%         
+%        function obj = NestednessContributions(obj)
+%         % NOT TESTED!!!!!!
+%         % NestednessContributions - Perform the nestedness contribution Statistical Analysis
+%         %
+%         %   obj = NestednessContributions(obj) Perform the nestedness contribution Statistical analsysis. Be
+%         %   sure to create the random matrices before calling this
+%         %   function. Otherwise default number of replicates and null model
+%         %   will be used (see main/Options.m)
+%         
+%             if(isempty(obj.nulls))
+%                 obj.DoNulls();
+%             end
+%             [obj.nodf_row_contrib,obj.nodf_col_contrib] = StatisticalTest.GET_NEST_CONTRIBUTIONS(obj.bipweb.matrix,obj.nulls);
+%             
+%             obj.nodf_row_contrib.replicates = obj.replicates;
+%             obj.nodf_row_contrib.null_model = obj.null_model;
+%             
+%             obj.nodf_col_contrib.replicates = obj.replicates;
+%             obj.nodf_col_contrib.null_model = obj.null_model;
+%             
+%             obj.nest_contrib_done = 1;
+%         end
+%         
+%         function [out] = GET_DEV_EIG(webbip,rmatrices)
+%         % NOT TESTED!!!!!!
+%         % GET_DEV_EIG - Perform a spectral radius Statistical Analysis
+%         %
+%         %   [out out_row out_col] =  GET_DEV_EIG(webbip,rmatrices) Perform t-test and
+%         %   z-test in the NTC value of the bipartite object webbip using
+%         %   the ser of random matrices rmatrices. Return a
+%         %   structure for NTC statistical values in the entire matrix(out)
+%         %   with the next elements:
+%         %      value   - The value in the empirical matrix
+%         %      p       - p-value of the performed t-test
+%         %      ci      - Confidence interval of the performet t-test
+%         %      percent - The percent of random networks for which  the
+%         %                empirical value is bigger than the value of the random
+%         %                networks
+%         %      z       - z-score of the empirical value      
+%             n = length(rmatrices);
+%             expect = zeros(n,1);
+%             
+%             maxe = MatrixNull.GetBiggestEigenvalue(webbip.matrix);
+%             
+%             for i = 1:n
+%                 expect(i) = MatrixNull.GetBiggestEigenvalue(rmatrices{i});
+%             end
+%             
+%             out = StatisticalTest.GET_STATISTICAL_VALUES(maxe,expect);
+%             
+%         end
+%         
+%         function [c_rows, c_cols] = GET_NEST_CONTRIBUTIONS(matrix, rmatrices)
+%         % NOT TESTED!!!!!!
+%         % GET_NEST_CONTRIBUTIONS - Get NODF nestedness contributions of a
+%         % matrix
+%         %
+%         %   [c_rows c_cols] = GET_NEST_CONTRIBUTIONS(matrix, rmatrices) Get
+%         %   the NODF contributions for both rows and columns. The
+%         %   contribution is calculated as the z-score of each individually
+%         %   randomly permuted row and columns
+%             nodf = NODF(matrix);
+%             N = nodf.nodf;
+%             [n_rows, n_cols] = size(matrix);
+%             nn = length(rmatrices);
+%             row_contrib = zeros(nn,n_rows);
+%             col_contrib = zeros(nn,n_cols);
+%             %orig_matrix = matrix;
+%             for i = 1:n_rows
+%                 temp_row = matrix(i,:);
+%                 for j = 1:nn
+%                     matrix(i,:) = rmatrices{j}(i,:);
+%                     nodf = NODF(matrix,0);
+%                     row_contrib(j,i) = nodf.nodf;
+%                     if(isnan(nodf.nodf))
+%                         continue;
+%                     end
+%                 end
+%                 matrix(i,:) = temp_row;
+%             end
+%             
+%             for i = 1:n_cols
+%                 temp_col = matrix(:,i);
+%                 for j = 1:nn
+%                     matrix(:,i) = rmatrices{j}(:,i);
+%                     nodf = NODF(matrix,0);
+%                     col_contrib(j,i) = nodf.nodf;
+%                 end
+%                 matrix(:,i) = temp_col;
+%             end
+%             std_rows = std(row_contrib);
+%             std_cols = std(col_contrib);
+%             mean_rows = mean(row_contrib);
+%             mean_cols = mean(col_contrib);
+%             
+%             c_rows = (N - mean_rows)./std_rows;
+%             c_cols = (N - mean_cols)./std_cols;
+%             
+%         end
+%         
+%         
+%     end

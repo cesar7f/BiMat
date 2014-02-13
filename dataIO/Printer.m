@@ -42,6 +42,7 @@ classdef Printer < handle
                 
         function obj = CreateCytoscapeData(obj,filename)
         % CreateCytoscapeData - Create input files for Cytoscape software
+        %
         %   obj = CreateCytoscapeData(obj,filename) Create two input files
         %   filename_edges.csv and filename_nodes.csv for Cytoscape
         %   software. The first one is indispensable for Cytoscape and
@@ -112,8 +113,10 @@ classdef Printer < handle
        
         function str = PrintAdjacencyList(obj,filename)
         % PrintAdjacencyList - Print the adjacency list
+        %
         %   obj = PrintAdjacencyList(obj) - Print the adjacency list of a
         %   network to screen.
+        %
         %   obj = PrintAdjacencyList(obj,FILE) - Print the adjacency list of a
         %   network to screen and text file FILE.
             str = '';
@@ -135,8 +138,10 @@ classdef Printer < handle
         
         function PrintGeneralProperties(obj,filename)
         % PrintGeneralProperties - Print the general properties 
+        %
         %   obj = PrintGeneralProperties(obj) - Print the general 
         %   properties of a bipartite network to screen. 
+        %
         %   obj = PrintGeneralProperties(obj,FILE) - Print the general 
         %   properties of a bipartite network to screen and text file FILE.
         
@@ -158,8 +163,10 @@ classdef Printer < handle
         
         function PrintStructureValues(obj,filename)
         % PrintStructureValues - Print the sctructure values
+        %
         %   obj = PrintStructureValues(obj) - Print the structure values
         %   of nestedness and modularity to screen.
+        %
         %   obj = PrintStructureValues(obj,FILE) - Print the structure values
         %   of nestedness and modularity to screen and text file FILE.
         
@@ -191,44 +198,46 @@ classdef Printer < handle
         
         function PrintStructureStatistics(obj,filename)
         % PrintStructureStatistics - Print the statistics of structure values
+        %
         %   obj = PrintStructureStatistics(obj) - Print the statistics of
         %   nestedness and modularity to screen.
+        %
         %   obj = PrintStructureStatistics(obj,FILE) - Print the statistics of
         %   nestedness and modularity to screen and text file FILE.
            
-            if(obj.bipweb.statistics.modul_done == 0)
-                obj.bipweb.statistics.TestModularity();
+            if(obj.bipweb.statistics.community_done == 0)
+                obj.bipweb.statistics.TestCommunityStructure();
             end
             
-            if(obj.bipweb.statistics.nest_done == 0)
+            if(obj.bipweb.statistics.nodf_done == 0)
                 obj.bipweb.statistics.TestNODF();
             end
             
-            if(obj.bipweb.statistics.temp_done == 0)
+            if(obj.bipweb.statistics.ntc_done == 0)
                 obj.bipweb.statistics.TestNTC();
             end
             
             str = 'Modularity\n';
-            str = [str, '\t Used algorithm:\t', sprintf('%30s',obj.bipweb.statistics.qb_vals.algorithm), '\n'];
-            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.qb_vals.model)), '\n'];
-            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.qb_vals.replicates), '\n'];
-            str = [str, '\t Qb value:      \t', sprintf('%30.4f',obj.bipweb.statistics.qb_vals.value), '\n'];
-            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.qb_vals.zscore), '\n'];
-            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.qb_vals.percent), '\n'];
+            str = [str, '\t Used algorithm:\t', sprintf('%30s',obj.bipweb.statistics.qb_values.algorithm), '\n'];
+            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.qb_values.null_model)), '\n'];
+            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.qb_values.replicates), '\n'];
+            str = [str, '\t Qb value:      \t', sprintf('%30.4f',obj.bipweb.statistics.qb_values.value), '\n'];
+            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.qb_values.zscore), '\n'];
+            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.qb_values.percentile), '\n'];
             
             str = [str, 'NODF Nestedness\n'];
-            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.nodf_vals.model)), '\n'];
-            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.nodf_vals.replicates), '\n'];
-            str = [str, '\t NODF value:    \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_vals.value), '\n'];
-            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_vals.zscore), '\n'];
-            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_vals.percent), '\n'];
+            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.nodf_values.null_model)), '\n'];
+            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.nodf_values.replicates), '\n'];
+            str = [str, '\t NODF value:    \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_values.value), '\n'];
+            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_values.zscore), '\n'];
+            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_values.percentile), '\n'];
             
             str = [str, 'NTC Nestedness\n'];
-            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.ntc_stats_values.model)), '\n'];
-            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.ntc_stats_values.replicates), '\n'];
-            str = [str, '\t NTC value:     \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_stats_values.value), '\n'];
-            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_stats_values.zscore), '\n'];
-            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_stats_values.percent), '\n'];
+            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.ntc_values.null_model)), '\n'];
+            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.ntc_values.replicates), '\n'];
+            str = [str, '\t NTC value:     \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_values.value), '\n'];
+            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_values.zscore), '\n'];
+            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_values.percentile), '\n'];
 
             fprintf(str);  
             
@@ -241,17 +250,19 @@ classdef Printer < handle
         function PrintStructureStatisticsOfModules(obj,filename)
         % PrintStructureStatisticsOfModules - Print the structure module
         % statistics
+        %
         %   obj = PrintStructureStatisticsOfModules(obj) - Print the statistics of
         %   nestedness and modularity for modules detected in the network
         %   to screen.
+        %
         %   obj = PrintStructureStatisticsOfModules(obj,FILE) - Print the statistics of
         %   nestedness and modularity for modules detected in the network
         %   to screen and text file FILE.
                
             if(nargin == 2)
-                obj.bipweb.internal_statistics.gtesting.PrintResults(filename);
+                obj.bipweb.internal_statistics.meta_statistics.Print(filename);
             else
-                obj.bipweb.internal_statistics.gtesting.PrintResults();
+                obj.bipweb.internal_statistics.meta_statistics.Print();
             end
             
         end
@@ -259,10 +270,12 @@ classdef Printer < handle
         function PrintRowModuleDiversity(obj, filename)
         % PrintRowModuleDiversity - Print the statistics of module
         % diversity for row nodes
+        %
         %   obj = PrintRowModuleDiversity(obj) - Print the statistics of
         %   class node diversity for rows inside modules. This statistics can be
         %   used as a test to detect if correlation exist between the class
         %   of nodes and module configuration.
+        %
         %   obj = PrintRowModuleDiversity(obj,FILE) - Print the statistics of
         %   class node diversity for rows inside modules to text file FILE. This statistics can be
         %   used as a test to detect if correlation exist between the class
@@ -276,7 +289,7 @@ classdef Printer < handle
             columns = (1:length(obj.bipweb.internal_statistics.row_diversity.value))';
             columns = [columns obj.bipweb.internal_statistics.row_diversity.value'];
             columns = [columns obj.bipweb.internal_statistics.row_diversity.zscore'];
-            columns = [columns obj.bipweb.internal_statistics.row_diversity.percent'];
+            columns = [columns obj.bipweb.internal_statistics.row_diversity.percentile'];
             
             str = Printer.CREATE_FORMATED_STRING(headers,columns,',');
             
@@ -293,10 +306,12 @@ classdef Printer < handle
         function PrintColumnModuleDiversity(obj, filename)
         % PrintColumnModuleDiversity - Print the statistics of module
         % diversity for row nodes
+        %
         %   obj = PrintColumnModuleDiversity(obj) - Print the statistics of
         %   class node diversity for columns inside modules. This statistics can be
         %   used as a test to detect if correlation exist between the class
         %   of nodes and module configuration.
+        %
         %   obj = PrintColumnModuleDiversity(obj,FILE) - Print the statistics of
         %   class node diversity for columns inside modules to text file FILE. This statistics can be
         %   used as a test to detect if correlation exist between the class
@@ -310,7 +325,7 @@ classdef Printer < handle
             columns = (1:length(obj.bipweb.internal_statistics.col_diversity.value))';
             columns = [columns obj.bipweb.internal_statistics.col_diversity.value'];
             columns = [columns obj.bipweb.internal_statistics.col_diversity.zscore'];
-            columns = [columns obj.bipweb.internal_statistics.col_diversity.percent'];
+            columns = [columns obj.bipweb.internal_statistics.col_diversity.percentile'];
             
             str = Printer.CREATE_FORMATED_STRING(headers,columns,',');
             
@@ -327,8 +342,10 @@ classdef Printer < handle
         
         function PrintGeneralPropertiesOfModules(obj, filename)
         % PrintGeneralPropertiesOfModules - Print general properties of modules
+        %
         %   obj = PrintGeneralPropertiesOfModules(obj) - Print the general properties
         %   of modules to screen.
+        %
         %   obj = PrintGeneralPropertiesOfModules(obj,FILE) - Print the general
         %   properties of modules to screen and text file FILE. 
         
@@ -371,6 +388,7 @@ classdef Printer < handle
         
         function PRINT_TO_FILE(str,filename)
         % PRINT_TO_FILE - Print a string to a text file
+        %
         %   PRINT_TO_FILE(STR, FILE) Print a string STR to text file FILE
             fid = fopen(filename,'w');
             fprintf(fid,str);            
@@ -379,6 +397,7 @@ classdef Printer < handle
         
         function formated_string = CREATE_FORMATED_STRING(headers,columns,delimiter)
         % CREATE_FORMATED_STRING - Created a formated string
+        %
         %   STR = CREATE_FORMATED_STRING(HEADERS, COLUMNS, DELIM) Create a
         %   formated single string STR that will contain a table with
         %   headers HEADERS using DELIM as column delimiter. The

@@ -103,7 +103,7 @@ classdef BipartiteModularity < handle
         
             obj.webmatrix = bipmatrix;
             obj.matrix = bipmatrix > 0;
-            [obj.n_rows obj.n_cols] = size(obj.matrix);
+            [obj.n_rows, obj.n_cols] = size(obj.matrix);
             
             obj.n_edges = sum(sum(obj.matrix));
             
@@ -186,23 +186,13 @@ classdef BipartiteModularity < handle
                 col_global = flipud(col_global);
                 obj.rr_sorted = obj.rr(row_global,:);
                 obj.tt_sorted = obj.tt(col_global,:);
-            catch eee
-                display(3);
+            catch
+                error('Error in BipartiteModularity. Please report to the main author');
             end
             
             obj.index_rows = row_global;
             obj.index_cols = col_global;
-            
-            %obj.row_modules = obj.row_modules(row_global);
-            %obj.col_modules = obj.col_modules(col_global);
-%             [a b] = ind2sub(size(obj.rr_sorted), find(obj.rr_sorted));
-%             [~, sortv] = sort(a);
-%             obj.row_modules = b(sortv);
-%             
-%             [a b] = ind2sub(size(obj.tt_sorted), find(obj.tt_sorted));
-%             [~, sortv] = sort(a);
-%             obj.col_modules = b(sortv);
-%             
+              
             [row,col] = find(obj.rr);[~,ix] = sort(row);obj.row_modules = col(ix);
             [row,col] = find(obj.tt);[~,ix] = sort(row);obj.col_modules = col(ix);
             
@@ -237,7 +227,7 @@ classdef BipartiteModularity < handle
                 obj.trials = ntrials;
             end
             
-            [obj.n_rows obj.n_cols] = size(obj.matrix);
+            [obj.n_rows, obj.n_cols] = size(obj.matrix);
             
             %Divide the network in isolated graph components.
             %mm = [zeros(obj.n_rows, obj.n_rows) obj.matrix; obj.matrix' zeros(obj.n_cols, obj.n_cols)];
@@ -245,7 +235,7 @@ classdef BipartiteModularity < handle
             %[S, C] = graphconncomp(sparse(mm),'Weak', true);
             
             %Assign component indexes to rows and column nodes.
-            [C_rows C_cols n_comp] = MatrixFunctions.ISOLATED_COMPONENTS(obj.matrix);
+            [C_rows, C_cols, n_comp] = MatrixFunctions.ISOLATED_COMPONENTS(obj.matrix);
             %C_rows = C(1:obj.n_rows);
             %C_cols = C(1+obj.n_rows:obj.n_rows+obj.n_cols);
             
@@ -277,7 +267,7 @@ classdef BipartiteModularity < handle
                 
                 %Extract the component matrix from the entire matrix.
                 obj.matrix_component = obj.matrix(idx_rows,idx_cols);
-                [obj.n_rows_component obj.n_cols_component] = size(obj.matrix_component);
+                [obj.n_rows_component, obj.n_cols_component] = size(obj.matrix_component);
                 %Calculate the modularity matrix for the extracted matrix
                 if(obj.optimize_by_component)
                     obj.bb_component = BipartiteModularity.CALCULATE_MODULARITY_MATRIX(obj.matrix_component,sum(obj.matrix_component(:)));
@@ -289,7 +279,7 @@ classdef BipartiteModularity < handle
                 if(sum(sum(obj.matrix_component))~=numel(obj.matrix_component))
                     obj.DetectComponent();
                     %Clean empty columns in the community matrices.
-                    [obj.rr_component obj.tt_component] = BipartiteModularity.CLEAN_MODULE_MATRICES(obj.rr_component,obj.tt_component);
+                    [obj.rr_component, obj.tt_component] = BipartiteModularity.CLEAN_MODULE_MATRICES(obj.rr_component,obj.tt_component);
                     obj.N_component = size(obj.rr_component,2);
                     %Assign each row and column in the matrix to its corresponding
                     %modules.
@@ -309,8 +299,7 @@ classdef BipartiteModularity < handle
                 col_modules_global(idx_cols) = obj.col_modules_component+obj.N;
                 obj.N = obj.N + obj.N_component;
                 catch err
-                    obj.matrix;
-                    
+                    error('Error in BipartiteModularity. Please report to the main author');
                 end
             end
 
@@ -358,7 +347,7 @@ classdef BipartiteModularity < handle
             end 
         end
         
-        function [module_rows module_cols] = ExtractCommunityIndexes(obj)
+        function [module_rows, module_cols] = ExtractCommunityIndexes(obj)
         % ExtractCommunityIndexes - Extract row and column community
         % indexes
         %
@@ -476,7 +465,7 @@ classdef BipartiteModularity < handle
         
             Qr = 0;
             n_modules = size(rr,2);
-            n_edges = sum(matrix(:));
+            m_edges = sum(matrix(:));
             for i = 1:n_modules
                 row_index = find(rr(:,i));
                 col_index = find(tt(:,i));
@@ -492,7 +481,7 @@ classdef BipartiteModularity < handle
                 end
             end
             
-            Qr = Qr / n_edges;
+            Qr = Qr / m_edges;
         end
         
         function module_idx = ASSIGN_MODULES(module_matrix)
@@ -502,13 +491,13 @@ classdef BipartiteModularity < handle
         %   module_idx = ASSIGN_MODULES(module_matrix) Create a vector with
         %   the indices modules given a module matrix module_matrix.
         
-            [a b] = ind2sub(size(module_matrix), find(module_matrix));
+            [a, b] = ind2sub(size(module_matrix), find(module_matrix));
             [~, sortv] = sort(a);
             module_idx = b(sortv);
             
         end
         
-        function [rr tt] = CLEAN_MODULE_MATRICES(rr,tt)
+        function [rr, tt] = CLEAN_MODULE_MATRICES(rr,tt)
         % CLEAN_MODULE_MATRICES - Clean module matrices
         %   [rr tt] = CLEAN_MODULE_MATRICES(rr,tt) Clean empty columns and
         %   rows in the module matrices. Such that no extra space is used.
@@ -523,7 +512,7 @@ classdef BipartiteModularity < handle
             tt = tt(:,coms);            
         end
         
-        function [rr tt preQ] = BRIM(rr,bb,tt,n_edges)
+        function [rr, tt, preQ] = BRIM(rr,bb,tt,n_edges)
         % BRIM - Perform the standar BRIM algorithm in a set of the
         % corresponding matrices
         %
