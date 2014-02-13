@@ -29,21 +29,21 @@
 %
 %
 % BipartiteModularity Methods:
-%    AssignModules
-%    AssignSingleModule
-%    CalculateBBMatrix
-%    CalculateQValue
-%    CalculateQrValue
-%    CleanCommunities
-%    Detect
-%    ExtractCommunityIndexes
-%    ExtractCommunityMatrices
-%    ExtractCommunityModules
-%    SortModules
-%    TestRowsContribution
+%    Detect - Main modularity detection method
+%    ExtractCommunityMatrices - Extract all community adjacency matrices
+%    ExtractCommunityIndexes - Extract row and column community indexes
+%    ExtractCommunityModules - Extract all communities as Bipartite objects
+%    Print - Print modularity information
+%    CALCULATE_MODULARITY_MATRIX - Calculate the modularity matrix of a bipartite network
+%    CALCULATE_Qb_VALUE - Calculate the standard modularity value
+%    CALCULATE_Qr_VALUE - Calculate the ratio of internal vs external interactions.
+%    BRIM - Perform the standar BRIM algorithm in a set of the corresponding matrices
+%    ADAPTIVE_BRIM - Calculate the modularity using the Adaptive Brim algorithm
+%    LP_BRIM - Calculate the modularity using the Adaptive Brim algorithm
+%    LEADING_EIGENVECTOR - Calculate the modularity using the Leading eigenvector algorithm
 %
 % See also:
-%    AdaptiveBrim, NewmanModularity, and LPBrim
+%    AdaptiveBrim, LeadingEigenvector, and LPBrim
 classdef BipartiteModularity < handle
 
     properties
@@ -82,28 +82,129 @@ classdef BipartiteModularity < handle
         N_component           = [];
     end
         
-    methods(Abstract)
+    methods(Abstract, Access = 'protected')
         
         % DetectComponent - Abstract method to be implemented in all
         %    BipartiteModularity son classes
-        % See AdaptiveBrim, NewmanModularity, and LPBrim
+        % See AdaptiveBrim, LeadingEigenvector, and LPBrim
         obj = DetectComponent(obj);
 
     end
     
-    methods(Access=protected)
+    methods(Access= 'protected')
         
+        
+        function obj = BipartiteModularity(bipmatrix)
         % BipartiteModularity(bipmatrix) - Main constructor
         %   It contains all the shared operations of the bipartite modularity algorithm
         %   constructors. Can be called only from a son class.
-        % See AdaptiveBrim, NewmanModularity, and LPBrim
-        function obj = BipartiteModularity(bipmatrix)
+        %
+        % See AdaptiveBrim, LeadingEigenvector, and LPBrim
         
             obj.webmatrix = bipmatrix;
             obj.matrix = bipmatrix > 0;
             [obj.n_rows obj.n_cols] = size(obj.matrix);
             
             obj.n_edges = sum(sum(obj.matrix));
+            
+        end
+        
+        function obj = AssignSingleModule(obj)
+        % AssignSingleModule(obj)
+        % Assign all the nodes to a single module.
+        
+            obj.N_component = 1;
+            obj.rr_component = ones(obj.n_rows_component,1);
+            obj.tt_component = ones(obj.n_cols_component,1);
+            obj.row_modules_component = ones(1,obj.n_rows_component);
+            obj.col_modules_component = ones(1,obj.n_cols_component);
+            
+        end
+        
+        function obj = SortModules(obj)
+        % obj = SortModules(obj)
+        % Method using for finding the adecuate sorting of rows and columns
+        % according to the module that they belong to. This method is
+        % mainly used for plotting modular graph and matrix plots.
+            
+            %Sort by module row or column size.
+            if(obj.n_rows > obj.n_cols)
+                [~,idx] = sort(sum(obj.rr),'descend');
+            else
+                [~,idx] = sort(sum(obj.tt),'descend');
+            end
+            
+            %Initial indexing is according in ascending order 1,2,3,...
+            obj.index_rows = 1:obj.n_rows;
+            obj.index_cols = 1:obj.n_cols;
+            
+            %Sort module index matrices
+            obj.rr = obj.rr(:,idx);
+            obj.tt = obj.tt(:,idx);
+            
+            %For each module, sort according to a nested configuration.
+            for i = 1:obj.N
+                idx_rows = obj.rr(:,i);
+                idx_cols = obj.tt(:,i);
+                
+                if(sum(sum(obj.matrix(idx_rows==1,:),2)==0) || sum(sum(obj.matrix(:,idx_cols==1),1))==0)
+                     rr_temp = obj.rr(:,i);
+                    tt_temp = obj.tt(:,i);
+                    for j = i:obj.N-1
+                        obj.rr(:,j) = obj.rr(:,j+1);
+                        obj.tt(:,j) = obj.tt(:,j+1);
+                    end
+                    obj.rr(:,obj.N) = rr_temp;
+                    obj.tt(:,obj.N) = tt_temp;
+                    break;
+                end
+            end
+            
+            sorted_matrix = obj.matrix;
+            
+            row_global = zeros(obj.n_rows,1); col_global = zeros(obj.n_cols,1);
+            %For each module, sort according to a nested configuration.
+            i_r = 0; i_c = 0;
+            for i = 1:obj.N
+               
+                row_i = find(obj.rr(:,i));
+                col_i = find(obj.tt(:,i));
+                
+                %[~,row_loc] = sort(sum(sorted_matrix(row_i,col_i),2),'descend');
+                %[~,col_loc] = sort(sum(sorted_matrix(row_i,col_i),1),'ascend');
+                
+                [~,row_loc] = sort(sum(10000*sorted_matrix(row_i,col_i),2)+sum(sorted_matrix(row_i,:),2),'descend');
+                [~,col_loc] = sort(sum(10000*sorted_matrix(row_i,col_i),1)+sum(sorted_matrix(:,col_i),1),'ascend');
+                
+                row_global(i_r+1 : i_r+length(row_i)) = row_i(row_loc);
+                col_global(i_c+1 : i_c+length(col_i)) = col_i(col_loc);
+                i_r = i_r+length(row_i); i_c = i_c+length(col_i);
+                
+            end
+           
+            try
+                col_global = flipud(col_global);
+                obj.rr_sorted = obj.rr(row_global,:);
+                obj.tt_sorted = obj.tt(col_global,:);
+            catch eee
+                display(3);
+            end
+            
+            obj.index_rows = row_global;
+            obj.index_cols = col_global;
+            
+            %obj.row_modules = obj.row_modules(row_global);
+            %obj.col_modules = obj.col_modules(col_global);
+%             [a b] = ind2sub(size(obj.rr_sorted), find(obj.rr_sorted));
+%             [~, sortv] = sort(a);
+%             obj.row_modules = b(sortv);
+%             
+%             [a b] = ind2sub(size(obj.tt_sorted), find(obj.tt_sorted));
+%             [~, sortv] = sort(a);
+%             obj.col_modules = b(sortv);
+%             
+            [row,col] = find(obj.rr);[~,ix] = sort(row);obj.row_modules = col(ix);
+            [row,col] = find(obj.tt);[~,ix] = sort(row);obj.col_modules = col(ix);
             
         end
     
@@ -113,11 +214,25 @@ classdef BipartiteModularity < handle
         
         
         function obj = Detect(obj,ntrials)
-        % obj = Detect(obj) - Main modularity detection method
-        % This method calculate the modularity by first dividing the
-        % network (matrix) in isolated components. The modularity is
-        % optimized in each component separatly.. 
+        % Detect - Main modularity detection method
+        %
+        %   obj = Detect(obj) - This method calculate the modularity by first dividing the
+        %   network (matrix) in isolated components. The modularity is
+        %   optimized in each component separatly. The modularity is
+        %   optimized globally by default, for optimizing components
+        %   independently of the rest change property optimize_by_component
+        %   to true before calling this method.
+        %
+        %   obj = Detect(obj,ntrials) - Same than the previous but instead
+        %   of using the default number of restarts, the method will use
+        %   ntrials as this number.
             
+            if(isempty(obj.matrix))
+                obj.Qb = NaN;
+                obj.Qr = NaN;
+                return;
+            end
+        
             if(nargin == 2)
                 obj.trials = ntrials;
             end
@@ -125,13 +240,14 @@ classdef BipartiteModularity < handle
             [obj.n_rows obj.n_cols] = size(obj.matrix);
             
             %Divide the network in isolated graph components.
-            mm = [zeros(obj.n_rows, obj.n_rows) obj.matrix; obj.matrix' zeros(obj.n_cols, obj.n_cols)];
+            %mm = [zeros(obj.n_rows, obj.n_rows) obj.matrix; obj.matrix' zeros(obj.n_cols, obj.n_cols)];
             %S = number of components, C = component indexes.
-            [S, C] = graphconncomp(sparse(mm),'Weak', true);
+            %[S, C] = graphconncomp(sparse(mm),'Weak', true);
             
             %Assign component indexes to rows and column nodes.
-            C_rows = C(1:obj.n_rows);
-            C_cols = C(1+obj.n_rows:obj.n_rows+obj.n_cols);
+            [C_rows C_cols n_comp] = MatrixFunctions.ISOLATED_COMPONENTS(obj.matrix);
+            %C_rows = C(1:obj.n_rows);
+            %C_cols = C(1+obj.n_rows:obj.n_rows+obj.n_cols);
             
             %Single nodes will go to the same empty module
             rows_empty = setdiff(C_rows,C_cols);
@@ -148,7 +264,7 @@ classdef BipartiteModularity < handle
 
             
             %For each component in the graph find the best modularity
-            for i = 1:S
+            for i = 1:n_comp
                
                 %Locate the nodes that belongs to component i
                 idx_rows = find(C_rows==i);
@@ -222,110 +338,17 @@ classdef BipartiteModularity < handle
             
         end
         
-        function obj = AssignSingleModule(obj)
-        % AssignSingleModule(obj)
-        % Assign all the nodes to a single module.
-        
-            obj.N_component = 1;
-            obj.rr_component = ones(obj.n_rows_component,1);
-            obj.tt_component = ones(obj.n_cols_component,1);
-            obj.row_modules_component = ones(1,obj.n_rows_component);
-            obj.col_modules_component = ones(1,obj.n_cols_component);
-            
-        end
-        
-        
-        function obj = SortModules(obj)
-        % obj = SortModules(obj)
-        % Method using for finding the adecuate sorting of rows and columns
-        % according to the module that they belong to. This method is
-        % mainly used for plotting modular graph and matrix plots.
-            
-            %Sort by module row or column size.
-            if(obj.n_rows > obj.n_cols)
-                [~,idx] = sort(sum(obj.rr),'descend');
-            else
-                [~,idx] = sort(sum(obj.tt),'descend');
-            end
-            
-            %Initial indexing is according in ascending order 1,2,3,...
-            obj.index_rows = 1:obj.n_rows;
-            obj.index_cols = 1:obj.n_cols;
-            
-            %Sort module index matrices
-            obj.rr = obj.rr(:,idx);
-            obj.tt = obj.tt(:,idx);
-            
-            %For each module, sort according to a nested configuration.
-            for i = 1:obj.N
-                idx_rows = obj.rr(:,i);
-                idx_cols = obj.tt(:,i);
-                
-                if(sum(sum(obj.matrix(idx_rows==1,:),2)==0) || sum(sum(obj.matrix(:,idx_cols==1),1))==0)
-                     rr_temp = obj.rr(:,i);
-                    tt_temp = obj.tt(:,i);
-                    for j = i:obj.N-1
-                        obj.rr(:,j) = obj.rr(:,j+1);
-                        obj.tt(:,j) = obj.tt(:,j+1);
-                    end
-                    obj.rr(:,obj.N) = rr_temp;
-                    obj.tt(:,obj.N) = tt_temp;
-                    break;
-                end
-            end
-            
-            sorted_matrix = obj.matrix;
-            
-            row_global = zeros(obj.n_rows,1); col_global = zeros(obj.n_cols,1);
-            %For each module, sort according to a nested configuration.
-            i_r = 0; i_c = 0;
-            for i = 1:obj.N
-               
-                row_i = find(obj.rr(:,i));
-                col_i = find(obj.tt(:,i));
-                
-                [~,row_loc] = sort(sum(sorted_matrix(row_i,col_i),2),'descend');
-                [~,col_loc] = sort(sum(sorted_matrix(row_i,col_i),1),'ascend');
-                
-                row_global(i_r+1 : i_r+length(row_i)) = row_i(row_loc);
-                col_global(i_c+1 : i_c+length(col_i)) = col_i(col_loc);
-                i_r = i_r+length(row_i); i_c = i_c+length(col_i);
-                
-            end
-           
-            try
-                col_global = flipud(col_global);
-                obj.rr_sorted = obj.rr(row_global,:);
-                obj.tt_sorted = obj.tt(col_global,:);
-            catch
-                display(3);
-            end
-            
-            obj.index_rows = row_global;
-            obj.index_cols = col_global;
-            
-            %obj.row_modules = obj.row_modules(row_global);
-            %obj.col_modules = obj.col_modules(col_global);
-%             [a b] = ind2sub(size(obj.rr_sorted), find(obj.rr_sorted));
-%             [~, sortv] = sort(a);
-%             obj.row_modules = b(sortv);
-%             
-%             [a b] = ind2sub(size(obj.tt_sorted), find(obj.tt_sorted));
-%             [~, sortv] = sort(a);
-%             obj.col_modules = b(sortv);
-%             
-            [row,col] = find(obj.rr);[~,ix] = sort(row);obj.row_modules = col(ix);
-            [row,col] = find(obj.tt);[~,ix] = sort(row);obj.col_modules = col(ix);
-            
-        end
-        
-        
        
         function matrices = ExtractCommunityMatrices(obj)
-        % obj = ExtractCommunityMatrices(obj)
-        % This method will return a cell array with N matrices, where N is
-        % the number of modules. Each matrix i will be composed of only the
-        % row and column nodes that belong to the module i.
+        % ExtractCommunityMatrices - Extract all community adjacency
+        % matrices
+        %
+        %   MATRICES = ExtractCommunityMatrices(obj)
+        %   Extract all the bipartite adjacency matrices corresponding to
+        %   all detected communities and return them in MATRICES, which is
+        %   a cell array compossed of N matrices, where N is the number of
+        %   modules of the current network. The rows and columns of each
+        %   matrix will correspond to each module.
         
             matrices = cell(obj.N,1);
             for i = 1:obj.N
@@ -336,11 +359,15 @@ classdef BipartiteModularity < handle
         end
         
         function [module_rows module_cols] = ExtractCommunityIndexes(obj)
-        % obj = ExtractCommunityMatrices(obj)
-        % This method will return two cell arrays with N matrices, where N is
-        % the number of modules. Each cell array will have a the index
-        % number (row/column id) of the row/columns that belongs to module
-        % i.
+        % ExtractCommunityIndexes - Extract row and column community
+        % indexes
+        %
+        %   [module_rows module_cols] = ExtractCommunityIndexes(obj)
+        %   This method will return two cell arrays with N matrices, where N is
+        %   the number of modules. Each cell array will have a the index
+        %   number (row/column id) of the row/columns that belongs to module
+        %   i.
+        
             module_rows = cell(obj.N,1);
             module_cols = cell(obj.N,1);
             for i = 1:obj.N
@@ -362,10 +389,13 @@ classdef BipartiteModularity < handle
         end
         
         function networks = ExtractCommunityModules(obj)
-        % networks = ExtractCommunityModules(obj)
-        % This method will return a cell array with N Bipartite objects, where N is
-        % the number of modules. Each bipartite object i will be composed of only the
-        % row and column nodes that belong to the module i.
+        % ExtractCommunityModules - Extract all communities as Bipartite
+        % objects
+        %
+        %    networks = ExtractCommunityModules(obj)
+        %    This method will return a cell array with N Bipartite objects, where N is
+        %    the number of modules. Each bipartite object i will be composed of only the
+        %    row and column nodes that belong to the module i.
         
             networks = cell(obj.N, 1);
             for i = 1:obj.N
@@ -376,6 +406,28 @@ classdef BipartiteModularity < handle
             end 
         end
         
+        function str = Print(obj,filename)
+        % Print - Print modularity information
+        %
+        %   STR = Print(obj) Print the modularity information to screen and
+        %   return this information to the string STR
+        %
+        %   STR = Print(obj, FILE) Print the modularity information to screen and
+        %   text file FILE and return this information to the string STR
+            
+            str = 'Modularity\n';
+            str = [str, '\tUsed algorithm:             \t', sprintf('%16s',class(obj)), '\n'];
+            str = [str, '\tN (Number of modules):      \t', sprintf('%16i',obj.N), '\n'];
+            str = [str, '\tQb (Standard metric):       \t', sprintf('%16.4f',obj.Qb), '\n'];
+            str = [str, '\tQr (Ratio of int/ext inter):\t', sprintf('%16.4f',obj.Qr), '\n'];
+            
+            fprintf(str);  
+            
+            if(nargin==2)
+                Printer.PRINT_TO_FILE(str,filename);
+            end
+            
+        end
     end
     
     methods(Static)
@@ -383,6 +435,7 @@ classdef BipartiteModularity < handle
         function bb = CALCULATE_MODULARITY_MATRIX(matrix,n_edges)
         % CALCULATE_MODULARITY_MATRIX - Calculate the modularity matrix of
         % a bipartite network
+        %
         %   bb = CALCULATE_MODULARITY_MATRIX(matrix,n_edges)
         %   Return the modularity matrix:
         %     bb_ij = matrix_ij - k_i d_j / n_edges
@@ -402,6 +455,7 @@ classdef BipartiteModularity < handle
         
         function Qb = CALCULATE_Qb_VALUE(rr,bb,tt,n_edges)
         % CALCULATE_Qb_VALUE - Calculate the standard modularity value
+        %
         %   Qb = CALCULATE_Qb_VALUE(rr,bb,tt,n_edges)
         %   Calculaate the standard bipartite modularity
         %     Qb = (1/n_edges) Tr (rr' bb tt)
@@ -415,6 +469,7 @@ classdef BipartiteModularity < handle
         function Qr= CALCULATE_Qr_VALUE(matrix,rr,tt)
         % CALCULATE_Qr_VALUE - Calculate the ratio of internal vs external
         % interactions.
+        %
         %   Qr = CALCULATE_Qr_VALUE(matrix,rr,tt) Calculate the ratio of
         %   internal vs external interactions as a way of a posteriory
         %   modularity metric.
@@ -443,6 +498,7 @@ classdef BipartiteModularity < handle
         function module_idx = ASSIGN_MODULES(module_matrix)
         % ASSIGN_MODULES - Assign modules to each node given a module
         % matrix (R or T).
+        %
         %   module_idx = ASSIGN_MODULES(module_matrix) Create a vector with
         %   the indices modules given a module matrix module_matrix.
         
@@ -470,11 +526,12 @@ classdef BipartiteModularity < handle
         function [rr tt preQ] = BRIM(rr,bb,tt,n_edges)
         % BRIM - Perform the standar BRIM algorithm in a set of the
         % corresponding matrices
-        % [rr tt preQ] = BRIM(rr,bb,tt,n_edges) Perform the BRIM modularity
-        % algorithm in the module matrices rr, tt using the modularity
-        % matrix bb (bb = adjacency - null model) and the corresponding
-        % number of edges. It returns the updated rr, tt and the biggest Q
-        % value found in preQ.
+        %
+        %   [rr tt preQ] = BRIM(rr,bb,tt,n_edges) Perform the BRIM modularity
+        %   algorithm in the module matrices rr, tt using the modularity
+        %   matrix bb (bb = adjacency - null model) and the corresponding
+        %   number of edges. It returns the updated rr, tt and the biggest Q
+        %   value found in preQ.
             
             inducingBlueFlag = 1;
             
@@ -504,6 +561,50 @@ classdef BipartiteModularity < handle
             end
         end
         
+        function modul = ADAPTIVE_BRIM(matrix)
+        % ADAPTIVE_BRIM - Calculate the modularity using the Adaptive Brim
+        % algorithm
+        %
+        %   modul = ADAPTIVE_BRIM(matrix) Calculate the modularity using
+        %   the Adaptive Brim algorithm, plot the basic information to
+        %   screen and return an AdaptiveBrim object that contains such
+        %   information in modul.
+            
+            modul = AdaptiveBrim(matrix);
+            modul.Detect();
+            modul.Print();
+            
+        end
+        
+        function modul = LP_BRIM(matrix)
+        % LP_BRIM - Calculate the modularity using the Adaptive Brim
+        % algorithm
+        %
+        %   modul = LP_BRIM(matrix) Calculate the modularity using
+        %   the LP&BRIM algorithm, plot the basic information to
+        %   screen and return an AdaptiveBrim object that contains such
+        %   information in modul.    
+        
+            modul = AdaptiveBrim(matrix);
+            modul.Detect();
+            modul.Print();
+            
+        end
 
+        function modul = LEADING_EIGENVECTOR(matrix)
+        % LEADING_EIGENVECTOR - Calculate the modularity using the Leading
+        % eigenvector algorithm
+        %
+        %   modul = LEADING_EIGENVECTOR(matrix) Calculate the modularity using
+        %   the LP&BRIM algorithm, plot the basic information to
+        %   screen and return an AdaptiveBrim object that contains such
+        %   information in modul. 
+        
+            modul = LeadingEigenvector(matrix);
+            modul.Detect();
+            modul.Print();
+            
+        end
+        
     end
 end  

@@ -30,7 +30,7 @@
 %     GET_NEST_CONTRIBUTIONS - Get NODF nestedness contributions of a
 %
 % See also:
-%     BipartiteModularity, NODF, NestednessBINMATNEST
+%     BipartiteModularity, NestednessNODF, NestednessNTC
 classdef InternalStatistics < handle
    
     properties(GetAccess = 'public', SetAccess = 'public')
@@ -41,7 +41,7 @@ classdef InternalStatistics < handle
         col_class         = []; % Labeling of columns
         module_networks = {}; % Cell composed of bipartite network objects which corresponds to the internal modules of biweb
         qb_vals         = [];
-        nestvals        = [];
+        nodf_vals        = [];
         tempvals        = [];
         delim_char      = ',';
         gtesting        = {};
@@ -123,8 +123,8 @@ classdef InternalStatistics < handle
                 sta_vals = StatisticalTest.GET_STATISTICAL_VALUES(real_value,random_values);
                 
                 diversity.value(i) = sta_vals.value;
-                diversity.p(i) = sta_vals.p;
-                diversity.ci(i,:) = sta_vals.ci;
+%                diversity.p(i) = sta_vals.p;
+%                diversity.ci(i,:) = sta_vals.ci;
                 diversity.zscore(i) = sta_vals.zscore;
                 diversity.percent(i) = sta_vals.percent;
             end
@@ -205,8 +205,8 @@ classdef InternalStatistics < handle
                 sta_vals = StatisticalTest.GET_STATISTICAL_VALUES(real_value,random_values);
                 
                 diversity.value(i) = sta_vals.value;
-                diversity.p(i) = sta_vals.p;
-                diversity.ci(i,:) = sta_vals.ci;
+                %diversity.p(i) = sta_vals.p;
+                %diversity.ci(i,:) = sta_vals.ci;
                 diversity.zscore(i) = sta_vals.zscore;
                 diversity.percent(i) = sta_vals.percent;
             end
@@ -476,7 +476,7 @@ classdef InternalStatistics < handle
                 fprintf('%i \t %f \t %f \t %f \t %f \t %f \t %f \t %f \t %f \t %f \n', ...
                 i, ...
                 networks{i}.statistics.qb_vals.Qb, networks{i}.statistics.qb_vals.zscore, networks{i}.statistics.qb_vals.percent, ...
-                networks{i}.statistics.nestvals.nodf, networks{i}.statistics.nestvals.zscore, networks{i}.statistics.nestvals.percent, ...
+                networks{i}.statistics.nodf_vals.nodf, networks{i}.statistics.nodf_vals.zscore, networks{i}.statistics.nodf_vals.percent, ...
                 networks{i}.statistics.tempvals.ntc, networks{i}.statistics.tempvals.zscore, networks{i}.statistics.tempvals.percent);
             end
             

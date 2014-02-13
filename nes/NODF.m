@@ -1,4 +1,4 @@
-function [nodf nodf_rows nodf_cols] = NODF(matrix, nodf_strict)
+function [nodf,nodf_rows,nodf_cols] = NODF(matrix, nodf_strict)
 % NODF - Calculate normalized nodf value of a matrix. To know how this
 % nestedness metric works you can consult the following paper:
 %
@@ -16,37 +16,51 @@ function [nodf nodf_rows nodf_cols] = NODF(matrix, nodf_strict)
 %   of matrix forcing an strict decreasing filling nodf_stric=1 or counting
 %   equal degree rows/columns as nested nodf_strict=0.
 %
-%   Implemented by Gabriel Mitchell (not.i.said.the.fox@gmail.com) This is
-%   a version in which NODF is calculated by multiplying bipartite
-%   adjacency matrix
-%
 % See also:
 %   NestednessBINMATNEST
-    
-    if(nargin==2 && nodf_strict==0)
-       
-        [n_rows n_cols] = size(matrix);
+    if(isempty(matrix))
+        if(nargin == 1)
+            nodf.nodf = NaN;
+            nodf.nodf_rows = NaN;
+            nodf.nodf_cols = NaN;
+        end
+        if(nargout==2)
+            nodf_rows = NaN;
+            nodf = NaN;
+        elseif(nargout == 3)
+            nodf_rows = NaN;
+            nodf_cols = NaN;
+            nodf = NaN;
+        end
+        return;
+    end
+
+    if(nargin>=2 && nodf_strict==0)
+
+        [n_rows, n_cols] = size(matrix);
         nest_rows = 0;
         nest_cols = 0;
         deg_rows = sum(matrix,2);
         deg_cols = sum(matrix,1);
         for ii = 1:n_rows
             for jj = ii+1:n_rows
+                if(deg_rows(ii)==0 || deg_rows(jj)==0); continue; end;
                 nest_rows = nest_rows + sum(matrix(ii,:).*matrix(jj,:))/min(deg_rows(ii),deg_rows(jj));
             end
         end
         for ii = 1:n_cols
             for jj = ii+1:n_cols
+                if(deg_cols(ii)==0 || deg_cols(jj)==0); continue; end;
                 nest_cols = nest_cols + sum(matrix(:,ii).*matrix(:,jj))/min(deg_cols(ii),deg_cols(jj));
             end
         end
-        
+
         nest_rows(isnan(nest_rows)) = 0;
         nest_cols(isnan(nest_cols)) = 0;
-        
-        denom = n_rows*(n_rows-1)/2 + n_cols*(n_cols-1)/2;
-        nodf.nodf_rows = 1.0*nest_rows/(n_rows*(n_rows-1)/2);
-        nodf.nodf_cols = 1.0*nest_cols/(n_cols*(n_cols-1)/2);   
+
+        denom = max(n_rows*(n_rows-1)/2 + n_cols*(n_cols-1)/2,1);
+        nodf.nodf_rows = 1.0*nest_rows/max(n_rows*(n_rows-1)/2,1);
+        nodf.nodf_cols = 1.0*nest_cols/max(n_cols*(n_cols-1)/2,1);   
         nodf.nodf = (nest_rows+nest_cols)/denom;
 
     else
@@ -55,7 +69,7 @@ function [nodf nodf_rows nodf_cols] = NODF(matrix, nodf_strict)
             nc = 0;
             nvalue = 0;
         else
-            [n_rows n_cols] = size(matrix);
+            [n_rows, n_cols] = size(matrix);
 
             C1 = (1.0*matrix)*matrix';
             D1 = repmat(diag(C1),1,n_rows);
@@ -73,9 +87,9 @@ function [nodf nodf_rows nodf_cols] = NODF(matrix, nodf_strict)
             nc = nansum(nc(:))/2;
             nvalue = nr+nc;
 
-            denom = n_rows*(n_rows-1)/2 + n_cols*(n_cols-1)/2;
-            nr = nr/(n_rows*(n_rows-1)/2);
-            nc = nc/(n_cols*(n_cols-1)/2);   
+            denom = max(n_rows*(n_rows-1)/2 + n_cols*(n_cols-1)/2,1);
+            nr = nr/max(n_rows*(n_rows-1)/2,1);
+            nc = nc/max(n_cols*(n_cols-1)/2,1);   
             nvalue = nvalue/denom;
         end
 
@@ -84,14 +98,14 @@ function [nodf nodf_rows nodf_cols] = NODF(matrix, nodf_strict)
         nodf.nodf = nvalue;
 
     end
-    
-    
+
+
     if(nargout==2)
         nodf_rows = nodf.nodf_rows;
         nodf = nodf.nodf;
     elseif(nargout == 3)
         nodf_rows = nodf.nodf_rows;
-        nodf = nodf.nodf;
         nodf_cols = nodf.nodf_cols;
+        nodf = nodf.nodf;
     end
 end

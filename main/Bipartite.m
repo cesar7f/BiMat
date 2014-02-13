@@ -32,7 +32,7 @@ classdef Bipartite < handle
         webmatrix             = []; % Interaction matrix (not neccesearly a binary matrix).
         matrix                = []; % Adjacency matrix (binary matrix)
         % Instance of the modularity algorithm. 
-        % See also AdaptiveBrim, NewmanModularity, and LPBrim
+        % See also AdaptiveBrim, LeadingEigenvector, and LPBrim
         modules               = {}; 
         nodf                  = {}; % Instance of a NODF nestedness algorithm
         ntc                   = {}; % Instance of a NTC nestedness algorithm
@@ -49,9 +49,9 @@ classdef Bipartite < handle
         col_labels            = {}; % Labels for col nodes.
         printer               = {}; % Object of the class Print.m for output.
         plotter               = {}; % Instance of the class PlotWebs.m for plotting matrices and graphs.
-        row_class               = []; % Id's of the row nodes
-        col_class               = []; % Id's of the col nodes.
-        internal_statistics            = {}; % Instance of the class InternalStatistics.m for multi-scale analysis.
+        row_class             = []; % Id's of the row nodes
+        col_class             = []; % Id's of the col nodes.
+        internal_statistics   = {}; % Instance of the class InternalStatistics.m for multi-scale analysis.
     end
     
     methods
@@ -85,7 +85,7 @@ classdef Bipartite < handle
             end
             
             %General Properties
-            [obj.n_rows obj.n_cols] = size(web);
+            [obj.n_rows, obj.n_cols] = size(web);
             %if(obj.n_rows == 0 || obj.n_cols == 0)
             %    return;
             %end;
@@ -99,8 +99,8 @@ classdef Bipartite < handle
             obj.col_degrees = sum(obj.matrix,1)';
             
             %Nestedness
-            obj.nodf = NODF(obj.matrix);
-            obj.ntc = NestednessBINMATNEST(obj.matrix);
+            obj.nodf = NestednessNODF(obj.matrix);
+            obj.ntc = NestednessNTC(obj.matrix);
             
             %Modularity
             obj.modules = Options.MODULARITY_ALGORITHM(obj.webmatrix);

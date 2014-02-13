@@ -222,7 +222,6 @@ classdef Nestedness < handle
                 
             end
             
-            
         end
     end
     

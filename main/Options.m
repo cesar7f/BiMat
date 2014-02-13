@@ -1,11 +1,9 @@
 classdef Options
     %Statistical TEST
     properties(Constant)
-        %Currently these values have not use in Bimat. However, they plan
-        %to be used to decide if a value has real significance or not.
-        P_VALUE    = 0.05; %p_value for statistical test
-        TWO_TAIL   = 1;    %Two or one tail for statistical test
-        Z_VALUE    = 1.96; %z-value for statistical test
+        %These values are used for testing for significance
+        P_VALUE    = 0.05; % p_value for statistical test
+        Z_VALUE    = 1.96; % z-value for statistical test
     end
     
     %Null Models
@@ -21,6 +19,6 @@ classdef Options
     properties(Constant)
         OPTIMIZE_COMPONENTS = 0; %Optimize by components or entire matrix in modularity
         MODULARITY_ALGORITHM = @AdaptiveBrim;
-        TRIALS_MODULARITY = 20; %Number of random restarts for AdaptiveBrim and LPBrim algorithms. NewmanModularity is deterministic and therefore does not use this variable.
+        TRIALS_MODULARITY = 20; %Number of random restarts for AdaptiveBrim and LPBrim algorithms. LeadingEigenvector is deterministic and therefore does not use this variable.
     end
 end

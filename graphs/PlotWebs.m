@@ -1,126 +1,136 @@
-% PlotWebs Matrix and graph plotting class. 
+% PlotWebs - Matrix and graph plotting class. 
 % This class allows the plotting of matrix and graph layouts that represent
 % the bipartite network.
 %
 % PlotWebs Properties:
-%     pos_x - X coordinate of each cell in a unit square
-%     pos_y - Y coordinate of each cell in a unit square
+%   GENERAL
+%     matrix - Adjacency matrix in boolean version
+%     webmatrix - Adjacency matrix with edge weight information
+%     biweb - Bipartite object that an object of the class will reference to
+%     n_rows - Number of row nodes
+%     n_cols - Number of column nodes
+%     use_type_interaction - Flag to color cells according to weight (only if discrete)
+%     use_module_format - Flag to give appropiate color format to modules
+%     row_labels - Text labels for row nodes
+%     col_labels - Text labels for column nodes
+%     use_labels - Flag that indicate the use of text labels
+%     font_size - Font size for text labels. Change according to network size
+%     colors - Colors used for draw modules
+%     color_interactions - Color of interactions. Used only if use_type_interaction = true
+%     interpreter - none or latex for text labels
+%     ax - Axis of the plot
+%   MATRIX LAYOUT
 %     cell_color - Cell color
 %     back_color - Back color
-%     margin - Margin between cels
-%     ax - Axis of the plot.
-%     border_color -
-%     border_line_width -
+%     margin - Margin between cells
 %     isocline_color - Color of the isocline
 %     division_color - Color used for the division of the modules
 %     line_width - Line width used in the isocline
-%     matrix - Adjacency matrix in boolean version
-%     webmatrix - Adjacency matrix with edge weight information
-%     use_type_interaction - Flag to color cells according to weight (only if discrete)
-%     use_row_sections - Flag to color sections
-%     use_module_format - Flag to give appropiate color format to modules
-%     biweb - Bipartite object that an object of the class will reference to
-%     row_labels - Text labels for row nodes
-%     col_labels - Text labels fof column nodes
-%     use_labels - Flag that indicate the use of text labels
-%     FontSize - Font size for text labels. Change according to number of rows and columns.
-%     index_rows - Index position of rows after modular or nested sorting
-%     index_cols - Index position of columns after modular or nested sorting.
-%     colors - Colors used for draw modules.
-%     color_interactions - Color of interactions. Used only if use_type_interaction = 1
-%     color_section - Color of the section. Used only if use_row_sections = 1
-%     n_rows - Number of rows in the matrix
-%     n_cols - Number of columns in the matrix
-%     interpreter - none or latex for text labels.
 %     plot_iso_modules - Flag that indicate the plotting of the isocline inside modules
-%     use_isocline - Flag that indicated the plotting of isocline in a nested graph    
+%     use_isocline - Flag that indicated the plotting of isocline in a nested graph
+%   GRAPH LAYOUT
 %     radius - Radius of the nodes for graph layouts.
 %     vertical_margin - Vertical margin between nodes for graph layouts.
 %     horizontal_proportion - Horizontal margin (proportional to the y total size) between nodes for graph layouts. 
-%     row_pos - Positions of the row nodes.
-%     col_pos - Positions of the column nodes.
-%     bead_color - Color of the nodes.
-%     link_color - Color of the links.        
+%     bead_color_rows - Color of the row nodes.
+%     bead_color_columns - Color of the column nodes.
+%     link_color - Color of the links.
+%     link_width - Edge width
 %
 % PlotWebs Methods:
 %     PlotWebs - Main Constructor
-%     FillPositions - Fill positions
 %     PlotGraph - Plot a original sorting graph layout
 %     PlotNestedGraph - Plot a nested sorting graph layout
 %     PlotModularGraph - Plot a modular sorting graph layout
-%     DrawLine - Draw and edge for graph layouts
-%     DrawCircle - Draw a node for graph layouts
 %     PlotMatrix - Plot a original sorting matrix layout
 %     PlotNestedMatrix - Plot a nested sorting matrix layout
 %     PlotModularMatrix - Plot a modular sorting matrix layout
-%     ApplyBasicFormat - Apply final format to the matrix layout
-%     ApplyBasicBFormat - Apply final format to the graph layout
-%     FillLabels - Create text labels
-%     DrawBack - Chose the color for the background
-%     DrawCell - Draw a cell for matrix layouts
-%     MakeDivision - Make a module division.
+%     PLOT_TO_PDF - Plot to PDF file the current Figure
+%     PLOT_TO_EPS - Plot to EPS file the current Figure
+%     PLOT_MATRIX - Plot a matrix layout of a bipartite network
+%     PLOT_NESTED_MATRIX - Plot a nested matrix layout of a bipartite network
+%     PLOT_MODULAR_MATRIX - Plot a modular matrix layout of a bipartite network
+%     PLOT_GRAPH - Plot a graph layout of a bipartite network
+%     PLOT_NESTED_GRAPH - Plot a nested graph layout of a bipartite network
+%     PLOT_MODULAR_GRAPH - Plot a modular graph layout of a bipartite network
+%     
 %
 % See also:
 %    Printer.CreateCytoscapeData
 classdef PlotWebs < handle;
-   
-    properties
-       
-        pos_x                = [];       % X coordinate of each cell in a unit square
-        pos_y                = [];       % Y coordinate of each cell in a unit square
-        cell_color           = [0 0 0];  % [1 1 1]; %Cell color
-        back_color           = [1 1 1];  % [0 0 128]/255; %Back color
-        margin               = 0.12;     % Margin between cels
-        ax                   = 'image';  % Axis of the plot.
-        border_color         = 'none'; 
-        border_line_width    = 0.0005;
-        isocline_color       = 'red';    % Color of the isocline
-        division_color       = 'blue';   % Color used for the division of the modules
-        line_width           = 1.5;      % Line width used in the isocline
-        
-    end
     
+    % GENERAL PROPERTIES
     properties
         
         matrix               = [];       % Adjacency matrix in boolean version
         webmatrix            = [];       % Adjacency matrix with edge weight information
-        use_type_interaction = 0;        % Flag to color cells according to weight (only if discrete)
-        use_row_sections     = 0;        % Flag to color row sections
-        use_col_sections     = 0;        % Flag to color columns sections
-        use_module_format    = 1;        % Flag to give appropiate color format to modules
         biweb                = {};       % Bipartite object that an object of the class will reference to
+        n_rows               = [];       % Number of row nodes
+        n_cols               = [];       % Number of column nodes
+        use_type_interaction = false;    % Flag to color cells according to weight (only if discrete)
+        use_module_format    = true;     % Flag to give appropiate color format to modules
         row_labels           = {};       % Text labels for row nodes
-        col_labels           = {};       % Text labels fof column nodes
-        use_labels           = 1;        % Flag that indicate the use of text labels
-        font_size            = 5;        % Font size for text labels. Change according to number of rows and columns.
-        index_rows           = [];       % Index position of rows after modular or nested sorting
-        index_cols           = [];       % Index position of columns after modular or nested sorting.
+        col_labels           = {};       % Text labels for column nodes
+        use_labels           = true;     % Flag that indicate the use of text labels
+        font_size            = 5;        % Font size for text labels. Change according to network size.
         colors               = [];       % Colors used for draw modules.
-        color_interactions   = [];       % Color of interactions. Used only if use_type_interaction = 1
-        color_section        = [];       % Color of the section. Used only if use_row_sections = 1
-        n_rows               = [];       % Number of rows in the matrix
-        n_cols               = [];       % Number of columns in the matrix
+        color_interactions   = [];       % Color of interactions. Used only if use_type_interaction = true
         interpreter          = 'none';   % none or latex for text labels.
-        plot_iso_modules     = 1;        % Flag that indicate the plotting of the isocline inside modules
-        use_isocline         = 1;        % Flag that indicated the plotting of isocline in a nested graph
+        ax                   = 'image';  % Axis of the plot.
+        
     end
     
+    properties(Access = 'protected')
+        index_rows           = [];       % Index position of rows after modular or nested sorting
+        index_cols           = [];       % Index position of columns after modular or nested sorting.
+    end
+    
+    % MATRIX LAYOUT PROPERTIES
+    properties
+       
+        cell_color           = [0 0 0];  % Cell color
+        back_color           = [1 1 1];  % Back color
+        margin               = 0.12;     % Margin between cells
+        isocline_color       = 'red';    % Color of the isocline
+        division_color       = 'blue';   % Color used for the division of the modules
+        line_width           = 1.5;      % Line width used in the isocline
+        plot_iso_modules     = true;     % Flag that indicate the plotting of the isocline inside modules
+        use_isocline         = true;     % Flag that indicated the plotting of isocline in a nested graph
+        
+    end
+    
+    properties(Access = 'protected')
+        pos_x                = [];       % X coordinate of each cell in a unit square
+        pos_y                = [];       % Y coordinate of each cell in a unit square
+        border_color         = 'none';   % Border color
+        border_line_width    = 0.0005;   % Border line width
+    end
+    
+    
+    % GRAPH LAYOUT PROPERTIES
     properties
        
         radius                = 0.5;     % Radius of the nodes for graph layouts.
         vertical_margin       = 0.12;    % Vertical margin between nodes for graph layouts.
         horizontal_proportion = 0.5;     % Horizontal margin (proportional to the y total size) between nodes for graph layouts. 
-        row_pos               = [];      % Positions of the row nodes.
-        col_pos               = [];      % Positions of the column nodes.
-        bead_color            = [0 0 0]; % Color of the nodes.
+        bead_color_rows       = [1 0 0]; % Color of the row nodes.
+        bead_color_columns    = [0 0 1]; % Color of the column nodes.
         link_color            = [0 0 0]; % Color of the links.
+        link_width            = 1.0;     % Edge width
         
     end
     
+    properties(Access = 'protected')
+        row_pos               = [];      % Positions of the row nodes.
+        col_pos               = [];      % Positions of the column nodes.
+    end
+    
+    % PUBLIC METHODS
     methods
        
         function obj = PlotWebs(bipmatrix_or_biweb)
         % PlotWebs - Main Constructor
+        %
         %   bp = PlotWebs(bipmatrix_or_biweb) Create a PlotWebs object
         %   called bp using a bipartite adjacency matrix or bipartite
         %   object named bipmatrix_or_biweb
@@ -136,57 +146,20 @@ classdef PlotWebs < handle;
             
             [obj.n_rows obj.n_cols] = size(obj.matrix);
             
-            obj.colors = colormap('jet');
-            obj.colors = obj.colors([23,2,13,42,57,20,15,11,9,16,3,28,26,24,46,59,41,18,56,40,17,48,27,53,6,62,5,60,14,32,64,19,36,58,39,21,4,8,35,30,50,63,25,51,55,34,61,37,47,44,54,43,38,12,52,33,31,1,22,29,10,45,49,7],:);
-            obj.color_interactions(1,:) = [1 0 0];
-            obj.color_interactions(2,:) = [0 0 1];
-            obj.color_section = [0.75 0.75 0.75];
-            
             if(length(unique(obj.webmatrix))>2)
                 obj.use_type_interaction = 1;
             end
             
-            %if(length(unique(obj.biweb.row_class))>1)
-            %    obj.use_row_sections = 1;
-            %end
+                       
             
-            %if(length(unique(obj.biweb.col_class))>1)
-            %    obj.use_col_sections = 1;
-            %end
+            obj.StartUp();
             
-            %Delete This section thereafter--------------------------
-            obj.color_interactions(1,:) = [255 0 0]/255;
-            obj.color_interactions(2,:) = [0 0 255]/255;
-            obj.colors(2,:) = [0    0.7500    1.0000];
-            obj.colors(3,:) = [1.0000    0.8750         0];
-            obj.colors(4,:) = [186,85,211]/255;
-            obj.colors(5,:) = [255,165,0]/255;
-            obj.colors(6,:) = [34 139 34]/255;
-            %--------------------------------------------------------
-            
-            obj.FillPositions();
-            
-        end
-        
-        function obj = FillPositions(obj)
-        % FillPositions - Fill positions
-        % obj = FillPositions(obj) - Calculate the geometrical position of matrix
-        % cells for rows and columns.
-            obj.pos_x = zeros(obj.n_rows,obj.n_cols);
-            obj.pos_y = zeros(obj.n_rows,obj.n_cols);
-
-            obj.pos_x = repmat(1:obj.n_cols, obj.n_rows, 1);
-            obj.pos_y = repmat(((obj.n_rows+1)-(1:obj.n_rows))',1,obj.n_cols);
-            
-            maxd = max(obj.n_rows,obj.n_cols);
-            obj.row_pos = linspace(maxd,1,obj.n_rows);
-            obj.col_pos = linspace(maxd,1,obj.n_cols);
-            
-        end
+        end  
         
         function PlotGraph(obj)
         % PlotGraph - Plot a original sorting graph layout
-        % obj = PlotGraph(obj) - Plot a graph layout using the original sorting of nodes.
+        %
+        %   obj = PlotGraph(obj) - Plot a graph layout using the original sorting of nodes.
             cla;
             maxd = max(obj.n_rows,obj.n_cols);
             x1 = 1; x2 = 1+maxd*obj.horizontal_proportion;
@@ -200,18 +173,18 @@ classdef PlotWebs < handle;
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
                     if(local_matrix(i,j)==1)
-                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'black');
+                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.link_color,'LineWidth',obj.link_width);
                     end
                 end
             end
             hold off;
             
             for i = 1:obj.n_rows
-                obj.DrawCircle(x1,obj.row_pos(i),'black');
+                obj.DrawCircle(x1,obj.row_pos(i),obj.bead_color_rows);
             end
             
             for j = 1:obj.n_cols
-                obj.DrawCircle(x2,obj.col_pos(j),'black');
+                obj.DrawCircle(x2,obj.col_pos(j),obj.bead_color_columns);
             end
             
             
@@ -222,8 +195,9 @@ classdef PlotWebs < handle;
         
         function PlotNestedGraph(obj)
         % PlotNestedGraph - Plot a nested sorting graph layout
-        % obj = PlotNestedGraph(obj) - Plot a graph layout where nodes
-        % are sorted such that the nestedness pattern is more visible
+        %
+        %   obj = PlotNestedGraph(obj) - Plot a graph layout where nodes
+        %   are sorted such that the nestedness pattern is more visible
             
             cla;
             maxd = max(obj.n_rows,obj.n_cols);
@@ -238,18 +212,18 @@ classdef PlotWebs < handle;
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
                     if(local_matrix(i,j)==1)
-                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.link_color);
+                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.link_color,'LineWidth',obj.link_width);
                     end
                 end
             end
             hold off;
             
             for i = 1:obj.n_rows
-                obj.DrawCircle(x1,obj.row_pos(i),obj.bead_color);
+                obj.DrawCircle(x1,obj.row_pos(i),obj.bead_color_rows);
             end
             
             for j = 1:obj.n_cols
-                obj.DrawCircle(x2,obj.col_pos(j),obj.bead_color);
+                obj.DrawCircle(x2,obj.col_pos(j),obj.bead_color_columns);
             end
             
             obj.ApplyBasicBFormat();
@@ -257,8 +231,9 @@ classdef PlotWebs < handle;
         
         function PlotModularGraph(obj)
         % PlotModularGraph - Plot a modular sorting graph layout
-        % obj = PlotModularGraph(obj) - Plot a graph layout where nodes
-        % are sorted such that the modular pattern is more visible            
+        %
+        %   obj = PlotModularGraph(obj) - Plot a graph layout where nodes
+        %   are sorted such that the modular pattern is more visible            
             cla;
             maxd = max(obj.n_rows,obj.n_cols);
             x1 = 1; x2 = 1+maxd*obj.horizontal_proportion;
@@ -283,14 +258,14 @@ classdef PlotWebs < handle;
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
                     if(local_matrix(i,j)==1 && row_mod(i)~=col_mod(j))
-                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color','black');
+                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.link_color,'LineWidth',obj.link_width);
                     end
                 end
             end
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
                     if(local_matrix(i,j)==1 && row_mod(i)==col_mod(j))
-                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.colors(mod(row_mod(i),n_col),:));
+                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.colors(mod(row_mod(i),n_col),:),'LineWidth',obj.link_width);
                     end
                 end
             end
@@ -307,57 +282,15 @@ classdef PlotWebs < handle;
             obj.ApplyBasicBFormat();
         end    
         
-        function DrawLine(start_cord,end_cord,color)
-        % DrawLine - Draw and edge for graph layouts
-        % obj = DrawLine(start_cord,end_cord,color) - Draw an edge between
-        % start_cord and end_cord geometrical coordinates (positions) using
-        % color as color. Function used for graph layout functions
         
-            plot([start_cord(1) end_cord(1)],[start_cord(2) end_cord(2)],color,'LineWidth',1.0);
-            
-        end
-        
-        function obj = DrawCircle(obj,x,y,color)
-        % DrawCircle - Draw a node for graph layouts
-        % obj = DrawCircle(obj,x,y,color) - Draw a node in coordinate (x,y)
-        % using color as color.
-            r = obj.radius;
-            marg = obj.vertical_margin;
-            rec = rectangle('Position',[x-r+marg,y-r+marg,2*(r-marg),2*(r-marg)],'Curvature',[1 1]);
-            set(rec,'FaceColor',color);
-            set(rec,'EdgeColor',color);
-        end
         
         function obj = PlotMatrix(obj)
         % PlotMatrix - Plot a original sorting matrix layout
-        % obj = PlotMatrix(obj) - Plot a matrix layout using the original sorting of nodes.    
+        %
+        %   obj = PlotMatrix(obj) - Plot a matrix layout using the original sorting of nodes.    
             cla;
             obj.index_rows = 1:obj.n_rows;
             obj.index_cols = 1:obj.n_cols;
-            
-            if(obj.use_row_sections)
-                row_section = obj.biweb.row_class;
-                row_section_unique = unique(row_section);
-                for i = 1:length(row_section_unique)
-                    if(mod(i,2)==1)
-                        x = find(row_section==row_section_unique(i));
-                        %MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor)
-                        obj.MakeDivision(x(end),1,length(x),obj.n_cols,obj.color_section,obj.color_section,0.6);
-                    end
-                end
-            end
-            
-            if(obj.use_col_sections)
-                col_section = obj.biweb.col_class;
-                col_section_unique = unique(col_section);
-                for i = 1:length(col_section_unique)
-                    if(mod(i,2)==1)
-                        x = find(col_section==col_section_unique(i));
-                        %MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor)
-                        obj.MakeDivision(obj.n_rows,x(1),obj.n_rows,length(x),obj.color_section,obj.color_section,0.6);
-                    end
-                end
-            end
             
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
@@ -377,7 +310,8 @@ classdef PlotWebs < handle;
         
         function obj = PlotNestedMatrix(obj)
         % PlotNestedMatrix - Plot a nested sorting matrix layout
-        % obj = PlotNestedMatrix(obj) - Plot a matrix layout using the nested sorting of nodes.    
+        %
+        %   obj = PlotNestedMatrix(obj) - Plot a matrix layout using the nested sorting of nodes.    
         
             cla;
             [~, obj.index_rows] = sort(sum(obj.matrix,2),'descend');
@@ -397,11 +331,13 @@ classdef PlotWebs < handle;
                 end
             end
             
-            hold on;
-            [x,y] = NestednessBINMATNEST.GET_ISOCLINE(obj.matrix);
-            p = plot(x,y);
-            set(p,'Color',obj.isocline_color,'LineWidth',obj.line_width);
-            hold off;
+            if(obj.use_isocline)
+                hold on;
+                [x,y] = NestednessNTC.GET_ISOCLINE(obj.matrix);
+                p = plot(x,y);
+                set(p,'Color',obj.isocline_color,'LineWidth',obj.line_width);
+                hold off;
+            end
             
             obj.ApplyBasicFormat();
             
@@ -409,7 +345,8 @@ classdef PlotWebs < handle;
         
         function obj = PlotModularMatrix(obj)
         % PlotModularMatrix - Plot a modular sorting matrix layout
-        % obj = PlotModularMatrix(obj) - Plot a matrix layout using the modular sorting of nodes.    
+        %
+        %   obj = PlotModularMatrix(obj) - Plot a matrix layout using the modular sorting of nodes.    
         
             cla;
             if(isempty(obj.biweb))
@@ -489,7 +426,7 @@ classdef PlotWebs < handle;
                         continue;
                     end
                     
-                    [x,y] = NestednessBINMATNEST.GET_ISOCLINE(matrices{i});
+                    [x,y] = NestednessNTC.GET_ISOCLINE(matrices{i});
                     p = plot(start_x-dx+x,start_y-dy+y);
                     %p = plot(x,y);
                     if(obj.use_module_format)
@@ -510,7 +447,68 @@ classdef PlotWebs < handle;
             obj.ApplyBasicFormat();
         end
         
+    end
+    
+    % PROTECTED METHODS
+    methods(Access = 'protected')
+        function obj = StartUp(obj)
+            obj.colors = colormap('jet');
+            obj.colors = obj.colors([23,2,13,42,57,20,15,11,9,16,3,28,26,24,46,59,41,18,56,40,17,48,27,53,6,62,5,60,14,32,64,19,36,58,39,21,4,8,35,30,50,63,25,51,55,34,61,37,47,44,54,43,38,12,52,33,31,1,22,29,10,45,49,7],:);
+            obj.color_interactions(1,:) = [1 0 0];
+            obj.color_interactions(2,:) = [0 0 1];
+            
+            
+           
+            %Delete This section thereafter--------------------------
+            obj.color_interactions(1,:) = [0 255 255]/255;
+            obj.color_interactions(2,:) = [0 160 160]/255;
+            obj.color_interactions(3,:) = [0 80 80]/255;
+            obj.colors(2,:) = [0    0.7500    1.0000];
+            obj.colors(3,:) = [1.0000    0.8750         0];
+            obj.colors(4,:) = [186,85,211]/255;
+            obj.colors(5,:) = [255,165,0]/255;
+            obj.colors(6,:) = [34 139 34]/255;
+            %--------------------------------------------------------
+            
+            obj.FillPositions();
+        end
         
+        function obj = FillPositions(obj)
+        % FillPositions - Fill positions
+        % obj = FillPositions(obj) - Calculate the geometrical position of matrix
+        % cells for rows and columns.
+            obj.pos_x = zeros(obj.n_rows,obj.n_cols);
+            obj.pos_y = zeros(obj.n_rows,obj.n_cols);
+
+            obj.pos_x = repmat(1:obj.n_cols, obj.n_rows, 1);
+            obj.pos_y = repmat(((obj.n_rows+1)-(1:obj.n_rows))',1,obj.n_cols);
+            
+            maxd = max(obj.n_rows,obj.n_cols);
+            obj.row_pos = linspace(maxd,1,obj.n_rows);
+            obj.col_pos = linspace(maxd,1,obj.n_cols);
+            
+        end
+        
+        function DrawLine(start_cord,end_cord,color)
+        % DrawLine - Draw and edge for graph layouts
+        % obj = DrawLine(start_cord,end_cord,color) - Draw an edge between
+        % start_cord and end_cord geometrical coordinates (positions) using
+        % color as color. Function used for graph layout functions
+        
+            plot([start_cord(1) end_cord(1)],[start_cord(2) end_cord(2)],color,'LineWidth',1.0);
+            
+        end
+        
+        function obj = DrawCircle(obj,x,y,color)
+        % DrawCircle - Draw a node for graph layouts
+        % obj = DrawCircle(obj,x,y,color) - Draw a node in coordinate (x,y)
+        % using color as color.
+            r = obj.radius;
+            marg = obj.vertical_margin;
+            rec = rectangle('Position',[x-r+marg,y-r+marg,2*(r-marg),2*(r-marg)],'Curvature',[1 1]);
+            set(rec,'FaceColor',color);
+            set(rec,'EdgeColor',color);
+        end
         
         function obj = ApplyBasicFormat(obj)
         % ApplyBasicFormat - Apply final format to the matrix layout
@@ -557,9 +555,6 @@ classdef PlotWebs < handle;
             box on;
             
         end
-        
-        
-        
         
         function obj = ApplyBasicBFormat(obj)
         % ApplyBasicBFormat - Apply final format to the graph layout
@@ -651,7 +646,7 @@ classdef PlotWebs < handle;
 %            set(rec1,'facealpha',1.0);
         end
         
-        function obj = MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor,alpha_value)
+        function obj = MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor)
         % MakeDivision - Make a module division.
         % obj = MakeDivision(obj,i,j,nrow,ncol,bordercolor,backcolor) -
         % Make a module division starting in cell positioned at i,j of size
@@ -690,6 +685,97 @@ classdef PlotWebs < handle;
              %set(rec,'EdgeColor','black');
 
         end
+    end
+    
+    % STATIC METHODS
+    methods(Static)
+
+        function PLOT_TO_PDF(filenampdf)
+        % PLOT_TO_PDF - Plot to PDF file the current Figure
+        %
+        %   PLOT_TO_PDF(filenampdf) Print to PDF file filenampdf what is
+        %   plotted in the current figure
+            set(gcf,'PaperPositionMode','auto');
+            print(filenampdf,'-dpdf');           
+        end
+        
+        function PLOT_TO_EPS(filenameps)
+        % PLOT_TO_EPS - Plot to EPS file the current Figure
+        %
+        %   PLOT_TO_EPS(filenampdf) Print to EPS file filenameps what is
+        %   plotted in the current figure
+            set(gcf,'PaperPositionMode','auto');
+            print(filenameps,'-depsc2');           
+        end
+        
+        function PLOT_TO_JPG(filejpg)
+        % PLOT_TO_JPG - Plot to JPG file the current Figure
+        %
+        %   PLOT_TO_JPG(filenampdf) Print to JPG file filenameps what is
+        %   plotted in the current figure            
+            set(gcf,'PaperPositionMode','auto');
+            print(filejpg,'-djpeg2'); 
+        end
+        
+        function plotter = PLOT_MATRIX(matrix)
+        % PLOT_MATRIX - Plot a matrix layout of a bipartite network
+        %
+        %   PW = PLOT_MATRIX(MATRIX) Plot a bipartite network with bipartite
+        %   adjacency matrix MATRIX in matrix layout using the original
+        %   sorting and returns a PlotWebs object PW
+            plotter = PlotWebs(matrix);
+            plotter.PlotMatrix();
+        end
+        
+        function plotter = PLOT_NESTED_MATRIX(matrix)
+        % PLOT_NESTED_MATRIX - Plot a nested matrix layout of a bipartite network
+        %
+        %   PW = PLOT_NESTED_MATRIX(MATRIX) Plot a bipartite network with bipartite
+        %   adjacency matrix MATRIX in matrix layout using the nested
+        %   sorting and returns a PlotWebs object PW
+            plotter = PlotWebs(matrix);
+            plotter.PlotNestedMatrix();
+        end
+        
+        function plotter = PLOT_MODULAR_MATRIX(matrix)
+        % PLOT_MODULAR_MATRIX - Plot a modular matrix layout of a bipartite network
+        %
+        %   PW = PLOT_MODULAR_MATRIX(MATRIX) Plot a bipartite network with bipartite
+        %   adjacency matrix MATRIX in matrix layout using the modular
+        %   sorting and returns a PlotWebs object PW            
+            plotter = PlotWebs(matrix);
+            plotter.PlotModularMatrix();
+        end
+        
+        function plotter = PLOT_GRAPH(matrix)
+        % PLOT_GRAPH - Plot a graph layout of a bipartite network
+        %
+        %   PW = PLOT_GRAPH(MATRIX) Plot a bipartite network with bipartite
+        %   adjacency matrix MATRIX in graph layout using the original
+        %   sorting and returns a PlotWebs object PW             
+            plotter = PlotWebs(matrix);
+            plotter.PlotGraph();
+        end
+        
+        function plotter = PLOT_NESTED_GRAPH(matrix)
+        % PLOT_NESTED_GRAPH - Plot a nested graph layout of a bipartite network
+        %
+        %   PW = PLOT_NESTED_GRAPH(MATRIX) Plot a bipartite network with bipartite
+        %   adjacency matrix MATRIX in graph layout using the nested
+        %   sorting and returns a PlotWebs object PW              
+            plotter = PlotWebs(matrix);
+            plotter.PlotNestedGraph();
+        end
+        
+        function plotter = PLOT_MODULAR_GRAPH(matrix)
+        % PLOT_MODULAR_GRAPH - Plot a modular graph layout of a bipartite network
+        %
+        %   PW = PLOT_MODULAR_GRAPH(MATRIX) Plot a bipartite network with bipartite
+        %   adjacency matrix MATRIX in graph layout using the modular
+        %   sorting and returns a PlotWebs object PW              
+            plotter = PlotWebs(matrix);
+            plotter.PlotModularGraph();
+        end      
         
     end
     

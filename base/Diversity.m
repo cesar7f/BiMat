@@ -2,8 +2,8 @@
 % correlation between rows/columns labels and modularity.
 %
 % Diversity Methods:
-%    SHANNON_INDEX - Shannon's index calculation
-%    SIMPSON_INDEX - Simpson's index calculation
+%    SHANNON_INDEX - Shannon's diversity index
+%    SIMPSON_INDEX - Simpson's diversity index
 %
 % See also:
 %    InternalStatistics
@@ -12,11 +12,12 @@ classdef Diversity
     methods(Static)
             
         function H = SHANNON_INDEX(species,un)
-            % SHANNON_INDEX - Shannon's index calculation
+            % SHANNON_INDEX - Shannon's diversity index
             %   H = SHANNON_INDEX(species) Calculate the Shannon's index H of
             %   vector species.
             %   H = SHANNON_INDEX(species,un) Calculate the shannon's index H of
             %   vector species using only specific indexes un
+            %                 H = \sum_{i=1}^n - {p_i} \log p_i
             if(nargin==1)
                 un = unique(species);
             end
@@ -34,7 +35,7 @@ classdef Diversity
         end
         
         function D = SIMPSON_INDEX(species,un)
-            % SIMPSON_INDEX - Simpson's index calculation
+            % SIMPSON_INDEX - Simpson's diversity index
             %   H = SIMPSON_INDEX(species) Calculate the Simpson's index H of
             %   vector species.
             %   H = SIMPSON_INDEX(species,un) Calculate the Simpson's index H of

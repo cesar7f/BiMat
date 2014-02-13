@@ -2,19 +2,39 @@
 % type of input files.
 %
 % Reading Methods:
-%    CREATE_FROM_MATRIX_WITH_LABELS - Create a bipartite object using an input file
+%     READ_ADJACENCY_LIST - Create a Bipartite object from an adjacency list text file
+%     READ_BIPARTITE_MATRIX - Create a Bipartite object from a bipartite adjacency matrix
 %
 % See also:
 %    Printer
-classdef Reading
+classdef Reader
    
     methods(Static)
        
-        function bp = READ_ADJACENCY_LIST(filename)
-            
+        function bp = READ_ADJACENCY_LIST(filename, delimiter)
+        % READ_ADJACENCY_LIST - Create a Bipartite object from an adjacency
+        % list text file
+        %   BP = READ_ADJACENCY_LIST(FILE) Reads an adjacency list from
+        %   text file FILE and use it for creating a bipartite object BP.
+        %   The FILE must contain two or three columns separated by an
+        %   space, such that the first colum will indicate node names that
+        %   are linked to nodes in the last column. Values in an optional
+        %   middle column will indicate the strenght of the link (only used
+        %   for plotting).
+        %   BP = READ_ADJACENCY_LIST(FILE, DELIM) Reads an adjacency list from
+        %   text file FILE and use it for creating a bipartite object BP.
+        %   The FILE must contain two or three columns separated by a
+        %   single character defined in DELIM,
+        %   such that the first colum will indicate node names that
+        %   are linked to nodes in the last column. Values in an optional
+        %   middle column will indicate the strenght of the link (only used
+        %   for plotting).
+        
             %Check how many columns
             fid = fopen(filename,'r');
-            delimiter = ' '; %or whatever
+            if(nargin == 1)
+                delimiter = ' '; %or whatever
+            end
             tLines = fgets(fid);
             numCols = numel(strfind(tLines,delimiter)) + 1;
             fclose(fid);
@@ -60,7 +80,12 @@ classdef Reading
         end
         
         function bp = READ_BIPARTITE_MATRIX(filename)
-            
+        % READ_BIPARTITE_MATRIX - Create a Bipartite object from a
+        % bipartite adjacency matrix
+        %   BP = READ_BIPARTITE_MATRIX(FILE) Reads a bipartite adjacency matrix from
+        %   text file FILE and use it for creating a bipartite object BP.
+        %   The values in the matrix must be separated by the space character.
+        
             matrix = dlmread(filename);
             
             bp = Bipartite(matrix);

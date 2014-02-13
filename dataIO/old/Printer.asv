@@ -1,38 +1,28 @@
 % Printer - Class used for printing output files on screen and files.
 %
-% Printer Properties:
-%     delimiter - Delimiter of columns for information presented in tables
-%     bipweb - Bipartite object for which the information will be printed
+% PlotWebs Properties:
+%     matrix - Adjacency matrix in boolean version
+%     webmatrix - Adjacency matrix with edge weight information
 %
 % Printer Methods:
 %    Printer - Main Constructor
 %    CreateCytoscapeData - Create input files for Cytoscape software
-%    PrintAdjacencyList - Print the adjacency list
-%    PrintGeneralProperties - Print the general properties 
-%    PrintStructureValues - Print the sctructure values
-%    PrintStructureStatistics - Print the statistics of structure values
-%    PrintStructureStatisticsOfModules - Print the structure module
-%    PrintRowModuleDiversity - Print the statistics of module
-%    PrintColumnModuleDiversity - Print the statistics of module
-%    PrintGeneralPropertiesOfModules - Print general properties of modules
-%    PRINT_TO_FILE - Print a string to a text file
-%    CREATE_FORMATED_STRING - Created a formated string
 %
 % See also:
-%    Reader
+%    Reading
 classdef Printer < handle
     
     properties
         
         delimiter      = ','; % Delimiter of columns for information presented in tables
-        bipweb         = {};  % Bipartite object for which the information will be printed
+        bipweb         = {};  % Bipartite object for which the information
         
     end
     
     methods
         
         function obj = Printer(webbip)
-        % Printer - Main Constructor
+        % PRINTER - Main Constructor
         %   pt = Printer(webbip) Create a Printer object pt wich will be
         %   related to Bipartite object webbip.
         
@@ -168,7 +158,7 @@ classdef Printer < handle
             end
             
             if(obj.bipweb.ntc.done == 0)
-                obj.bipweb.ntc.Detect();
+                obj.bipweb.ntc.CalculateNestedness;
             end
             
             str = 'Modularity\n';
@@ -197,15 +187,15 @@ classdef Printer < handle
         %   nestedness and modularity to screen and text file FILE.
            
             if(obj.bipweb.statistics.modul_done == 0)
-                obj.bipweb.statistics.TestModularity();
+                obj.bipweb.statistics.Modularity();
             end
             
             if(obj.bipweb.statistics.nest_done == 0)
-                obj.bipweb.statistics.TestNODF();
+                obj.bipweb.statistics.Nestedness();
             end
             
             if(obj.bipweb.statistics.temp_done == 0)
-                obj.bipweb.statistics.TestNTC();
+                obj.bipweb.statistics.Temperature();
             end
             
             str = 'Modularity\n';
@@ -217,18 +207,18 @@ classdef Printer < handle
             str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.qb_vals.percent), '\n'];
             
             str = [str, 'NODF Nestedness\n'];
-            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.nodf_vals.model)), '\n'];
-            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.nodf_vals.replicates), '\n'];
-            str = [str, '\t NODF value:    \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_vals.value), '\n'];
-            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_vals.zscore), '\n'];
-            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_vals.percent), '\n'];
+            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.nestvals.model)), '\n'];
+            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.nestvals.replicates), '\n'];
+            str = [str, '\t NODF value:    \t', sprintf('%30.4f',obj.bipweb.statistics.nestvals.value), '\n'];
+            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.nestvals.zscore), '\n'];
+            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.nestvals.percent), '\n'];
             
             str = [str, 'NTC Nestedness\n'];
-            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.ntc_stats_values.model)), '\n'];
-            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.ntc_stats_values.replicates), '\n'];
-            str = [str, '\t NTC value:     \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_stats_values.value), '\n'];
-            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_stats_values.zscore), '\n'];
-            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_stats_values.percent), '\n'];
+            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.tempvals.model)), '\n'];
+            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.tempvals.replicates), '\n'];
+            str = [str, '\t NTC value:     \t', sprintf('%30.4f',obj.bipweb.statistics.tempvals.value), '\n'];
+            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.tempvals.zscore), '\n'];
+            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.tempvals.percent), '\n'];
 
             fprintf(str);  
             

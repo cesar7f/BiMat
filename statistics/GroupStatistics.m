@@ -4,8 +4,8 @@ classdef GroupStatistics < handle
         matrices        = {}; % The matrices that will be tested
         names           = {}; % The names of the matrix (no required)
         qb_vals         = []; % Statistics for the modularity values
-        nestvals        = []; % Statistics for the nodf values
-        tempvals        = []; % Statistics for the ntc values
+        nodf_vals        = []; % Statistics for the nodf values
+        ntc_statistics        = []; % Statistics for the ntc values
         n_networks      = 0;  % Number of matrices (networks)
         do_modul        = 1;  % Flag to Perform the tests for modularity
         do_nest         = 1;  % Flag to Perform the tests for nodf
@@ -15,6 +15,14 @@ classdef GroupStatistics < handle
         null_model      = Options.DEFAULT_NULL_MODEL; %Null model that will be used during the tests
         networks        = {}; % A cell that will contain the bipartite objects
         clean_nulls     = 1; % Clean the random matrices (nulls) after performing each test. Useful for not saturating memory
+    end
+    
+    % Properties using during plotting
+    properties
+        p_value         = Options.P_VALUE;
+        z_value         = Options.Z_VALUE;
+        nest_mat_test   = 1;
+        plotter   = {};
     end
     
     methods
@@ -41,7 +49,8 @@ classdef GroupStatistics < handle
                         obj.networks{i} = matrices_or_networks_or_files{i};
                         obj.matrices{i} = obj.networks{i}.matrix;
                     else
-                        obj.networks{i} = Bipartite(matrices_or_networks_or_files{i});
+                        obj.networks{i} = Bipartite(MatrixFunctions.NON_ZERO_MATRIX(matrices_or_networks_or_files{i}));
+                        %obj.networks{i} = Bipartite(matrices_or_networks_or_files{i});
                         obj.matrices{i} = obj.networks{i}.matrix;
                     end
                 end
@@ -55,10 +64,12 @@ classdef GroupStatistics < handle
                 end
             else
                 for i = 1:obj.n_networks
-                    obj.networks{i}.name = ['Network %i', i];
-                    obj.names{i} = ['Network %i', i];
+                    obj.networks{i}.name = sprintf('Network %i',i);
+                    obj.names{i} = sprintf('Network %i',i);
                 end
             end
+            
+            obj.plotter = MetaStatisticsPlotter(obj);
             
         end
         
@@ -95,19 +106,20 @@ classdef GroupStatistics < handle
                 %    continue;
                 %end
                 
-                net{i}.statistics.DoNulls(obj.null_model,obj.replicates);
+                net{i}.statistics.DoNulls(obj.replicates,obj.null_model);
                 net{i}.statistics.print_output = 0;
+                net{i}.statistics.print_status = 0;
                 
                 if(obj.do_nest == 1)
-                    net{i}.statistics.Nestedness();
-                    nest.value(i,1) = net{i}.statistics.nestvals.value;
-                    nest.mean(i,1) = net{i}.statistics.nestvals.mean;
-                    nest.std(i,1) = net{i}.statistics.nestvals.std;
-                    nest.p(i,1) = net{i}.statistics.nestvals.p;
-                    nest.ci(i,:) = net{i}.statistics.nestvals.ci;
-                    nest.zscore(i,1) = net{i}.statistics.nestvals.zscore;
-                    nest.percent(i,1) = net{i}.statistics.nestvals.percent;
-                    nest.random_values(i,:) = net{i}.statistics.nestvals.random_values;
+                    net{i}.statistics.TestNODF();
+                    nest.value(i,1) = net{i}.statistics.nodf_vals.value;
+                    nest.mean(i,1) = net{i}.statistics.nodf_vals.mean;
+                    nest.std(i,1) = net{i}.statistics.nodf_vals.std;
+%                    nest.p(i,1) = net{i}.statistics.nodf_vals.p;
+%                    nest.ci(i,:) = net{i}.statistics.nodf_vals.ci;
+                    nest.zscore(i,1) = net{i}.statistics.nodf_vals.zscore;
+                    nest.percent(i,1) = net{i}.statistics.nodf_vals.percent;
+                    nest.random_values(i,:) = net{i}.statistics.nodf_vals.random_values;
                 end
                     
                 if(obj.do_modul == 1)
@@ -116,20 +128,20 @@ classdef GroupStatistics < handle
                     qb.value(i,1) = net{i}.statistics.qb_vals.value;
                     qb.mean(i,1) = net{i}.statistics.qb_vals.mean;
                     qb.std(i,1) = net{i}.statistics.qb_vals.std;
-                    qb.p(i,1) = net{i}.statistics.qb_vals.p;
-                    qb.ci(i,:) = net{i}.statistics.qb_vals.ci;
+%                    qb.p(i,1) = net{i}.statistics.qb_vals.p;
+%                    qb.ci(i,:) = net{i}.statistics.qb_vals.ci;
                     qb.zscore(i,1) = net{i}.statistics.qb_vals.zscore;
                     qb.percent(i,1) = net{i}.statistics.qb_vals.percent;
                     qb.random_values(i,:) = net{i}.statistics.qb_vals.random_values;
                 end
                 
                 if(obj.do_temp == 1)
-                    net{i}.statistics.Temperature();
+                    net{i}.statistics.TestNTC();
                     temp.value(i,1) = net{i}.statistics.tempvals.value;
                     temp.mean(i,1) = net{i}.statistics.tempvals.mean;
                     temp.std(i,1) = net{i}.statistics.tempvals.std;
-                    temp.p(i,1) = net{i}.statistics.tempvals.p;
-                    temp.ci(i,:) = net{i}.statistics.tempvals.ci;
+%                    temp.p(i,1) = net{i}.statistics.tempvals.p;
+%                    temp.ci(i,:) = net{i}.statistics.tempvals.ci;
                     temp.zscore(i,1) = net{i}.statistics.tempvals.zscore;
                     temp.percent(i,1) = net{i}.statistics.tempvals.percent;
                     temp.random_values(i,:) = net{i}.statistics.tempvals.random_values;
@@ -149,9 +161,9 @@ classdef GroupStatistics < handle
             end
             
             if(obj.do_nest == 1)
-                obj.nestvals = nest;
-                obj.nestvals.replicates = obj.replicates;
-                obj.nestvals.model = obj.null_model;
+                obj.nodf_vals = nest;
+                obj.nodf_vals.replicates = obj.replicates;
+                obj.nodf_vals.model = obj.null_model;
             end
             
             if(obj.do_temp == 1)
@@ -180,7 +192,7 @@ classdef GroupStatistics < handle
                 obj.networks{i}.modules.Detect();
                 q_values(i,2) = obj.networks{i}.modules.Qb;
                 
-                obj.networks{i}.modules = NewmanModularity(obj.matrices{i});
+                obj.networks{i}.modules = LeadingEigenvector(obj.matrices{i});
                 obj.networks{i}.modules.Detect();
                 q_values(i,3) = obj.networks{i}.modules.Qb;
                 
@@ -204,15 +216,15 @@ classdef GroupStatistics < handle
                 i = i+4;
             end
             
-            if(~isempty(obj.nestvals))
+            if(~isempty(obj.nodf_vals))
                 headers{i} = 'NODF';
                 headers{i+1} = 'NODF mean';
                 headers{i+2} = 'NODF z-score';
                 headers{i+3} = 'NODF percent';
-                columns = [columns obj.nestvals.value];
-                columns = [columns obj.nestvals.mean];
-                columns = [columns obj.nestvals.zscore];
-                columns = [columns obj.nestvals.percent];
+                columns = [columns obj.nodf_vals.value];
+                columns = [columns obj.nodf_vals.mean];
+                columns = [columns obj.nodf_vals.zscore];
+                columns = [columns obj.nodf_vals.percent];
                 i = i+4;
             end
             
@@ -235,29 +247,7 @@ classdef GroupStatistics < handle
         end
         
     end
-    
-    methods(Static)
-       
-%         function [matrices names] = GET_MATRICES_FROM_FILES(file_name)
-%             
-%             [pathstr, ~, ext] = fileparts(file_name);
-%             files = dir(file_name);
-%             
-%             for i = 1:length(files)
-%                
-%                 fprintf('%s\n',files(i).name);
-%                 matrices{i} = dlmread([pathstr,'/',files(i).name]);
-%                 
-%                 [~, name, ~] = fileparts(files(i).name);
-%                 names{i} = name;
-%                 
-%             end
-%             
-%         end
-        
-    end
-    
-    
+      
 end
 % 
 %     function obj = DoTotalGroupTesting(obj,n_trials)
@@ -272,9 +262,9 @@ end
 %                 obj.adaptive_modular.z(i) = bn.statistics.qb_vals.zscore;
 %                 obj.adaptive_modular.p(i) = bn.statistics.qb_vals.percent;
 %                 
-%                 obj.nodf_nested.v(i) = bn.statistics.nestvals.nodf;
-%                 obj.nodf_nested.z(i) = bn.statistics.nestvals.zscore;
-%                 obj.nodf_nested.p(i) = bn.statistics.nestvals.percent;
+%                 obj.nodf_vals.v(i) = bn.statistics.nodf_vals.nodf;
+%                 obj.nodf_vals.z(i) = bn.statistics.nodf_vals.zscore;
+%                 obj.nodf_vals.p(i) = bn.statistics.nodf_vals.percent;
 %                 
 %                 obj.ntc_nested.v(i) = bn.statistics.tempvals.ntc;
 %                 obj.ntc_nested.z(i) = bn.statistics.tempvals.zscore;

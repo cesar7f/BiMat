@@ -1,27 +1,23 @@
 classdef AdaptiveBrim < BipartiteModularity
-    % AdaptiveBrim Main code class. 
-    % Adaptive Brim algorithm to evaluate modularity. However, this objects
-    % is just a interface for the Barber adaptive brim algorithm code.
-    % Thiss is a son class of the BipartiteModularity class. The adaptive
-    % BRIM algorithm is described on the paper:
-    %    
-    %    Barber, Michael J. Modularity and community detection in bipartite
-    %    networks. Physical Review E. 2007
-    %
-    % AdaptiveBrim Properties:
-    %   prob_reassigment - probability of reassigment when new modules are created
-    %   expansion_factor - factor of expansion for creating new modules (2.0=duplicate number of modules).
-    %
-    % AdaptiveBrim Methods:
-    %    AdaptiveBrim - Main constructor    
-    %    DetectComponent - Detect the modularity in a single component of
-    %    the network
-    %    FindExpandedSolution - Expand the module matrices RR and TT to a
-    %    new number of modules
-    %    RecursiveBisection - Recursively look for the best solution by
-    %    doing some kind of bisection method/ternary search.
-    %
-    % See BipartiteModularity.
+	% AdaptiveBrim - Main code class
+	% Adaptive Brim algorithm to evaluate modularity. However, this objects
+	% is just a interface for the Barber adaptive brim algorithm code.
+	% Thiss is a son class of the BipartiteModularity class. The adaptive
+	% BRIM algorithm is described on the paper:
+	%    
+	%    Barber, Michael J. Modularity and community detection in bipartite
+	%    networks. Physical Review E. 2007
+	%
+	% AdaptiveBrim Properties:
+	%   prob_reassigment - probability of reassigment when new modules are created
+	%   expansion_factor - factor of expansion for creating new modules (2.0=duplicate number of modules).
+	%
+	% AdaptiveBrim Methods:
+	%    AdaptiveBrim - Main constructor 
+	%    EXPAND_MODULE_QUANTITY - Expand the number of modules (columns) in a module matrix (rr or tt).
+	%
+	% See also:
+	%    BipartiteModularity, LeadingEigenvector, and LPBrim
     
     properties
         prob_reassigment = 0.5; %probability of reassigment when new modules are created
@@ -31,17 +27,29 @@ classdef AdaptiveBrim < BipartiteModularity
     methods
         
         function obj = AdaptiveBrim(bipmatrix)
-        % obj = AdaptiveBrim(bipmatrix) - Main constructor
-            
+			% AdaptiveBrim - Main Constructor
+			% 
+			%   obj = AdaptiveBrim(MATRIX) Creates an AdaptiveBrim object obj
+			%   using a bipartite adjacency matrix MATRIX that will be used to
+			%   calculate modularity using the Adaptive Brim Algorithm
+			%
+			% See also:
+			%   AdaptiveBrim
+				
             %Call the parent class
             obj = obj@BipartiteModularity(bipmatrix);
             
         end
         
-        
+    end
+    
+    methods (Access=protected)
+	
         function obj = DetectComponent(obj)
-        % obj = DetectComponent(obj) - Detect the modularity in a specific
-        % component.
+			% DetectComponent - Main method of the algorithm
+			%
+			%   obj = DetectComponent(obj) Detect the modularity in a specific
+			%   component.
             
             %Get number of edges
             obj.n_edges_component = sum(obj.matrix_component(:));
@@ -93,13 +101,14 @@ classdef AdaptiveBrim < BipartiteModularity
         end     
         
         function sol_new = FindExpandedSolution(obj,prev_sol,N)
-        % FindExpandedSolution - Expand the module matrices RR and TT to a
-        % new number of modules
-        %   sol_new = FindExpandedSolution(obj,prev_sol,N) Expand the number of
-        %   modules prev_sol.N to a new value N by first doing a simple
-        %   expansion and later optimize the values of rr and tt using BRIM
-        %   algorithm. The empty modules are deleted before returning the
-        %   result in a structure sol_new.
+			% FindExpandedSolution - Expand the module matrices RR and TT to a
+			% new number of modules
+			%
+			%   sol_new = FindExpandedSolution(obj,prev_sol,N) Expand the number of
+			%   modules prev_sol.N to a new value N by first doing a simple
+			%   expansion and later optimize the values of rr and tt using BRIM
+			%   algorithm. The empty modules are deleted before returning the
+			%   result in a structure sol_new.
         
             sol_new.N = N;
             sol_new.rr = AdaptiveBrim.EXPAND_MODULE_QUANTITY(prev_sol.rr, N, obj.prob_reassigment);
@@ -117,14 +126,15 @@ classdef AdaptiveBrim < BipartiteModularity
          
         
         function sol = RecursiveBisection(obj,sol_inf,sol_mid,sol_end)
-        % RecursiveBisection - Recursively look for the best solution by
-        % doing some kind of bisection method/ternary search.
-        %   sol = RecursiveBisection(obj,sol_inf,sol_mid,sol_end) Find for
-        %   the best solution between sol_inf and sol_end by looking first
-        %   between sol_mid and sol_end and later between sol_inf ans
-        %   sol_mid and keeping the best value at sol_mid. This function
-        %   assumes that the modularity value has only one maxima and is
-        %   well behaved.
+			% RecursiveBisection - Recursively look for the best solution by
+			% doing some kind of bisection method/ternary search.
+			%
+			%   sol = RecursiveBisection(obj,sol_inf,sol_mid,sol_end) Find for
+			%   the best solution between sol_inf and sol_end by looking first
+			%   between sol_mid and sol_end and later between sol_inf ans
+			%   sol_mid and keeping the best value at sol_mid. This function
+			%   assumes that the modularity value has only one maxima and is
+			%   well behaved.
         
             n_try_right = floor((sol_end.N + sol_mid.N)/2);
             n_try_left = floor((sol_inf.N + sol_mid.N)/2);
@@ -157,21 +167,20 @@ classdef AdaptiveBrim < BipartiteModularity
             end
             
         end
-        
-        
     end
     
     methods(Static)
 
+
         
         function module_matrix = EXPAND_MODULE_QUANTITY(module_matrix,n_end_modules,prob)
-        % EXPAND_MODULE_QUANTITY - Expand the number of modules (columns)
-        % in a module matrix (rr or tt).
-        %   module_matrix = EXPAND_MODULE_QUANTITY(module_matrix,n_end_modules,prob)
-        %   Expand the number of modules of module_matrix to n_end_module
-        %   using a probability of reassigment of prob. In other words the
-        %   expected number of nodes that are reassigned to the new modules
-        %   is equal to prob*size(module_matrix,1);
+			% EXPAND_MODULE_QUANTITY - Expand the number of modules (columns)
+			% in a module matrix (rr or tt).
+			%   module_matrix = EXPAND_MODULE_QUANTITY(module_matrix,n_end_modules,prob)
+			%   Expand the number of modules of module_matrix to n_end_module
+			%   using a probability of reassigment of prob. In other words the
+			%   expected number of nodes that are reassigned to the new modules
+			%   is equal to prob*size(module_matrix,1);
         
             [n_nodes n_modules] = size(module_matrix);
             

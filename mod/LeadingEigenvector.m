@@ -1,55 +1,63 @@
-classdef NewmanModularity < BipartiteModularity
-    % NewmanModularity Main code class. 
-    % Newman spectral algorithm to calculate modularity in unipartite
-    % networks. In this case, the bipartite network is converted to
-    % unipartite and then, the Newman algorithm is applied in the
-    % unipartite adjacency matrix of the network. The algorithm is
-    % explained in the paper:
-    %
-    %    Newman, Mark EJ. Modularity and community structure in networks.
-    %    PNAS 2006
-    %
-    % NewmanModularity Properties:
-    %    adjacency - Unipartite version of the adjacency matrix
-    %    n_nodes - n_cols + n_rows
-    %    pp - Null model matrix
-    %    kk - Node Degrees
-    %    ss - Community indices of the unipartite version
-    %    DoKernighanLinTunning - Do a final tuning in the modularity configuration to improve the results.
-    %    Q - Modularity value in uniparte version.
-    %
-    % NewmanModularity Methods:
-    %    NewmanModularity - Main constructor    
-    %    DetectComponent - Detect the modularity in a single component of
-    %    the network
-    %
-    % See also:
-    %    BipartiteModularity
-    
+classdef LeadingEigenvector < BipartiteModularity
+% LeadingEigenvector - Main code class
+% Newman's leading eigenvector algorithm to calculate modularity in unipartite
+% networks. In this case, the bipartite network is converted to
+% unipartite and then, the Newman algorithm is applied in the
+% unipartite adjacency matrix of the network. The algorithm is
+% explained in the paper:
+%
+%    Newman, Mark EJ. Modularity and community structure in networks.
+%    PNAS 2006
+%
+% LeadingEigenvector Properties:
+%    DoKernighanLinTunning - Do a final tuning in the modularity configuration to improve the results.
+%
+% LeadingEigenvector Methods:
+%    LeadingEigenvector - Main constructor    
+%
+% See also:
+%    BipartiteModularity, AdaptiveBrim, and LPBrim
     
     properties
+        DoKernighanLinTunning= true;   %Do a final tuning in the modularity configuration to improve the results.
+    end
+    
+    properties(Access = 'protected')
         adjacency            = [];  %Unipartite version of the adjacency matrix
         n_nodes              = 0;   %n_cols + n_rows
         pp                   = [];  %Null model matrix
         kk                   = 0;   %Node Degrees
         ss                   = 0;   %Community indices of the unipartite version
-        DoKernighanLinTunning= true;   %Do a final tuning in the modularity configuration to improve the results.
         Q                    = 1;   %Modularity value in uniparte version.
     end
     
     methods
        
-        function obj = NewmanModularity(bipmatrix)
-        % obj = NewmanModularity(bipmatrix) - Main constructor
+        function obj = LeadingEigenvector(bipmatrix)
+        % LeadingEigenvector - Main Constructor
+        % 
+        %   obj = LeadingEigenvector(MATRIX) Creates an LeadingEigenvector object obj
+        %   using a bipartite adjacency matrix MATRIX that will be used to
+        %   calculate modularity using the Newman's Leading Eigenvector
+        %   algorithm
+        %
+        % See also:
+        %   LeadingEigenvector
             
             %Call the parent class
             obj = obj@BipartiteModularity(bipmatrix);
             
         end
         
+    end
+        
+    methods(Access = 'protected')
+        
         function obj = DetectComponent(obj)
-        % obj = DetectComponent(obj) - Detect the modularity in a specific
-        % component.
+        % DetectComponent - Main method of the algorithm
+        %
+        %   obj = DetectComponent(obj) Detect the modularity in a specific
+        %   component.
         
             %Convert the bipartite matrix component to unipartite version.
             obj.adjacency = [zeros(obj.n_rows_component) obj.matrix_component; obj.matrix_component' zeros(obj.n_cols_component)];

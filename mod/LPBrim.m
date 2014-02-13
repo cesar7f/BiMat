@@ -1,24 +1,22 @@
 classdef LPBrim < BipartiteModularity
-    % LPBrim Main code class. 
-    % LPBrim algorithm that may work better than the adaptive brim version
-    % for large scale bipartite networks. To know how the algorithm works
-    % you can consult the following paper:
-    %
-    %    Liu, Xin and Murata, Tsuyoshi. Community detection in large-scale
-    %    bipartite networks. Web Intelligence and Intelligent Agent 
-    %    Technologies, 2009
-    %
-    % LPBrim Properties:
-    %    red_labels - Works as module identifiers for rows
-    %    blue_labels - Works as module identifiers for columns
-    %
-    % LPBrim Methods:
-    %    LPBrim - Main constructor    
-    %    DetectComponent - Detect the modularity in a single component of
-    %    the network
-    %
-    % See also:
-    %    BipartiteModularity
+% LPBrim - Main code class
+% LPBrim algorithm that may work better than the adaptive brim version
+% for large scale bipartite networks. To know how the algorithm works
+% you can consult the following paper:
+%
+%    Liu, Xin and Murata, Tsuyoshi. Community detection in large-scale
+%    bipartite networks. Web Intelligence and Intelligent Agent 
+%    Technologies, 2009
+%
+% LPBrim Properties:
+%    red_labels - Works as module identifiers for rows
+%    blue_labels - Works as module identifiers for columns
+%
+% LPBrim Methods:
+%    LPBrim - Main constructor    
+%
+% See also:
+%    BipartiteModularity, AdaptiveBrim, and LeadingEigenvector
     
     properties%(GetAccess = 'private', SetAccess = 'private')
         red_labels           = 0; %Works as module identifiers for rows
@@ -29,16 +27,29 @@ classdef LPBrim < BipartiteModularity
     methods
         
         function obj = LPBrim(bipmatrix)
-        % obj = LPBrim(bipmatrix) - Main constructor
+        % LPBrim - Main Constructor
+        % 
+        %   obj = LPBrim(MATRIX) Creates an LPBrim object obj
+        %   using a bipartite adjacency matrix MATRIX that will be used to
+        %   calculate modularity using the LPBrim Algorithm
+        %
+        % See also:
+        %   LPBrim
             
             %Call the parent class    
             obj = obj@BipartiteModularity(bipmatrix);
            
         end
+            
+    end
+    
+    methods(Access = 'protected')
         
         function obj = DetectComponent(obj)
-        % obj = DetectComponent(obj) - Detect the modularity in a specific
-        % component.
+        % DetectComponent - Main method of the algorithm
+        %
+        %   obj = DetectComponent(obj) Detect the modularity in a specific
+        %   component.
             
             %Apply the LP algorithm
             obj.LP();
@@ -50,11 +61,6 @@ classdef LPBrim < BipartiteModularity
                         
             
         end
-            
-    end
-    
-    methods
-       
        
         function obj = LP(obj)
             
@@ -185,5 +191,6 @@ classdef LPBrim < BipartiteModularity
         
         
     end
+    
     
 end

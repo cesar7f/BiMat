@@ -32,7 +32,7 @@ gp.null_model = @NullModels.EQUIPROBABLE; %Our Null model
 gp.modul_class = @AdaptiveBrim; %Algorithm for modularity.
 gp.do_temp = 1; % Perform NTC analysis (default)
 gp.do_modul = 1; % Perform Modularity analysis (default)
-gp.do_nest = 0; % Do not perform NODF analysis
+gp.do_nest = 1; % Perform Modularity analysis (default)
 gp.names = grouptesting.name;
 gp.DoGroupTesting(); % Perform the analysis.
 %%
@@ -43,7 +43,8 @@ gp.DoGroupTesting(); % Perform the analysis.
 % matrix is nested and/or modular is to chose a two tail p-value = 0.05 as
 % Flores et al 2011 did. Therefore, the next lines of code will show how
 % many matrices are found nested and/or modular
-fprintf('Number of nested matrices: %i\n',sum(gp.tempvals.percent >= 97.5));
+fprintf('Number of NTC nested matrices: %i\n',sum(gp.ntc_stats_values.percent >= 97.5));
+fprintf('Number of NODF nested matrices: %i\n',sum(gp.nodf_vals.percent >= 97.5));
 fprintf('Number of modular matrices: %i\n',sum(gp.qb_vals.percent >= 97.5));
 %%
 % Because we only did 100 random matrices you may get different results. For
@@ -51,85 +52,26 @@ fprintf('Number of modular matrices: %i\n',sum(gp.qb_vals.percent >= 97.5));
 % We can also show the entire set of results by calling:
 gp.PrintResults();
 
-%% Using a GroupStatistics object to create your own plots
-% We can use a GroupStatistics object (gp in this case) to create specific
-% plots. Suppose we are interested in plotting all the matrices in modular
-% sorting, such that the lables in the matrix are in red if the matrix is
-% modular and in blue if it is antimodular. A simple script for performing
-% this task will be:
-n_rows = 5;
-n_cols = 8;
-modular_indices = gp.qb_vals.percent >= 97.5;
-no_modular_indices = gp.qb_vals.percent <= 2.5;
-figure(1);
-for i = 1:gp.n_networks
-    subplot(n_rows, n_cols, i);
-    gp.networks{i}.plotter.use_labels = 0; %Do not show row/column labels
-    gp.networks{i}.plotter.plot_iso_modules = 0;%No isocline inside modules
-    gp.networks{i}.plotter.PlotModularMatrix();
-    col = 'black'; % Color for not significance
-    if(modular_indices(i) == 1) % Color for significant modularity
-        col = 'red';
-    elseif(no_modular_indices(i) == 1)%Color for significant antimodularity 
-        col = 'blue';
-    end
-    title(gp.names{i},'Color',col, 'FontSize',10);
-end
-set(gcf,'Position', [148         213        1142         746]);
+%% Ploting results
+%The user can visualize the results of the last output in a graphical way. For example for visualizing
+%the results of modularity and NTC nestedness value, the user can type:
+gp.plotter.p_value = 0.05; %p-value for error bars
+gp.plotter.font_size = 10; %Size for x-labels.
+gp.plotter.PlotModularValues();
+gp.plotter.PlotNTCValues();
 %%
-% We may want to create a plot that compare the values of the networks with
-% the random values of the null model. The next lines will show how to
-% create such plot for the case of the NTC results
-ntc_vals = gp.tempvals.value;
-[~,sorted_indexes] = sort(ntc_vals); % I will plot in increasing NTC value
-
-%Get random values and sort according to sorted_indexes
-ntc_vals = ntc_vals(sorted_indexes);
-mean_random_vals = gp.tempvals.mean(sorted_indexes);
-random_values = gp.tempvals.random_values; %variable already sorted in rows
-random_values = random_values(sorted_indexes,:); %sort in rows
-names = gp.names(sorted_indexes);
-
-%Find the limits of the error bars using two tail p-value=0.05
-sup_bound = random_values(:,round(gp.replicates * 0.975));
-low_bound = random_values(:,round(gp.replicates * 0.025));
-
-%Plot the data of the real matrices
-figure(2);
-plot(1:gp.n_networks, ntc_vals,'o','MarkerFaceColor','red','MarkerEdgeColor','red');
-hold on;
-%Plot the data of the random values
-errorbar(1:gp.n_networks, mean_random_vals, ... 
-    mean_random_vals - low_bound, sup_bound - mean_random_vals, ...
-    'o','MarkerFaceColor','white','MarkerEdgeColor','black');
-hold off;
-
-%Write the labels
-set(gca,'xticklabel',[]);
-for i=1:gp.n_networks
-    tmph=text(i,-0.01,names(i));
-    set(tmph,'HorizontalAlignment','right');
-    set(tmph,'rotation',90);
-    set(tmph,'fontsize',10);
-end
-
-%Labels in title, y-axis and legends
-tmplh = legend('Measured modularity','Random expectation',1,'Location','NorthWest');
-legend('boxoff')
-title('Nestedness in Bacteria-Phage Networks','fontsize',20);
-ylabel('Nestedness (NTC)','fontsize',16);
-
-%Give format to the matrix
-xlim([1 1+gp.n_networks]);
-ylim([0 1]);
-
-%Give appropiate size to the figure window
-set(gcf,'Position',[91   135   859   505]);
-set(gca,'Units','pixels');
-set(gcf,'Position', [91   135   859   505+150])
-apos = get(gca,'position');
-apos(2) = apos(2) + 82;
-set(gca,'position',apos);
-set(gcf,'position',[91   135   859   596]);
+% In addition the user can also plot the data in either graph or matrix
+% layout. Here we show for graph nested layout and modular matrix layout.
+% As in the case of a single networks, is possible to specify some of the
+% most fundamental format properties.
+gp.plotter.p_value = 0.05; %p-value for color labeling
+% Plot of nested graphs
+gp.plotter.bead_color_rows = 'blue'; %Color of row nodes
+gp.plotter.bead_color_columns = 'red'; %Color of column nodes
+gp.plotter.link_width = 0.5; %Edge width
+gp.plotter.nest_test = 2; %Use NODF for color labels (1 is for NTC).
+gp.plotter.PlotModularMatrices(5,8);
+%Plot of modular matrices
+gp.plotter.PlotNestedGraphs(5,8);
 
 

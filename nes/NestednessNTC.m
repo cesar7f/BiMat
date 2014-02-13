@@ -1,4 +1,4 @@
-% NestednessBINMATNEST - NTC (Nestedness Temperature Calculator) algorithm
+% NestednessNTC - NTC (Nestedness Temperature Calculator) algorithm
 % This class calculates the nestedness of a matrix using the temperature.
 % The value of nestedness if found by normalizing tempereature N = (100-T)
 % / 100, and have values between 0 and 1, where 1 is perfectly nested and 0\
@@ -12,75 +12,61 @@
 %     calculate the nestedness temperature of presence--absence matrices.
 %     Journal of Biogeography 2006
 %
-% NestednessBINMATNEST Properties:
-%     P - p parameter of the isocline function that is calculated using the fill of the matrix
-%     PositionMatrixX - X coordinate of each matrix cell in a unit square
-%     PositionMatrixY - Y coordinate of each matrix cell in a unit square
-%     dMatrix - distances with the perfect nestedness line
-%     DMatrix - Size of the diagonal that cross the matrix element
-%     uMatrix - Unexpectedness Matrix
+% NestednessNTC Properties:
+%     matrix - Bipartite Adjacency Matrix
 %     T - T emperature
-%     CalculatedFill - Calculated fill using the integral of Fxp(P,X). Ideally must have the same value than the fill of the matrix.
-%     X - Vector of X coordinate
-%     Fxp - Vector of isocline values in y coordinate
-%     UMin - Unexpectedness matrix
-%     tunsorted - 
-%     DoGeometry - Flag to indicate the calculus of geometry
-%     done - Flag to indicate if the algorith has ben performed
-%     PMax - Maximal P value for finding the isoclane.
-%     PMin - Minimal p value for finding the isoclane.
-%     UsedArea - Chose a value in 1,2,3
-%     DeltaX - X Increment in order to get the vector of the Isoclane values (obj.Fxp)
-%     DebugMessages - 1,0 Print Debug Messages
-%     K  - Constant to normalize values of T in [0,100]
-%     BreakRandom - How many initial random permutations in the matrix
+%     N - Nestedness NTC value
+%     do_geometry - Flag to indicate the calculus of geometry
+%     n_rows - Number of row nodes
+%     n_cols - Number of column nodes
+%     index_rows - Register of the swaps in Rows.
+%     index_cols - Register of the swaps in Cols.
+%     done - Flag to indicate if the algorithm has been performed
+%     connectance - Fill of the matrix
+%     trials - Number of random initializations
+%     do_sorting - Sort the matrix before calculating the temperature
 %
-% NestednessBINMATNEST Methods:
-%    NestednessBINMATNEST - Main Constructor
-%    SetMatrix - Change the matrix of the algorithm
-%    Detect - Main method calculating Nestedness
-%    CalculateMatrixGeometry - Calculate all the geometry aspects
-%    AssignMatrixPositions - Map the matrix elements to a unit
-%    FindPValue - Find the parameter 'p' of the isocline function
-%    GetFilledArea - Get the area above the isocline
-%    CalculateDiagonalsAndDistances - Calculate diagonal and isocline distance size matrices
-%    CalculateTemperature - Calculate the matrix temperature
-%    CalculateUnexpectedness - Calculate the matrix unexpectedness
-%    PERFECT_NESTED - Return a perfect nested matrix according to the NTC algorithm
-%    FIND_UNEXPECTED_CELLS - Return a matrix that indicate what are the unexpected cells.
-%    GET_ISOCLINE - Get the isocline function
+% NestednessNTC Methods:
+%     NestednessNTC - Main Constructor
+%     SetMatrix - Change the adjacency matrix of the algorithm
+%     Detect - Main method for calculating NTC Nestedness Temperature Calculator
+%     Print - Print NTC nestedness information
+%     NTC - Calculate the NTC nestedness
+%     PERFECT_NESTED - Return a perfect nested matrix according to the NTC algorithm
+%     FIND_UNEXPECTED_CELLS - Return a matrix that indicates what are the unexpected cells.
+%     GET_ISOCLINE - Get the isocline function
 %
 % See also:
-%    NODF
-classdef NestednessBINMATNEST < handle
+%    NestednessNODF
+classdef NestednessNTC < handle
 
-    properties(GetAccess = 'public')%, SetAccess = 'private')
-        matrix             = []  % Bipartite Adjacency Matrix
-        T                  = 0;  % T emperature
-        N                  = 0;  % Nestedness NTC value
-        do_geometry        = 1;  % Flag to indicate the calculus of geometry
-        n_rows             = 0;  % Number of row nodes
-        n_cols             = 0;  % Number of column nodes
-        index_rows         = []; % Register of the swaps in Rows.
-        index_cols         = []; % Register of the swaps in Cols.
-        done               = 0;  % Flag to indicate if the algorith has ben performed
-        connectance        = 0;  % Fill of the matrix
-        trials             = 50;  
-        do_sorting         = true; 
+    properties(GetAccess = 'public', SetAccess = 'private')
+        matrix             = []    % Bipartite Adjacency Matrix
+        T                  = 0;    % T emperature
+        N                  = 0;    % Nestedness NTC value
+        do_geometry        = true; % Flag to indicate the calculus of geometry
+        n_rows             = 0;    % Number of row nodes
+        n_cols             = 0;    % Number of column nodes
+        index_rows         = [];   % Register of the swaps in Rows.
+        index_cols         = [];   % Register of the swaps in Cols.
+        done               = 0;    % Flag to indicate if the algorith has ben performed
+        connectance        = 0;    % Fill of the matrix
+        trials             = 5;    % Number of random initializations
+        do_sorting         = true; % Sort the matrix before calculating the temperature
     end
     
     properties(Access = 'private')
-        matrix_minimal     = [];
+        matrix_minimal     = []; % The matrix with the smalles temperature (highest nestedness)
         P                  = 0;  % p parameter of the isocline function that is calculated using the fill of the matrix
-        PositionMatrixX    = []; % X coordinate of each matrix cell in a unit square
-        PositionMatrixY    = []; % Y coordinate of each matrix cell in a unit square
-        dMatrix            = []; % distances with the perfect nestedness line
-        DMatrix            = []; % Size of the diagonal that cross the matrix element
-        uMatrix            = []; % Unexpectedness Matrix
-        CalculatedFill     = 0;  % Calculated fill using the integral of Fxp(P,X). Ideally must have the same value than the fill of the matrix.
+        pos_x_matrix       = []; % X coordinate of each matrix cell in a unit square
+        pos_y_matrix       = []; % Y coordinate of each matrix cell in a unit square
+        d_matrix           = []; % distances with the perfect nestedness line
+        diag_matrix        = []; % Size of the diagonal that cross the matrix element
+        u_matrix           = []; % Unexpectedness Matrix
+        calculated_fill    = 0;  % Calculated fill using the integral of fxp(P,X). Ideally must have the same value than the fill of the matrix.
         X                  = []; % Vector of X coordinate
-        Fxp                = []; % Vector of isocline values in y coordinate
-        UMin               = 0;  % Unexpectedness matrix
+        fxp                = []; % Vector of isocline values in y coordinate
+        u_min              = 0;  % Unexpectedness matrix
         tunsorted          = 0;  
         sorting_method     = 2; %1 for NTC, 2 for Sum Heuristic
         n_row_sorts        = 0;
@@ -88,70 +74,70 @@ classdef NestednessBINMATNEST < handle
     end
     %DEBUG Properties - Change to parametrize and Debug the algorithm;
     properties(Access = 'private')
-        PMax               = 99999;      % Maximal P value for finding the isoclane.
-        PMin               = 0.0005;     % Minimal p value for finding the isoclane.
-        UsedArea           = 2;          % Chose a value in 1,2,3
-        DeltaX             = 0.001;      % X Increment in order to get the vector of the Isoclane values (obj.Fxp)
-        DebugMessages      = 0;          % 1,0 Print Debug Messages
+        p_max               = 99999;      % Maximal P value for finding the isoclane.
+        p_min               = 0.0005;     % Minimal p value for finding the isoclane.
+        used_area           = 2;          % Chose a value in 1,2,3
+        delta_x             = 0.001;      % X Increment in order to get the vector of the Isoclane values (obj.fxp)
+        debug_messages      = 0;          % 1,0 Print Debug Messages
         K                  = 2.4125e+003 % 100 / 0.04145;  %Value found in the literature
-        BreakRandom        = 10;         % How many initial random permutations in the matrix
+        break_random        = 20;         % How many initial random permutations in the matrix
     end
     
     %CONSTRUCTOR AND MAIN PROCEDURE ALGORITHM
     methods
-        function obj = NestednessBINMATNEST(bipmatrix)
-        % NestednessBINMATNEST - Main Constructor
+
+        
+        function obj = NestednessNTC(bipmatrix)
+        % NestednessNTC - Main Constructor
         % 
-        %   obj = NestednessBINMATNEST(MATRIX) Creates an NestednessBINMATNEST object obj
+        %   obj = NestednessNTC(MATRIX) Creates an NestednessNTC object obj
         %   using a bipartite adjacency matrix MATRIX that will be used to
         %   calculate nestedes using the Nestedness Temperature Calculator
-        %   (ntc).
+        %   (NTC).
         %
         % See also:
-        %    NestednessBINMATNEST
+        %    NestednessNODF
             
             obj.matrix = bipmatrix > 0; %Normalize the matrix
-            [obj.n_rows obj.n_cols] = size(obj.matrix);
+            [obj.n_rows, obj.n_cols] = size(obj.matrix);
             obj.connectance = sum(sum(obj.matrix))/(obj.n_rows*obj.n_cols);   
                         
             obj.index_rows = 1:obj.n_rows;
             obj.index_cols = 1:obj.n_cols;
-
+            
         end
-        
+
         function obj = SetMatrix(obj,matrix)
-        % SetMatrix - Change the adjacency matrix of the algorithm
-        %
         %   obj = SetMatrix(obj,matrix) Change the matrix in which the
         %   algorithm will be performed. Useful only when the new matrix
         %   has the same size and similar connectance (fill) than a
-        %   the old matrix. Usint this method, we do not have to perform
+        %   the old matrix. Using this method, we do not have to perform
         %   the goemetrical pre-calculus another time (isocline, distances,
         %   diagonals, etc).
             obj.matrix = matrix > 0; %Normalize the matrix
-            [obj.n_rows obj.n_cols] = size(matrix);
+            [obj.n_rows, obj.n_cols] = size(matrix);
             obj.connectance = sum(sum(obj.matrix))/numel(obj.matrix);
             obj.index_rows = 1:obj.n_rows;
             obj.index_cols = 1:obj.n_cols;
 
         end
-        
+
         function obj = Detect(obj)
-        % CalculateNestedness - Main method for calculating NTC nestedness
+        % Detect - Main method for calculating NTC nestedness
         % Temperature Calculator
         %
-        %   obj = CalculateNestedness(obj) Calculates the nestedness of the
+        %   obj = Detect(obj) Calculates the nestedness of the
         %   matrix. Use obj.N after calling this method to get the
         %   nestedness value, and obj.T for getting the temperature value.
         
             if(isempty(obj.matrix))
-                obj.N = NaN;
+                obj.N= NaN;
                 obj.T = NaN;
                 return;
             end
         
             if(obj.n_rows==1 || obj.n_cols==1)
-                obj.N = 0;
+                obj.N= 0;
                 return;
             end
             
@@ -167,7 +153,7 @@ classdef NestednessBINMATNEST < handle
             obj.CalculateTemperature();
 
             %Normalize the temperature to the nestedness value
-            obj.N = (100-obj.T)/100;
+            obj.N= (100-obj.T)/100;
             
             %If you want the calculus for a unsorted matrix you are
             %finished. Normally obj.do_sorting = 1, such that you want an optimal ordering. 
@@ -192,9 +178,9 @@ classdef NestednessBINMATNEST < handle
             % matrix to be tested
             for i = 1:obj.trials
                 
-                % If no increase is detected in obj.BreakRandom continuos
+                % If no increase is detected in obj.break_random continuos
                 % trials, no need for continue looking.
-                if(failedtoincrease > obj.BreakRandom)
+                if(failedtoincrease > obj.break_random)
                     %fprintf('Break on i = %i\n',i);
                     break;
                 end
@@ -203,15 +189,22 @@ classdef NestednessBINMATNEST < handle
                 permutationMinimalT = 500; %temperature infinite
                 obj.T = 500;
                 
-                obj.RandomizeMatrix();
+                [matrix_permuted,new_row_index,new_col_index] = MatrixFunctions.RANDOM_SORT(obj.matrix);
+                obj.matrix = matrix_permuted;
+                obj.index_rows(new_row_index)
+                obj.index_cols(new_col_index)
 %                i = 1;
                 while(1)
                     %display(i);
                     %i = i+1;
-                    obj.SortMatrix();
+                    [sort_matrix, new_row_index, new_col_index] = MatrixFunctions.SORT_MATRIX(obj.matrix);
+                    obj.matrix = sort_matrix;
+                    obj.index_rows = obj.index_rows(new_row_index);
+                    obj.index_cols = obj.index_cols(new_col_index);
+                    
                     obj.CalculateTemperature();
                     
-                    if(obj.DebugMessages == 1); fprintf('TLocal = %f T = %f\n', permutationMinimalT,obj.T); end;
+                    if(obj.debug_messages == 1); fprintf('TLocal = %f T = %f\n', permutationMinimalT,obj.T); end;
                     
                     if(abs(permutationMinimalT - obj.T) <= 0.001 || obj.T > permutationMinimalT)
                         break;
@@ -225,7 +218,7 @@ classdef NestednessBINMATNEST < handle
                     end
                     
                 end
-                if(obj.DebugMessages == 1); fprintf('finalizo ciclo\n'); end;
+                if(obj.debug_messages == 1); fprintf('finalizo ciclo\n'); end;
                 
                 %Save if permutation is smaller than the global minimal
                 if(permutationMinimalT < globalMinimalT)
@@ -245,7 +238,7 @@ classdef NestednessBINMATNEST < handle
            obj.index_rows = indexRowGlobalMinima;
            obj.index_cols = indexColGlobalMinima;
            obj.T = globalMinimalT;
-           obj.N = (100-obj.T)/100;
+           obj.N= (100-obj.T)/100;
             
            obj.done = 1;
            %obj.PrintOutput();
@@ -263,10 +256,10 @@ classdef NestednessBINMATNEST < handle
         %
         % See also: 
         %   Printer
-        
+            
             str = 'Nestedness NTC:\n';
             str = [str, '\tNTC (Nestedness value):     \t', sprintf('%16.4f',obj.N), '\n'];
-            str = [str, '\tT (Temperature value):      \t', sprintf('%16.4f',obj.N), '\n'];
+            str = [str, '\tT (Temperature value):      \t', sprintf('%16.4f',obj.T), '\n'];
            
             fprintf(str);  
             
@@ -298,9 +291,9 @@ classdef NestednessBINMATNEST < handle
             obj.AssignMatrixPositions();
             
             %2.- Function of the isoclane f(x;p) based in the matrix density Fill
-            obj.X = (0.5/obj.n_cols):obj.DeltaX:((obj.n_cols-0.5)/obj.n_cols); %Define the X Vector of the function
+            obj.X = (0.5/obj.n_cols):obj.delta_x:((obj.n_cols-0.5)/obj.n_cols); %Define the X Vector of the function
             obj.P = obj.FindPValue();
-            obj.Fxp = 0.5/obj.n_rows + ((obj.n_rows-1)/obj.n_rows) * (1-(1-(obj.n_cols*(obj.X)-0.5)/(obj.n_cols-1)).^(obj.P)).^(1/(obj.P));
+            obj.fxp = 0.5/obj.n_rows + ((obj.n_rows-1)/obj.n_rows) * (1-(1-(obj.n_cols*(obj.X)-0.5)/(obj.n_cols-1)).^(obj.P)).^(1/(obj.P));
             %3.-,4.-
             obj.CalculateDiagonalsAndDistances();
             
@@ -314,33 +307,33 @@ classdef NestednessBINMATNEST < handle
         %   square coordinate system.
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
-                    obj.PositionMatrixX(i,j) = (j-0.5)/obj.n_cols;
-                    obj.PositionMatrixY(i,j) = (obj.n_rows-i+0.5)/obj.n_rows;
+                    obj.pos_x_matrix(i,j) = (j-0.5)/obj.n_cols;
+                    obj.pos_y_matrix(i,j) = (obj.n_rows-i+0.5)/obj.n_rows;
                 end 
             end
         end
         
         function p = FindPValue(obj)
             % FindPValue - Find the parameter 'p' of the isocline function
-            % p = FindPValue(obj) - Get the parameter p of the isocline
-            % function by doing a search in the p space and doing a
-            % bisection method at the end, such that the area above the
-            % isocline is the same than the connectance (fill) of the matrix.
+            %   p = FindPValue(obj) - Get the parameter p of the isocline
+            %   function by doing a search in the p space and doing a
+            %   bisection method at the end, such that the area above the
+            %   isocline is the same than the connectance (fill) of the matrix.
             
-            p = obj.PMin; %Starting with the minimal pre-defined value of p parameter
+            p = obj.p_min; %Starting with the minimal pre-defined value of p parameter
             filledarea = 0; %Area above the curve. The objective is to equalize to obj.connectance.
-            while(p < obj.PMax) %After some predefined PMax the increase in p will not affect the form of the isocline
+            while(p < obj.p_max) %After some predefined p_max the increase in p will not affect the form of the isocline
                 filledarea = obj.GetFilledArea(p);
                 if(obj.connectance > filledarea) 
                     break;
                 end
-                if(obj.DebugMessages); fprintf('area = %5.4f p = %5.4f\n', filledarea,p); end; 
+                if(obj.debug_messages); fprintf('area = %5.4f p = %5.4f\n', filledarea,p); end; 
                 p = p*2;          
             end
             
-            %if(obj.DebugMessages); fprintf('area = %10.9f p = %5.4f lastp = %5.4f\n', filledarea,upp,lowp); end;
+            %if(obj.debug_messages); fprintf('area = %10.9f p = %5.4f lastp = %5.4f\n', filledarea,upp,lowp); end;
             
-            if(p < obj.PMax && p > obj.PMin) %If the parameter p is not an extreme case
+            if(p < obj.p_max && p > obj.p_min) %If the parameter p is not an extreme case
                 %BISECTION METHOD
                 upp = p;
                 lowp = p / 2;
@@ -353,14 +346,14 @@ classdef NestednessBINMATNEST < handle
                     else
                         lowp = mid;
                     end
-                    if(obj.DebugMessages); fprintf('area = %10.9f p = %f\n', filledarea,mid); end;        
+                    if(obj.debug_messages); fprintf('area = %10.9f p = %f\n', filledarea,mid); end;        
                 end
                 if(mid ~= 0)
                     p = mid;
                 end;
             end
             
-            obj.CalculatedFill = filledarea;
+            obj.calculated_fill = filledarea;
         end
         
         function Area = GetFilledArea(obj,p)
@@ -371,14 +364,14 @@ classdef NestednessBINMATNEST < handle
             
             
             %Isocline equation
-            obj.Fxp = 0.5/obj.n_rows + ((obj.n_rows-1)/obj.n_rows) * (1-(1-(obj.n_cols*(obj.X)-0.5)/(obj.n_cols-1)).^p).^(1/p);
+            obj.fxp = 0.5/obj.n_rows + ((obj.n_rows-1)/obj.n_rows) * (1-(1-(obj.n_cols*(obj.X)-0.5)/(obj.n_cols-1)).^p).^(1/p);
             
             %Area below the isocline
-            integral = trapz(obj.X,obj.Fxp);
+            integral = trapz(obj.X,obj.fxp);
             
             %Three ways of calculating the area (only important when the
             %matrix is small. Case 2 gives the best results.
-            switch obj.UsedArea
+            switch obj.used_area
                 case 1
                     Area = 1 - real(integral);
                 case 2
@@ -394,18 +387,18 @@ classdef NestednessBINMATNEST < handle
         %
         %   obj = CalculateDiagonalsAndDistances(obj) - Calculate diagonal and
         %   isocline distance size matrices
-            obj.uMatrix = zeros(size(obj.matrix));
+            obj.u_matrix = zeros(size(obj.matrix));
             MaxDiag = sqrt(2);
             
-            obj.DMatrix = zeros(size(obj.matrix));
-            obj.dMatrix = zeros(size(obj.matrix));
+            obj.diag_matrix = zeros(size(obj.matrix));
+            obj.d_matrix = zeros(size(obj.matrix));
             
             %For each row and column
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
                          
-                    y1 = real(obj.PositionMatrixX(i,j) + obj.PositionMatrixY(i,j) - obj.X);
-                    y2 = obj.Fxp;
+                    y1 = real(obj.pos_x_matrix(i,j) + obj.pos_y_matrix(i,j) - obj.X);
+                    y2 = obj.fxp;
                     
                     [~, index] = min(abs(y1-y2));
                     
@@ -415,27 +408,25 @@ classdef NestednessBINMATNEST < handle
                     xcross = obj.X(index);
 
                     %Distance from the isocline to the matrix element
-                    distance = sqrt( (obj.PositionMatrixX(i,j)-xcross)^2 + (obj.PositionMatrixY(i,j)-ycross)^2 );
-                    obj.dMatrix(i,j) = distance;
-                    obj.DMatrix(i,j) = (obj.PositionMatrixX(i,j) + obj.PositionMatrixY(i,j)) * sqrt(2);
+                    distance = sqrt( (obj.pos_x_matrix(i,j)-xcross)^2 + (obj.pos_y_matrix(i,j)-ycross)^2 );
+                    obj.d_matrix(i,j) = distance;
+                    obj.diag_matrix(i,j) = (obj.pos_x_matrix(i,j) + obj.pos_y_matrix(i,j)) * sqrt(2);
 
-                    if(obj.DMatrix(i,j) > MaxDiag)
-                        obj.DMatrix(i,j) = abs(obj.PositionMatrixX(i,j) + obj.PositionMatrixY(i,j) - 2) * sqrt(2);
+                    if(obj.diag_matrix(i,j) > MaxDiag)
+                        obj.diag_matrix(i,j) = abs(obj.pos_x_matrix(i,j) + obj.pos_y_matrix(i,j) - 2) * sqrt(2);
                     end
                     
                     % Change to negative elements below isocline, such that
                     % the sign will differentiate above vs below isocline
                     % elemnts.
-                    if(obj.PositionMatrixY(i,j) < ycross)
-                        obj.dMatrix(i,j) = -obj.dMatrix(i,j);
+                    if(obj.pos_y_matrix(i,j) < ycross)
+                        obj.d_matrix(i,j) = -obj.d_matrix(i,j);
                     end
                 end
             end       
         end 
         
     end
-    
-    
     
     % CALCULATE TEMPERATURE AND IMPORTANT VALUES
     methods(Access = 'protected')
@@ -447,9 +438,9 @@ classdef NestednessBINMATNEST < handle
             %   the interval [0,100], while the nestedness in the interval
             %   [0,1]. High values of temperature corresponds to low values
             %   of nestedness.
-            obj.UMin = obj.CalculateUnexpectedness();
-            obj.T = obj.K*obj.UMin;
-            obj.N = (100-obj.T)/100;
+            obj.u_min = obj.CalculateUnexpectedness();
+            obj.T = obj.K*obj.u_min;
+            obj.N= (100-obj.T)/100;
         end
         
         function unex = CalculateUnexpectedness(obj)
@@ -457,177 +448,25 @@ classdef NestednessBINMATNEST < handle
             %   obj = CalculateUnexpectedness(obj) - Sum all temperature
             %   contributions from unexpected cells (absences below the
             %   matrix and presences above the matrix)
-            obj.uMatrix = zeros(size(obj.matrix));
-            obj.uMatrix = ((obj.matrix==0 & obj.dMatrix > 0) | (obj.matrix ~=0 & obj.dMatrix < 0 )).*((obj.dMatrix./obj.DMatrix).^2);   
-            unex = sum(sum(obj.uMatrix)) / (obj.n_rows*obj.n_cols);
+            obj.u_matrix = zeros(size(obj.matrix));
+            obj.u_matrix = ((obj.matrix==0 & obj.d_matrix > 0) | (obj.matrix ~=0 & obj.d_matrix < 0 )).*((obj.d_matrix./obj.diag_matrix).^2);   
+            unex = sum(sum(obj.u_matrix)) / (obj.n_rows*obj.n_cols);
         end
     end
-
-        % SORTING AND MATRIX MANIPULATIONS
-    methods
-        
-        function obj = SortMatrix(obj)
-            %fprintf('I sort\n');
-            switch obj.sorting_method
-                case 1
-                    obj.SortMatrixByNTCHeuristic();
-                otherwise
-                    obj.SortMatrixBySUMHeuristic();
-            end
-        end
-        
-        function obj = SortMatrixByNTCHeuristic(obj)
-                        
-            %tmsRows = size(n);
-            %tmsCols = size(n);
-    
-            %tmsRows(i) = sum(obj.GetRScore(1));
-            %tmsCols(i) = sum(obj.GetRScore(2));
-
-            if(obj.n_cols >= obj.n_rows) 
-                obj.ReorderMatrixColumns();
-                obj.ReorderMatrixRows();
-            else
-                obj.ReorderMatrixRows();
-                obj.ReorderMatrixColumns();
-            end
-        end
-        
-        function obj = SortMatrixBySUMHeuristic(obj)
-            
-            sumCols = sum(obj.matrix);
-            sumRows = sum(obj.matrix,2);
-            %sumRows = sum(obj.matrix');
-            
-            
-            [~,tmpic]=sort(sumCols,'descend');
-            [~,tmpir]=sort(sumRows,'descend');
-
-            obj.ReorderCols(tmpic);
-            obj.ReorderRows(tmpir);
-            
-        end
-         
-       
-        function obj = ReorderMatrixColumns(obj)
-
-            r = obj.GetRScore(2); %Get the vector r score in columns
-            
-            [~, indexr] = sort(r);
-            
-            obj.ReorderCols(indexr);
-            
-        end
-        
-        function obj = ReorderMatrixRows(obj)
-            
-            r = obj.GetRScore(1); %Get the vector r score in rows
-            
-            [~, indexr] = sort(r);
-            
-            obj.ReorderRows(indexr);
-        end
-        
-        function r = GetRScore(obj, rowsOrCols)
-            %Get the sequence or actual total r score of the rows or
-            %columns.
-            
-            if(rowsOrCols == 1) %Case of Rows
-            
-                s = zeros(1,obj.n_rows);
-                for i = 1:obj.n_rows
-                    s(i) = 0;
-                    for j = 1:obj.n_cols
-                        if(obj.matrix(i,j) > 0)
-                            s(i) = s(i) + (j*j);
-                        end
-                    end
-                end
-
-                t = zeros(1,obj.n_rows);
-                for i = 1:obj.n_rows
-                    t(i) = 0;
-                    for j = 1:obj.n_cols
-                        if(obj.matrix(i,j) == 0)
-                            t(i) = t(i) + (obj.n_cols-j+1)^2;
-                        end
-                    end
-                end
-                
-            else %Case of Columns
-                
-                s = zeros(1,obj.n_cols);
-                for j = 1:obj.n_cols
-                    s(j) = 0;
-                    for i = 1:obj.n_rows
-                        if(obj.matrix(i,j) > 0)
-                            s(j) = s(j) + (i*i);
-                        end
-                    end
-                end
-
-                t = zeros(1,obj.n_cols);
-                for j = 1:obj.n_cols
-                    t(j) = 0;
-                    for i = 1:obj.n_rows
-                        if(obj.matrix(i,j) == 0)
-                            t(j) = t(j) + (obj.n_rows-i+1)^2;
-                        end
-                    end
-                end
-            end
-            r = 0.5*t - 0.5*s;
-        end
-        
-        function obj = MirrorMatrix(obj)
-            
-            mirrorCols = fliplr(obj.index_cols);
-            mirrorRows = filplr(obj.index_rows);
-            
-            obj.ReorderCols(mirrorCols);
-            obj.ReorderRows(mirrorRows);
-            
-        end
-        
-        function obj = RandomizeMatrix(obj)
-            %Creates a random permutation of the matrix
-           
-            colRandom = randperm(obj.n_cols);
-            rowRandom = randperm(obj.n_rows);
-            
-            obj.ReorderCols(colRandom);
-            obj.ReorderRows(rowRandom);
-        end
-      
-        
-        function obj = ReorderCols(obj,newIndexes)
-             obj.matrix  = obj.matrix(:,newIndexes);
-           %= temp;
-            obj.index_cols = obj.index_cols(newIndexes);
-        end
-        
-        function obj = ReorderRows(obj,newIndexes)
-            temp = obj.matrix(newIndexes,:);
-            obj.matrix = temp;
-            obj.index_rows = obj.index_rows(newIndexes);
-        end
-
-    end
-    
     
     
     methods(Static)
         
         function ntc = NTC(matrix)
-        % ADAPTIVE_BRIM - Calculate the NTC nestedness
+        % NTC - Calculate the NTC nestedness
         %
         %   nest = NTC(matrix) Calculate the NTC nestedness,
         %   print the basic information to
-        %   screen and return an NestednessBIMATNEST object that contains such
+        %   screen and return an NestednessNTC object that contains such
         %   information in nest.
         
-            ntc = NestednessBINMATNEST(matrix);
-            ntc.CalculateNestedness();
+            ntc = NestednessNTC(matrix);
+            ntc.Detect();
             ntc.Print();
         end
         
@@ -644,7 +483,7 @@ classdef NestednessBINMATNEST < handle
         
             bnest = NetworkBipartite(matrix);
             
-            nest = NestednessBINMATNEST(bnest);
+            nest = NestednessNTC(bnest);
             nest.Fill = fill;
             nest = nest.CalculateMatrixGeometry();
             nest = nest.CalculateDiagonalsAndDistances();
@@ -672,7 +511,7 @@ classdef NestednessBINMATNEST < handle
         %   calculate the geometry in order to return a matrix 'matrix_unex'
         %   with ones in the position of unexpected cells of the original
         %   matrix.
-            nest = NestednessBINMATNEST(matrix);
+            nest = NestednessNTC(matrix);
             nest.CalculateMatrixGeometry();
             nest.CalculateUnexpectedness();
             
@@ -680,7 +519,7 @@ classdef NestednessBINMATNEST < handle
             
         end
         
-        function [x y] = GET_ISOCLINE(n_rows,n_cols,p_value)
+        function [x,y] = GET_ISOCLINE(n_rows,n_cols,p_value)
         % GET_ISOCLINE - Get the isocline function
         %
         %   [x y] = GET_ISOCLINE(n_rows,n_cols,p_value) - Get the isocline
@@ -689,18 +528,18 @@ classdef NestednessBINMATNEST < handle
         %   only interested in the isocline (e.g. plotting) and not the
         %   temperature value.
             if(nargin==1)
-                matrix = n_rows>0;
+                matrix_loc = n_rows>0;
             else
-                matrix = zeros(n_rows,n_cols);
+                matrix_loc = zeros(n_rows,n_cols);
                 len = n_rows*n_cols;
-                matrix(1:round(len*p_value))=1;
+                matrix_loc(1:round(len*p_value))=1;
             end
             
-            nest = NestednessBINMATNEST(matrix);
+            nest = NestednessNTC(matrix_loc);
             
             nest.CalculateMatrixGeometry();
             x = 0.5 + nest.nCols.*nest.X;
-            y = 0.5 + nest.nRows.*nest.Fxp;
+            y = 0.5 + nest.nRows.*nest.fxp;
         end
         
     end

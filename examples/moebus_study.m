@@ -44,7 +44,7 @@ bp.printer.PrintGeneralProperties();
 % specified on |Options.MODULARITY_ALGORITHM|. However, we can assign 
 % another algorithm dynamically. Here we will use the Newman's algorithm
 % (leading eigenvector).
-bp.modules = NewmanModularity(bp.matrix);
+bp.modules = LeadingEigenvector(bp.matrix);
 % The next flag is exclusive of Newman Algorithm and what it does is to
 % performn a final tuning after each sub-division (see Newman 2006). 
 bp.modules.DoKernighanLinTunning = false; %Very slow, so we turn off.
@@ -82,7 +82,7 @@ fprintf('The fraction inside modules Qr is %f\n',bp.modules.Qr);
 % The first algorithm is runned during the creation of the Bipartite
 % object, but because the NTC algorithm is slow, you need to run the
 % algorithm explicitally:
-bp.ntc.CalculateNestedness();
+bp.ntc.Detect();
 %%
 % Finally to show the values of the two algorithms you need to call:
 % The same value will be printed all the times
