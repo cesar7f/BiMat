@@ -9,6 +9,13 @@
 %    Printer
 classdef Reader
    
+    methods (Access = private)
+    %private so that you can't instatiate.
+        function out = Reader
+
+        end
+    end 
+    
     methods(Static)
        
         function bp = READ_ADJACENCY_LIST(filename, delimiter)

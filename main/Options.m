@@ -28,4 +28,11 @@ classdef Options
         MODULARITY_ALGORITHM = @AdaptiveBrim; % Modularity default algorithm.
         TRIALS_MODULARITY = 20; %Number of random restarts for AdaptiveBrim and LPBrim algorithms. LeadingEigenvector is deterministic and therefore does not use this variable.
     end
+    
+    methods (Access = private)
+    %private so that you can't instatiate.
+        function out = Options
+
+        end
+    end 
 end

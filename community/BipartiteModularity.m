@@ -481,7 +481,7 @@ classdef BipartiteModularity < handle
                 end
             end
             
-            Qr = Qr / m_edges;
+            Qr = (2*Qr/m_edges) - 1;
         end
         
         function module_idx = ASSIGN_MODULES(module_matrix)

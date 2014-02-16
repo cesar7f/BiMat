@@ -127,8 +127,6 @@ classdef Bipartite < handle
             
             
         end
-    
-        
         
     end
        
