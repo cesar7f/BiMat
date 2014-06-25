@@ -7,24 +7,19 @@
 %   Oikos 2008
 %
 % NestednessNTC Properties:
-%     matrix - Bipartite adjacency matrix where the NODF will be applied
-%     N - NODF value 
 %     N_rows - NODF value for rows
 %     N_cols - NODF value for columns
 %
 % NestednessNTC Methods:
 %     NestednessNODF - Main Constructor
-%     Detect - Main method for calculating NODF Nestedness
-%     Print - Print NTC nestedness information
+%     Print - Print NODF nestedness information
 %     NODF - Calculate the NODF nestedness o a matrix
 %
 % See also:
-%    NestednessNTC
-classdef NestednessNODF < handle
+%    NestednessNTC, Nestedness
+classdef NestednessNODF < Nestedness
 
     properties(GetAccess = 'public', SetAccess = 'protected')
-        matrix   = []; % Bipartite adjacency matrix where the NODF will be applied
-        N        = 0; % NODF value 
         N_rows   = 0; % NODF value for rows
         N_cols   = 0; % NODF value for columns
     end
@@ -41,23 +36,11 @@ classdef NestednessNODF < handle
         % See also:
         %    NestednessNTC
             
-            obj.matrix = bipmatrix > 0; %Normalize the matrix
+            obj = obj@Nestedness(bipmatrix);
             
+            obj.independent_rows_cols = true;
         end
-        
-        function obj = Detect(obj)
-        % Detect - Main method for calculating NODF nestedness
-        % values
-        %
-        %   obj = Detect(obj) Calculates the nestedness of the
-        %   matrix. Use obj.N after calling this method to get the
-        %   nestedness value. Aditionally, you can use obj.N_rows and
-        %   obj.N_cols for the contribution of row and column to
-        %   nestedness
-        
-            [obj.N,obj.N_rows,obj.N_cols] = NODF(obj.Matrix);
-
-        end
+       
         
         function obj = Print(obj,filename)
         % Print - Print NODF nestedness information
@@ -71,9 +54,9 @@ classdef NestednessNODF < handle
         % See also: 
         %   Printer     
             str = 'Nestedness NODF:\n';
-            str = [str, '\tNODF (Nestedness value):    \t', sprintf('%16.4f',obj.nodf), '\n'];
-            str = [str, '\tNODF (Rows value):          \t', sprintf('%16.4f',obj.nodf_rows), '\n'];
-            str = [str, '\tNODF (Columns value):       \t', sprintf('%16.4f',obj.nodf_cols), '\n'];
+            str = [str, '\tNODF (Nestedness value):    \t', sprintf('%20.4f',obj.N), '\n'];
+            str = [str, '\tNODF (Rows value):          \t', sprintf('%20.4f',obj.N_rows), '\n'];
+            str = [str, '\tNODF (Columns value):       \t', sprintf('%20.4f',obj.N_cols), '\n'];
             fprintf(str);  
             
             if(nargin==2)
@@ -86,6 +69,23 @@ classdef NestednessNODF < handle
         
     end
 
+    methods(Access='protected')
+       
+                function obj = RunNestedAlgorithm(obj)
+        % RunNestedAlgorithm - Main method for calculating NODF nestedness
+        % values
+        %
+        %   obj = RunNestedAlgorithm(obj) Calculates the nestedness of the
+        %   matrix. Use obj.N after calling this method to get the
+        %   nestedness value. Aditionally, you can use obj.N_rows and
+        %   obj.N_cols for the contribution of row and column to
+        %   nestedness
+        
+            [obj.N,obj.N_rows,obj.N_cols] = NODF(obj.matrix);
+
+        end
+        
+    end
     
     methods(Static)    
         

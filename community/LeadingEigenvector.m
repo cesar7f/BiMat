@@ -76,7 +76,11 @@ classdef LeadingEigenvector < BipartiteModularity
             %version equation
             else
                 %obj.bb_component = obj.adjacency - (obj.kk*obj.kk')/(2*obj.n_edges_component);
-                obj.bb_component = obj.adjacency - (obj.kk*obj.kk')/(2*obj.n_edges);
+                if(obj.optimize_by_component == false)
+                    obj.bb_component = obj.adjacency - (obj.kk*obj.kk')/(2*obj.n_edges);
+                else
+                    obj.bb_component = obj.adjacency - (obj.kk*obj.kk')/(2*obj.n_edges_component);
+                end
             end
             
             %Run the newman algorithm.

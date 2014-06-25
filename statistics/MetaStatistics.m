@@ -9,15 +9,14 @@
 % MetaStatistics Properties:
 %     matrices - The matrices that will be tested
 %     names - The names of the matrix (no required)
-%     qb_values - Statistics for the modularity values
-%     qr_values - Statistics for the modularity interactions ratio values
-%     nodf_values - Statistics for the nodf values
-%     ntc_values - Statistics for the ntc values
+%     Qb_values - Statistics for the modularity values
+%     Qr_values - Statistics for the modularity interactions ratio values
+%     N_values - Statistics for the nestedness values
 %     n_networks - Number of matrices (networks)
-%     do_modul - Flag to Perform the tests for modularity
-%     do_nodf - Flag to Perform the tests for nodf
-%     do_ntc - Flag to Perform the tests for temperature
+%     do_community - Flag to Perform the tests for modularity
+%     do_nestedness - Flag to Perform the tests for nestedness
 %     modularity_algorithm - Algorithm for modularity
+%     nestedness_algorithm - Algorithm for nestedness
 %     replicates - Number of replicates for the tests
 %     null_model - Null model that will be used during the tests
 %     networks - A cell that will contain the Bipartite objects
@@ -36,15 +35,14 @@ classdef MetaStatistics < handle
     properties
         matrices             = {}; % The matrices that will be tested
         names                = {}; % The names of the matrix (no required)
-        qb_values            = []; % Statistics for the modularity values
-        qr_values            = []  % Statistics for the modularity interactions ratio values
-        nodf_values          = []; % Statistics for the nodf values
-        ntc_values           = []; % Statistics for the ntc values
+        Qb_values            = []; % Statistics for the modularity values
+        Qr_values            = []  % Statistics for the modularity interactions ratio values
+        N_values             = []; % Statistics for the Nestedness values
         n_networks           = 0;  % Number of matrices (networks)
-        do_modul             = 1;  % Flag to Perform the tests for modularity
-        do_nodf              = 1;  % Flag to Perform the tests for nodf
-        do_ntc               = 1;  % Flag to Perform the tests for temperature
+        do_community             = 1;  % Flag to Perform the tests for modularity
+        do_nestedness        = 1;  % Flag to Perform the tests for nestedness
         modularity_algorithm = Options.MODULARITY_ALGORITHM; %Algorithm for modularity
+        nestedness_algorithm = Options.NESTEDNESS_ALGORITHM; %Algorithm for modularity
         replicates           = Options.REPLICATES; %Number of replicates for the tests
         null_model           = Options.DEFAULT_NULL_MODEL; %Null model that will be used during the tests
         networks             = {}; % A cell that will contain the Bipartite objects
@@ -119,7 +117,7 @@ classdef MetaStatistics < handle
         %   specified null model nullmodel.
         %
         % See also:
-        %   MetaStatistics.do_modul, MetaStatistics.do_nodf, MetaStatistics.do_ntc
+        %   MetaStatistics.do_community, MetaStatistics.do_nestedness
         
             if(nargin == 2)
                 obj.replicates = ntrials;
@@ -140,47 +138,41 @@ classdef MetaStatistics < handle
                 %end
                 
                 net{i}.statistics.DoNulls(obj.replicates,obj.null_model);
-                net{i}.statistics.print_status = 0;
+                net{i}.statistics.print_status = false;
                 
-                if(obj.do_nodf == 1)
-                    net{i}.statistics.TestNODF();
-                    nest.value(i,1) = net{i}.statistics.nodf_values.value;
-                    nest.mean(i,1) = net{i}.statistics.nodf_values.mean;
-                    nest.std(i,1) = net{i}.statistics.nodf_values.std;
-                    nest.zscore(i,1) = net{i}.statistics.nodf_values.zscore;
-                    nest.percentile(i,1) = net{i}.statistics.nodf_values.percentile;
-                    nest.random_values(i,:) = net{i}.statistics.nodf_values.random_values;
+                if(obj.do_nestedness == 1)
+                    net{i}.nestedness = obj.nestedness_algorithm(net{i}.matrix);
+                    net{i}.nestedness.print_results = false;
+                    net{i}.statistics.TestNestedness();
+                    nest.value(i,1) = net{i}.statistics.N_values.value;
+                    nest.mean(i,1) = net{i}.statistics.N_values.mean;
+                    nest.std(i,1) = net{i}.statistics.N_values.std;
+                    nest.zscore(i,1) = net{i}.statistics.N_values.zscore;
+                    nest.percentile(i,1) = net{i}.statistics.N_values.percentile;
+                    nest.random_values(i,:) = net{i}.statistics.N_values.random_values;
                 end
                     
-                if(obj.do_modul == 1)
-                    net{i}.modules = obj.modularity_algorithm(net{i}.matrix);
+                if(obj.do_community == 1)
+                    net{i}.community = obj.modularity_algorithm(net{i}.matrix);
+                    net{i}.community.print_results = false;
                     net{i}.statistics.TestCommunityStructure();
                     
-                    qb.value(i,1) = net{i}.statistics.qb_values.value;
-                    qb.mean(i,1) = net{i}.statistics.qb_values.mean;
-                    qb.std(i,1) = net{i}.statistics.qb_values.std;
-                    qb.zscore(i,1) = net{i}.statistics.qb_values.zscore;
-                    qb.percentile(i,1) = net{i}.statistics.qb_values.percentile;
-                    qb.random_values(i,:) = net{i}.statistics.qb_values.random_values;
+                    qb.value(i,1) = net{i}.statistics.Qb_values.value;
+                    qb.mean(i,1) = net{i}.statistics.Qb_values.mean;
+                    qb.std(i,1) = net{i}.statistics.Qb_values.std;
+                    qb.zscore(i,1) = net{i}.statistics.Qb_values.zscore;
+                    qb.percentile(i,1) = net{i}.statistics.Qb_values.percentile;
+                    qb.random_values(i,:) = net{i}.statistics.Qb_values.random_values;
                     
-                    qr.value(i,1) = net{i}.statistics.qb_values.value;
-                    qr.mean(i,1) = net{i}.statistics.qb_values.mean;
-                    qr.std(i,1) = net{i}.statistics.qb_values.std;
-                    qr.zscore(i,1) = net{i}.statistics.qb_values.zscore;
-                    qr.percentile(i,1) = net{i}.statistics.qb_values.percentile;
-                    qr.random_values(i,:) = net{i}.statistics.qb_values.random_values;
+                    qr.value(i,1) = net{i}.statistics.Qr_values.value;
+                    qr.mean(i,1) = net{i}.statistics.Qr_values.mean;
+                    qr.std(i,1) = net{i}.statistics.Qr_values.std;
+                    qr.zscore(i,1) = net{i}.statistics.Qr_values.zscore;
+                    qr.percentile(i,1) = net{i}.statistics.Qr_values.percentile;
+                    qr.random_values(i,:) = net{i}.statistics.Qr_values.random_values;
                     
                 end
                 
-                if(obj.do_ntc == 1)
-                    net{i}.statistics.TestNTC();
-                    temp.value(i,1) = net{i}.statistics.ntc_values.value;
-                    temp.mean(i,1) = net{i}.statistics.ntc_values.mean;
-                    temp.std(i,1) = net{i}.statistics.ntc_values.std;
-                    temp.zscore(i,1) = net{i}.statistics.ntc_values.zscore;
-                    temp.percentile(i,1) = net{i}.statistics.ntc_values.percentile;
-                    temp.random_values(i,:) = net{i}.statistics.ntc_values.random_values;
-                end
                 
                 %Avoid memory overflow
                 if(obj.clean_nulls == 1)
@@ -188,28 +180,23 @@ classdef MetaStatistics < handle
                 end
             end
             
-            if(obj.do_modul == 1)
-                obj.qb_values = qb;
-                obj.qb_values.algorithm = obj.modularity_algorithm;
-                obj.qb_values.replicates = obj.replicates;
-                obj.qb_values.null_model = obj.null_model;
+            if(obj.do_community == 1)
+                obj.Qb_values = qb;
+                obj.Qb_values.algorithm = obj.modularity_algorithm;
+                obj.Qb_values.replicates = obj.replicates;
+                obj.Qb_values.null_model = obj.null_model;
                 
-                obj.qr_values = qr;
-                obj.qr_values.algorithm = obj.modularity_algorithm;
-                obj.qr_values.replicates = obj.replicates;
-                obj.qr_values.null_model = obj.null_model;
+                obj.Qr_values = qr;
+                obj.Qr_values.algorithm = obj.modularity_algorithm;
+                obj.Qr_values.replicates = obj.replicates;
+                obj.Qr_values.null_model = obj.null_model;
             end
             
-            if(obj.do_nodf == 1)
-                obj.nodf_values = nest;
-                obj.nodf_values.replicates = obj.replicates;
-                obj.nodf_values.null_model = obj.null_model;
-            end
-            
-            if(obj.do_ntc == 1)
-                obj.ntc_values = temp;
-                obj.ntc_values.replicates = obj.replicates;
-                obj.ntc_values.null_model = obj.null_model;
+            if(obj.do_nestedness == 1)
+                obj.N_values = nest;
+                obj.N_values.algorithm = obj.nestedness_algorithm;
+                obj.N_values.replicates = obj.replicates;
+                obj.N_values.null_model = obj.null_model;
             end
             
         end
@@ -224,17 +211,19 @@ classdef MetaStatistics < handle
             for i = 1:obj.n_networks
                 
                 fprintf('Testing Matrix: %i . . .\n', i);
-                obj.networks{i}.modules = AdaptiveBrim(obj.matrices{i});
-                obj.networks{i}.modules.Detect();
-                q_values(i,1) = obj.networks{i}.modules.Qb;
+                obj.networks{i}.community = AdaptiveBrim(obj.matrices{i});
+                obj.networks{i}.community.print_results = false;
                 
-                obj.networks{i}.modules = LPBrim(obj.matrices{i});
-                obj.networks{i}.modules.Detect();
-                q_values(i,2) = obj.networks{i}.modules.Qb;
+                obj.networks{i}.community.Detect();
+                q_values(i,1) = obj.networks{i}.community.Qb;
                 
-                obj.networks{i}.modules = LeadingEigenvector(obj.matrices{i});
-                obj.networks{i}.modules.Detect();
-                q_values(i,3) = obj.networks{i}.modules.Qb;
+                obj.networks{i}.community = LPBrim(obj.matrices{i});
+                obj.networks{i}.community.Detect();
+                q_values(i,2) = obj.networks{i}.community.Qb;
+                
+                obj.networks{i}.community = LeadingEigenvector(obj.matrices{i});
+                obj.networks{i}.community.Detect();
+                q_values(i,3) = obj.networks{i}.community.Qb;
                 
             end
         end
@@ -254,50 +243,38 @@ classdef MetaStatistics < handle
             headers{1} = 'Network';
             columns = (1:obj.n_networks)';
             i = 2;
-            if(~isempty(obj.qb_values))
+            if(~isempty(obj.Qb_values))
                 headers{i} = 'Qb';
                 headers{i+1} = 'Qb mean';
                 headers{i+2} = 'Qb z-score';
                 headers{i+3} = 'Qb percent';
-                columns = [columns obj.qb_values.value];
-                columns = [columns obj.qb_values.mean];
-                columns = [columns obj.qb_values.zscore];
-                columns = [columns obj.qb_values.percentile];
+                columns = [columns obj.Qb_values.value];
+                columns = [columns obj.Qb_values.mean];
+                columns = [columns obj.Qb_values.zscore];
+                columns = [columns obj.Qb_values.percentile];
                 
                 headers{i+4} = 'Qr';
                 headers{i+5} = 'Qr mean';
                 headers{i+6} = 'Qr z-score';
                 headers{i+7} = 'Qr percent';
-                columns = [columns obj.qr_values.value];
-                columns = [columns obj.qr_values.mean];
-                columns = [columns obj.qr_values.zscore];
-                columns = [columns obj.qr_values.percentile];
+                columns = [columns obj.Qr_values.value];
+                columns = [columns obj.Qr_values.mean];
+                columns = [columns obj.Qr_values.zscore];
+                columns = [columns obj.Qr_values.percentile];
                 
                 i = i+8;
             end
             
-            if(~isempty(obj.nodf_values))
-                headers{i} = 'NODF';
-                headers{i+1} = 'NODF mean';
-                headers{i+2} = 'NODF z-score';
-                headers{i+3} = 'NODF percent';
-                columns = [columns obj.nodf_values.value];
-                columns = [columns obj.nodf_values.mean];
-                columns = [columns obj.nodf_values.zscore];
-                columns = [columns obj.nodf_values.percentile];
+            if(~isempty(obj.N_values))
+                headers{i} = 'N';
+                headers{i+1} = 'N mean';
+                headers{i+2} = 'N z-score';
+                headers{i+3} = 'N percent';
+                columns = [columns obj.N_values.value];
+                columns = [columns obj.N_values.mean];
+                columns = [columns obj.N_values.zscore];
+                columns = [columns obj.N_values.percentile];
                 i = i+4;
-            end
-            
-            if(~isempty(obj.ntc_values))
-                headers{i} = 'NTC';
-                headers{i+1} = 'NTC mean';
-                headers{i+2} = 'NTC z-score';
-                headers{i+3} = 'NTC percent';
-                        
-                columns = [columns obj.ntc_values.value];
-                columns = [columns obj.ntc_values.mean];
-                columns = [columns obj.ntc_values.zscore];
-                columns = [columns obj.ntc_values.percentile];
             end
             
             str = Printer.CREATE_FORMATED_STRING(headers,columns,',');
@@ -322,17 +299,17 @@ end
 %                 bn = Bipartite(obj.matrices{i});
 %                 bn.statistics.print_output = 0;
 %                 bn.statistics.DoCompleteAnalysis(n_trials);
-%                 obj.adaptive_modular.v(i) = bn.statistics.qb_values.Qb;
-%                 obj.adaptive_modular.z(i) = bn.statistics.qb_values.zscore;
-%                 obj.adaptive_modular.p(i) = bn.statistics.qb_values.percentile;
+%                 obj.adaptive_modular.v(i) = bn.statistics.Qb_values.Qb;
+%                 obj.adaptive_modular.z(i) = bn.statistics.Qb_values.zscore;
+%                 obj.adaptive_modular.p(i) = bn.statistics.Qb_values.percentile;
 %                 
-%                 obj.nodf_values.v(i) = bn.statistics.nodf_values.nodf;
-%                 obj.nodf_values.z(i) = bn.statistics.nodf_values.zscore;
-%                 obj.nodf_values.p(i) = bn.statistics.nodf_values.percentile;
+%                 obj.N_values.v(i) = bn.statistics.N_values.nodf;
+%                 obj.N_values.z(i) = bn.statistics.N_values.zscore;
+%                 obj.N_values.p(i) = bn.statistics.N_values.percentile;
 %                 
-%                 obj.ntc_nested.v(i) = bn.statistics.ntc_values.ntc;
-%                 obj.ntc_nested.z(i) = bn.statistics.ntc_values.zscore;
-%                 obj.ntc_nested.p(i) = bn.statistics.ntc_values.percentile;
+%                 obj.ntc_nested.v(i) = bn.statistics.N_values.ntc;
+%                 obj.ntc_nested.z(i) = bn.statistics.N_values.zscore;
+%                 obj.ntc_nested.p(i) = bn.statistics.N_values.percentile;
 %                 
 %                 obj.eig_nested.v(i) = bn.statistics.eigvals.maxe;
 %                 obj.eig_nested.z(i) = bn.statistics.eigvals.zscore;

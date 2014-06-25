@@ -17,7 +17,8 @@
 %     row_class - Labeling of rows
 %     col_class - Labeling of columns
 %     module_networks - Cell composed of bipartite network objects which corresponds to the internal modules of biweb
-%     meta_statistics - MetaStatistics object that is populated with all modules (communities) inside bipweb  
+%     meta_statistics - MetaStatistics object that is populated with all modules (communities) inside bipweb 
+%     idx_to_focus_on - Module indexes of where to focus the analysis. If empty all modules are evaluated.
 %
 % InternalStatistics Methods:
 %     InternalStatistics - Main Constructor
@@ -25,7 +26,7 @@
 %     TestDiversityColumns - Function used for calculating the diverstiy of column classes
 %
 % See also:
-%     BipartiteModularity, NestednessNODF, NestednessNTC
+%     BipartiteModularity, Nestedness
 classdef InternalStatistics < handle
    
     properties(GetAccess = 'public', SetAccess = 'public')
@@ -36,6 +37,7 @@ classdef InternalStatistics < handle
         col_class       = []; % Labeling of columns
         module_networks = {}; % Cell composed of bipartite network objects which corresponds to the internal modules of biweb
         meta_statistics = {}; % MetaStatistics object that is populated with all modules (communities) inside bipweb
+        idx_to_focus_on = []; % Module indexes of where to focus the analysis. If empty all modules are evaluated.
     end
     
     methods
@@ -88,9 +90,9 @@ classdef InternalStatistics < handle
                 index_function = @Diversity.SIMPSON_INDEX;
             end
             
-            assert(length(row_class)==obj.bipweb.modules.n_rows);
+            assert(length(row_class)==obj.bipweb.community.n_rows);
             
-            modul = obj.bipweb.modules;
+            modul = obj.bipweb.community;
 
             obj.row_class = row_class;
             
@@ -165,9 +167,9 @@ classdef InternalStatistics < handle
                 index_function = @Diversity.SIMPSON_INDEX;
             end
             
-            assert(length(col_class)==obj.bipweb.modules.n_cols);
+            assert(length(col_class)==obj.bipweb.community.n_cols);
             
-            modul = obj.bipweb.modules;
+            modul = obj.bipweb.community;
             
             obj.col_class = col_class;
             
@@ -226,16 +228,21 @@ classdef InternalStatistics < handle
                 null_model = Options.DEFAULT_NULL_MODEL;
             end
             
-            module = obj.bipweb.modules;
+            module = obj.bipweb.community;
             obj.module_networks = module.ExtractCommunityModules();
+            
+            if(~isempty(obj.idx_to_focus_on))
+                obj.module_networks = obj.module_networks(obj.idx_to_focus_on);
+            end
             
             gp = MetaStatistics(obj.module_networks);
             gp.replicates = n_trials;
             gp.null_model = null_model;
-            gp.modularity_algorithm = str2func(class(obj.bipweb.modules));
-            gp.do_ntc = 1; % Perform NTC analysis (default)
-            gp.do_modul = 1; % Perform Modularity analysis (default)
-            gp.do_nodf = 1; % Perform NODF analysis
+            gp.modularity_algorithm = str2func(class(obj.bipweb.community));
+            gp.nestedness_algorithm = str2func(class(obj.bipweb.nestedness));
+            
+            gp.do_community = 1; % Perform Modularity analysis (default)
+            gp.do_nestedness = 1; % Perform Nestedness analysis
             gp.DoMetaAnalyisis(); % Perform the analysis.
             
             obj.meta_statistics = gp;
@@ -254,10 +261,10 @@ classdef InternalStatistics < handle
         % object.
             
             if(isempty(obj.module_networks))
-                if(obj.bipweb.modules.done == 0)
-                    obj.bipweb.modules.Detect();
+                if(obj.bipweb.community.done == 0)
+                    obj.bipweb.community.Detect();
                 end
-                value = obj.bipweb.modules.ExtractCommunityModules();
+                value = obj.bipweb.community.ExtractCommunityModules();
             else
                 value = obj.module_networks;
             end
@@ -271,7 +278,7 @@ end
 % EXAUSTIVELLY. THE USER IS FREE TO INCLUDE THEM IF HE WANTS.
 
 % function networks = ExtractCommunityModules(obj)
-%             modul = obj.bipweb.modules;
+%             modul = obj.bipweb.community;
 %             networks = cell(modul.N,1);
 %             for i = 1:modul.N
 %                 idx_rows = find(modul.rr(:,i)==1);
@@ -313,8 +320,8 @@ end
 %         
 %         function nodf = TestNODFModuleContributions(obj)
 %             matrix = obj.bipweb.matrix;
-%             rr = obj.bipweb.modules.rr;
-%             tt = obj.bipweb.modules.tt;
+%             rr = obj.bipweb.community.rr;
+%             tt = obj.bipweb.community.tt;
 %             
 %             [n_rows n_cols] = size(matrix);
 %             

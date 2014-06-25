@@ -9,14 +9,11 @@
 %     biweb - Bipartite object that an object of the class will reference to
 %     n_rows - Number of row nodes
 %     n_cols - Number of column nodes
-%     use_type_interaction - Flag to color cells according to weight (only if discrete)
-%     use_module_format - Flag to give appropiate color format to modules
 %     row_labels - Text labels for row nodes
 %     col_labels - Text labels for column nodes
 %     use_labels - Flag that indicate the use of text labels
 %     font_size - Font size for text labels. Change according to network size
 %     colors - Colors used for draw modules
-%     color_interactions - Color of interactions. Used only if use_type_interaction = true
 %     interpreter - none or latex for text labels
 %     ax - Axis of the plot
 %   MATRIX LAYOUT
@@ -26,8 +23,10 @@
 %     isocline_color - Color of the isocline
 %     division_color - Color used for the division of the modules
 %     line_width - Line width used in the isocline
-%     plot_iso_modules - Flag that indicate the plotting of the isocline inside modules
 %     use_isocline - Flag that indicated the plotting of isocline in a nested graph
+%     color_interactions - Color of interactions. Used only if use_type_interaction = true
+%     use_module_format - Flag to give appropiate color format to modules
+%     use_type_interaction - Flag to color cells according to weight (only if discrete)
 %   GRAPH LAYOUT
 %     radius - Radius of the nodes for graph layouts.
 %     vertical_margin - Vertical margin between nodes for graph layouts.
@@ -67,14 +66,11 @@ classdef PlotWebs < handle;
         biweb                = {};       % Bipartite object that an object of the class will reference to
         n_rows               = [];       % Number of row nodes
         n_cols               = [];       % Number of column nodes
-        use_type_interaction = false;    % Flag to color cells according to weight (only if discrete)
-        use_module_format    = true;     % Flag to give appropiate color format to modules
         row_labels           = {};       % Text labels for row nodes
         col_labels           = {};       % Text labels for column nodes
         use_labels           = true;     % Flag that indicate the use of text labels
         font_size            = 5;        % Font size for text labels. Change according to network size.
         colors               = [];       % Colors used for draw modules.
-        color_interactions   = [];       % Color of interactions. Used only if use_type_interaction = true
         interpreter          = 'none';   % none or latex for text labels.
         ax                   = 'image';  % Axis of the plot.
         
@@ -94,9 +90,11 @@ classdef PlotWebs < handle;
         isocline_color       = 'red';    % Color of the isocline
         division_color       = 'blue';   % Color used for the division of the modules
         line_width           = 1.5;      % Line width used in the isocline
-        plot_iso_modules     = true;     % Flag that indicate the plotting of the isocline inside modules
         use_isocline         = true;     % Flag that indicated the plotting of isocline in a nested graph
-        
+        color_interactions   = [];       % Color of interactions. Used only if use_type_interaction = true
+        use_type_interaction = false;    % Flag to color cells according to weight (only if discrete)
+        use_module_format    = true;     % Flag to give appropiate color format to modules
+
     end
     
     properties(Access = 'protected')
@@ -116,7 +114,7 @@ classdef PlotWebs < handle;
         bead_color_rows       = [1 0 0]; % Color of the row nodes.
         bead_color_columns    = [0 0 1]; % Color of the column nodes.
         link_color            = [0 0 0]; % Color of the links.
-        link_width            = 1.0;     % Edge width
+        link_width            = 0.75;     % Edge width
         
     end
     
@@ -241,15 +239,15 @@ classdef PlotWebs < handle;
             if(isempty(obj.biweb))
                 obj.biweb = Bipartite(obj.matrix);
             end
-            if(obj.biweb.modules.done == 0)
-                obj.biweb.modules.Detect();
+            if(obj.biweb.community.done == 0)
+                obj.biweb.community.Detect();
             end
             
-            obj.index_rows = obj.biweb.modules.index_rows;
-            obj.index_cols = flipud(obj.biweb.modules.index_cols);
+            obj.index_rows = obj.biweb.community.index_rows;
+            obj.index_cols = flipud(obj.biweb.community.index_cols);
             
-            row_mod = obj.biweb.modules.row_modules(obj.index_rows);
-            col_mod = obj.biweb.modules.col_modules(obj.index_cols);
+            row_mod = obj.biweb.community.row_modules(obj.index_rows);
+            col_mod = obj.biweb.community.col_modules(obj.index_cols);
             
             local_matrix = obj.matrix(obj.index_rows,obj.index_cols);
             n_col = length(obj.colors);
@@ -260,23 +258,24 @@ classdef PlotWebs < handle;
                     if(local_matrix(i,j)==1 && row_mod(i)~=col_mod(j))
                         plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.link_color,'LineWidth',obj.link_width);
                     end
-                end
-            end
-            for i = 1:obj.n_rows
-                for j = 1:obj.n_cols
+                    
                     if(local_matrix(i,j)==1 && row_mod(i)==col_mod(j))
-                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.colors(mod(row_mod(i),n_col),:),'LineWidth',obj.link_width);
+                        idx_col = mod(row_mod(i),n_col); if(idx_col==0); idx_col = n_col; end;
+                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.colors(idx_col,:),'LineWidth',obj.link_width);
                     end
+                    
                 end
             end
             hold off;
             
             for i = 1:obj.n_rows
-                obj.DrawCircle(x1,obj.row_pos(i),obj.colors(mod(row_mod(i),n_col),:));
+                idx_col = mod(row_mod(i),n_col); if(idx_col==0); idx_col = n_col; end;
+                obj.DrawCircle(x1,obj.row_pos(i),obj.colors(idx_col,:));
             end
             
             for j = 1:obj.n_cols
-                obj.DrawCircle(x2,obj.col_pos(j),obj.colors(mod(col_mod(j),n_col),:));
+                idx_col = mod(col_mod(j),n_col); if(idx_col==0); idx_col = n_col; end;
+                obj.DrawCircle(x2,obj.col_pos(j),obj.colors(idx_col,:));
             end
             
             obj.ApplyBasicBFormat();
@@ -352,15 +351,15 @@ classdef PlotWebs < handle;
             if(isempty(obj.biweb))
                 obj.biweb = Bipartite(obj.matrix);
             end
-            if(obj.biweb.modules.done == 0)
-                obj.biweb.modules.Detect();
+            if(obj.biweb.community.done == 0)
+                obj.biweb.community.Detect();
             end
             
-            obj.index_rows = obj.biweb.modules.index_rows;
-            obj.index_cols = obj.biweb.modules.index_cols;
+            obj.index_rows = obj.biweb.community.index_rows;
+            obj.index_cols = obj.biweb.community.index_cols;
             
-            row_mod = obj.biweb.modules.row_modules(obj.index_rows);
-            col_mod = obj.biweb.modules.col_modules(obj.index_cols);
+            row_mod = obj.biweb.community.row_modules(obj.index_rows);
+            col_mod = obj.biweb.community.col_modules(obj.index_cols);
             
             local_matrix = obj.webmatrix(obj.index_rows,obj.index_cols);
             n_col = length(obj.colors);
@@ -368,13 +367,14 @@ classdef PlotWebs < handle;
             start_y = 1;
             start_x = obj.n_cols;
             
-            for i = 1:obj.biweb.modules.N
+            for i = 1:obj.biweb.community.N
                
                 dx = length(find(col_mod==i));
                 dy = length(find(row_mod==i));
                 if(dx>0 && dy>0)
                     if(obj.use_module_format)
-                        obj.MakeDivision(start_y+dy-1,start_x-dx+1,dy,dx,obj.colors(mod(i,n_col)+1,:),obj.back_color);
+                        idx_col = mod(i,n_col); if(idx_col==0); idx_col = n_col; end;
+                        obj.MakeDivision(start_y+dy-1,start_x-dx+1,dy,dx,obj.colors(idx_col,:),obj.back_color);
                     else
                         obj.MakeDivision(start_y+dy-1,start_x-dx+1,dy,dx,obj.division_color,obj.back_color);
                     end
@@ -398,7 +398,8 @@ classdef PlotWebs < handle;
                             end
                         else
                             if(row_mod(i)==col_mod(j))
-                                obj.DrawCell(i,j,obj.colors(mod(row_mod(i),n_col)+1,:));
+                                idx_col = mod(row_mod(i),n_col); if(idx_col==0); idx_col = n_col; end;
+                                obj.DrawCell(i,j,obj.colors(idx_col,:));
                             else
                                 obj.DrawCell(i,j,obj.cell_color);
                             end
@@ -409,13 +410,13 @@ classdef PlotWebs < handle;
 
             end
 
-            if(obj.plot_iso_modules)
-                matrices = obj.biweb.modules.ExtractCommunityMatrices();
+            if(obj.use_isocline)
+                matrices = obj.biweb.community.ExtractCommunityMatrices();
                 start_y = obj.n_rows;
                 start_x = obj.n_cols;
                 hold on;
 
-                for i = 1:obj.biweb.modules.N
+                for i = 1:obj.biweb.community.N
 
                     dx = length(find(col_mod==i));
                     dy = length(find(row_mod==i));
@@ -430,7 +431,8 @@ classdef PlotWebs < handle;
                     p = plot(start_x-dx+x,start_y-dy+y);
                     %p = plot(x,y);
                     if(obj.use_module_format)
-                        set(p,'Color',obj.colors(mod(i,n_col)+1,:),'LineWidth',obj.line_width);
+                        idx_col = mod(i,n_col); if(idx_col==0); idx_col = n_col; end;
+                        set(p,'Color',obj.colors(idx_col,:),'LineWidth',obj.line_width);
                     else
                         set(p,'Color',obj.isocline_color,'LineWidth',obj.line_width);
                     end
@@ -452,22 +454,23 @@ classdef PlotWebs < handle;
     % PROTECTED METHODS
     methods(Access = 'protected')
         function obj = StartUp(obj)
-            obj.colors = colormap('jet');
+            obj.colors = colormap(jet(64));%colormap('jet');
             obj.colors = obj.colors([23,2,13,42,57,20,15,11,9,16,3,28,26,24,46,59,41,18,56,40,17,48,27,53,6,62,5,60,14,32,64,19,36,58,39,21,4,8,35,30,50,63,25,51,55,34,61,37,47,44,54,43,38,12,52,33,31,1,22,29,10,45,49,7],:);
+            obj.color_interactions = obj.colors;
             obj.color_interactions(1,:) = [1 0 0];
             obj.color_interactions(2,:) = [0 0 1];
             
             
            
             %Delete This section thereafter--------------------------
-            obj.color_interactions(1,:) = [0 255 255]/255;
-            obj.color_interactions(2,:) = [0 160 160]/255;
-            obj.color_interactions(3,:) = [0 80 80]/255;
-            obj.colors(2,:) = [0    0.7500    1.0000];
-            obj.colors(3,:) = [1.0000    0.8750         0];
-            obj.colors(4,:) = [186,85,211]/255;
-            obj.colors(5,:) = [255,165,0]/255;
-            obj.colors(6,:) = [34 139 34]/255;
+%             obj.color_interactions(1,:) = [0 255 255]/255;
+%             obj.color_interactions(2,:) = [0 160 160]/255;
+%             obj.color_interactions(3,:) = [0 80 80]/255;
+%             obj.colors(2,:) = [0    0.7500    1.0000];
+%             obj.colors(3,:) = [1.0000    0.8750         0];
+%             obj.colors(4,:) = [186,85,211]/255;
+%             obj.colors(5,:) = [255,165,0]/255;
+%             obj.colors(6,:) = [34 139 34]/255;
             %--------------------------------------------------------
             
             obj.FillPositions();

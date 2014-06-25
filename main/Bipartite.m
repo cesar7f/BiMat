@@ -7,7 +7,7 @@ classdef Bipartite < handle
     % Bipartite Properties:
     %    webmatrix - Interaction matrix (not neccesearly a binary matrix).
     %    matrix - Adjacency matrix (binary matrix)
-    %    modules - Instance of the modularity algorithm
+    %    community - Instance of the modularity algorithm
     %    nestedness - Instance of a nestedness algorithm
     %    n_edges - Number of edges
     %    connectance - Fill of the webmatrix
@@ -25,6 +25,7 @@ classdef Bipartite < handle
     %    row_class - Id's of the row classes
     %    col_class - Id's of the col classes.
     %    internal_statistics - Instance of the class InternalStatistics.m for multi-scale analysis.
+    %    print_results - Flag to indicate if result output will be generated
     %
     % Bipartite Methods:
     %    Bipartite - Main constructor
@@ -33,9 +34,10 @@ classdef Bipartite < handle
         matrix                = []; % Adjacency matrix (binary matrix)
         % Instance of the modularity algorithm. 
         % See also AdaptiveBrim, LeadingEigenvector, and LPBrim
-        modules               = {}; 
-        nodf                  = {}; % Instance of a NODF nestedness algorithm
-        ntc                   = {}; % Instance of a NTC nestedness algorithm
+        community               = {}; 
+        % Instance of the nestedness algorithm. 
+        % See also NestednessNTC, NestednessNODF
+        nestedness            = {}; 
         n_edges               = 0;  % Number of edges
         connectance           = 0;  % Fill of the webmatrix
         n_rows                = 0;  % Number of rows
@@ -52,6 +54,7 @@ classdef Bipartite < handle
         row_class             = []; % Id's of the row nodes
         col_class             = []; % Id's of the col nodes.
         internal_statistics   = {}; % Instance of the class InternalStatistics.m for multi-scale analysis.
+        print_results         = Options.PRINT_RESULTS % Flag to indicate if result output will be generated
     end
     
     methods
@@ -99,11 +102,10 @@ classdef Bipartite < handle
             obj.col_degrees = sum(obj.matrix,1)';
             
             %Nestedness
-            obj.nodf = NestednessNODF(obj.matrix);
-            obj.ntc = NestednessNTC(obj.matrix);
+            obj.nestedness = Options.NESTEDNESS_ALGORITHM(obj.webmatrix);
             
             %Modularity
-            obj.modules = Options.MODULARITY_ALGORITHM(obj.webmatrix);
+            obj.community = Options.MODULARITY_ALGORITHM(obj.webmatrix);
             
             %Statistical tests
             obj.statistics = StatisticalTest(obj);
@@ -128,6 +130,8 @@ classdef Bipartite < handle
             
         end
         
+        
+        
     end
        
     % SET/GET methods
@@ -139,6 +143,14 @@ classdef Bipartite < handle
             end
             value = obj.plotter;
         end
+        
+%         function obj = set.print_results(obj,value)
+%             The plotter is created the first time than is called
+%             if(~isempty(obj.community))
+%                 obj.community.print_results = value;
+%             end
+%             value = obj.plotter;
+%         end
     end
     
 end

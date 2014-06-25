@@ -26,7 +26,8 @@
 %    col_modules - Module index for columns
 %    done - The algorithm has been performed
 %    webmatrix - Same than matrix but not neccesearly boolean.
-%
+%    optimize_by_component - Otimize modularity by component, nor by the entire network.
+%    print_results - Flag to indicate if result output will be generated
 %
 % BipartiteModularity Methods:
 %    Detect - Main modularity detection method
@@ -67,6 +68,7 @@ classdef BipartiteModularity < handle
         done                 = 0;   %The algorithm has been performed
         webmatrix            = [];  %Same than matrix but not neccesearly boolean.
         optimize_by_component= 0;   %Otimize modularity by component, nor by the entire network.
+        print_results        = Options.PRINT_RESULTS % Flag to indicate if result output will be generated
     end
     
     properties(Access = protected) %Used for calculating modularity in a single graph component
@@ -325,6 +327,10 @@ classdef BipartiteModularity < handle
             
             obj.done = 1;
             
+            if(obj.print_results)
+                obj.Print();
+            end
+            
         end
         
        
@@ -404,11 +410,11 @@ classdef BipartiteModularity < handle
         %   STR = Print(obj, FILE) Print the modularity information to screen and
         %   text file FILE and return this information to the string STR
             
-            str = 'Modularity\n';
-            str = [str, '\tUsed algorithm:             \t', sprintf('%16s',class(obj)), '\n'];
-            str = [str, '\tN (Number of modules):      \t', sprintf('%16i',obj.N), '\n'];
-            str = [str, '\tQb (Standard metric):       \t', sprintf('%16.4f',obj.Qb), '\n'];
-            str = [str, '\tQr (Ratio of int/ext inter):\t', sprintf('%16.4f',obj.Qr), '\n'];
+            str = 'Modularity:\n';
+            str = [str, '\tUsed algorithm:             \t', sprintf('%20s',class(obj)), '\n'];
+            str = [str, '\tN (Number of modules):      \t', sprintf('%20i',obj.N), '\n'];
+            str = [str, '\tQb (Standard metric):       \t', sprintf('%20.4f',obj.Qb), '\n'];
+            str = [str, '\tQr (Ratio of int/ext inter):\t', sprintf('%20.4f',obj.Qr), '\n'];
             
             fprintf(str);  
             
@@ -560,6 +566,7 @@ classdef BipartiteModularity < handle
         %   information in modul.
             
             modul = AdaptiveBrim(matrix);
+            modul.print_results = false;
             modul.Detect();
             modul.Print();
             
@@ -575,6 +582,7 @@ classdef BipartiteModularity < handle
         %   information in modul.    
         
             modul = AdaptiveBrim(matrix);
+            modul.print_results = false;
             modul.Detect();
             modul.Print();
             
@@ -590,6 +598,7 @@ classdef BipartiteModularity < handle
         %   information in modul. 
         
             modul = LeadingEigenvector(matrix);
+            modul.print_results = false;
             modul.Detect();
             modul.Print();
             

@@ -3,6 +3,11 @@ classdef Options
 % BiMat include optional arguments. When those optional arguments are
 % specified by the user, the values in this class are used instead.
     
+    %General
+    properties(Constant)
+        PRINT_RESULTS = true; % Call the print method of any instance that is called (i.e. print modularity output after calling the BipartiteModularity.Detect() method).
+    end
+
     %Statistical TEST
     properties(Constant)
         %These values are used for testing for significance
@@ -26,6 +31,9 @@ classdef Options
         % Modularity default algorithm. See also: AdaptiveBrim,
         % LPBrim, LeadingEigenvector
         MODULARITY_ALGORITHM = @AdaptiveBrim; % Modularity default algorithm.
+        % Nestedness default algorithm. See also: NestednessNTC,
+        % NestednessNODF
+        NESTEDNESS_ALGORITHM = @NestednessNODF;
         TRIALS_MODULARITY = 20; %Number of random restarts for AdaptiveBrim and LPBrim algorithms. LeadingEigenvector is deterministic and therefore does not use this variable.
     end
     

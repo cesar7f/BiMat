@@ -11,14 +11,18 @@
 %     z_value - z-value for plotting random value bars and significance
 %     use_labels - Flag that indicate the use of text labels
 %     font_size - Font size for text labels. Change according to number of rows and columns.
-%     nest_test - 1 - for NTC, 2 - for NODF during graph and plot layout.
 %     do_test_in_plots - Color labels according to statistical significance.
 %     idx_to_be_ploted - Indexes of the networks that will be plotted
+%     use_type_interaction - Color interactions according to integer value (type)
 %   MATRIX LAYOUT
 %     cell_color - Cell color
 %     back_color - Back color
 %     line_width - Line width used in the isocline
 %     use_isocline - Flag that indicated the plotting of isocline in a nested graph
+%     isocline_color - Color of the isoclines
+%     colors - Spefic color for each matrix
+%     use_specific_colors - Use specific color for each matrix
+%     use_module_format - Flag to give appropiate color format to modules
 %   GRAPH LAYOUT
 %     radius - Radius of the nodes for graph layouts.
 %     vertical_margin - Vertical margin between nodes for graph layouts.
@@ -30,8 +34,7 @@
 %
 % PlotWebs Methods:
 %     MetaStatisticsPlotter - Main Constructor
-%     PlotNTCValues - Plot NTC nestedness values
-%     PlotNODFValues - Plot NODF nestedness values
+%     PlotNestednessValues - Plot Nestedness values
 %     PlotModularValues - Plot modularity values
 %     PlotMatrices - Plot all the networks in matrix layout in original sorting
 %     PlotNestedMatrices - Plot all the networks in matrix layout in nested sorting
@@ -42,7 +45,7 @@
 %     
 % See also:
 %    PlotWebs, GroupStatistics
-classdef MetaStatisticsPlotter;
+classdef MetaStatisticsPlotter < handle;
    
     % GENERAL
     properties
@@ -50,10 +53,10 @@ classdef MetaStatisticsPlotter;
         p_value               = Options.P_VALUE; % p-value for plotting random value bars and significance
         z_value               = Options.Z_VALUE; % z-value for plotting random value bars and significance
         use_labels            = false;    % Flag that indicate the use of text labels
-        font_size             = 10;       % Font size for text labels. Change according to number of rows and columns.
-        nest_test             = 1;        % 1 - for NTC, 2 - for NODF during graph and plot layout.
+        font_size             = 12;       % Font size for text labels. Change according to number of rows and columns.
         do_test_in_plots      = true;     % Color labels according to statistical significance.
         idx_to_be_ploted      = [];       % Indexes of the networks that will be plotted
+        use_type_interaction  = false;    % Color interactions according to integer value (type)
     end
     
     % MATRIX LAYOUT
@@ -62,6 +65,10 @@ classdef MetaStatisticsPlotter;
         back_color            = [1 1 1];  % Back color
         line_width            = 1.5;      % Line width used in the isocline
         use_isocline          = true;     % Flag that indicated the plotting of isocline in a nested graph
+        isocline_color        = 'red';    % Color of the isoclines
+        colors                = {};       % Spefic color for each matrix
+        use_specific_colors   = false;    % Use specific color for each matrix
+        use_module_format     = true;     % Flag to give color to modules
     end
     
     % GRAPH LAYOUT
@@ -89,49 +96,27 @@ classdef MetaStatisticsPlotter;
             
         end
         
-        function obj = PlotNTCValues(obj,pvalue)
-        % PlotNTCValues - Plot NTC nestedness values
+        function obj = PlotNestednessValues(obj,pvalue)
+        % PlotNestednessValues - Plot PlotNestednessValues nestedness values
         %
-        %   obj = PlotNTCValues(obj) Plot NTC and random
+        %   obj = PlotNestednessValues(obj) Plot Nestedness and random
         %   expectation values for all the networks that are being
         %   analyzed using a double tail p-value defined on obj.p_value
         %
-        %   obj = PlotNTCValues(obj,P_VAL) Plot NTC and random
+        %   obj = PlotNestednessValues(obj,P_VAL) Plot Nestedness and random
         %   expectation values for all the networks that are being
         %   analyzed using a double tail p-value defined on P_VAL.
         
             if(nargin == 1)
-                obj.PlotValues(obj.meta_statistics.ntc_values.value, obj.meta_statistics.ntc_values.random_values);
+                obj.PlotValues(obj.meta_statistics.N_values.value, obj.meta_statistics.N_values.random_values);
             else
-                obj.PlotValues(obj.meta_statistics.ntc_values.value, obj.meta_statistics.ntc_values.random_values,pvalue);
+                obj.PlotValues(obj.meta_statistics.N_values.value, obj.meta_statistics.N_values.random_values,pvalue);
             end
             %Labels in title, y-axis and legends
-            legend('Measured NTC','Random expectation',1,'Location','NorthWest');
+            legend('Measured Nestedness','Random expectation',1,'Location','NorthWest');
             legend('boxoff')
-            ylabel('Nestedness (NTC)','fontsize',16);
+            ylabel('Nestedness (N)','fontsize',18);
 
-        end
-        
-        function obj = PlotNODFValues(obj,pvalue)
-        % PlotNODFValues - Plot NODF nestedness values
-        %
-        %   obj = PlotNODFValues(obj) Plot NODF and random
-        %   expectation values for all the networks that are being
-        %   analyzed using a double tail p-value defined on obj.p_value
-        %
-        %   obj = PlotNODFValues(obj,P_VAL) Plot NODF and random
-        %   expectation values for all the networks that are being
-        %   analyzed using a double tail p-value defined on P_VAL.     
-        
-            if(nargin==1)
-                obj.PlotValues(obj.meta_statistics.nodf_values.value, obj.meta_statistics.nodf_values.random_values);
-            else
-                obj.PlotValues(obj.meta_statistics.nodf_values.value, obj.meta_statistics.nodf_values.random_values,pvalue);
-            end
-            %Labels in title, y-axis and legends
-            legend('Measured NODF','Random expectation',1,'Location','NorthWest');
-            legend('boxoff')
-            ylabel('Nestedness (NODF)','fontsize',16);
         end
         
         function obj = PlotModularValues(obj,pvalue)
@@ -146,15 +131,15 @@ classdef MetaStatisticsPlotter;
         %   analyzed using a double tail p-value defined on P_VAL.     
         
             if(nargin==1)
-                obj.PlotValues(obj.meta_statistics.qb_values.value, obj.meta_statistics.qb_values.random_values);
+                obj.PlotValues(obj.meta_statistics.Qb_values.value, obj.meta_statistics.Qb_values.random_values);
             else
-                obj.PlotValues(obj.meta_statistics.qb_values.value, obj.meta_statistics.qb_values.random_values,pvalue);
+                obj.PlotValues(obj.meta_statistics.Qb_values.value, obj.meta_statistics.Qb_values.random_values,pvalue);
             end
             
             %Labels in title, y-axis and legends
             legend('Measured Modularity','Random expectation',1,'Location','NorthWest');
             legend('boxoff');
-            ylabel('Modularity (Q)','fontsize',16);
+            ylabel('Modularity (Q)','fontsize',18);
         end
         
         
@@ -179,17 +164,28 @@ classdef MetaStatisticsPlotter;
                 n_cols = ceil(obj.meta_statistics.n_networks/n_rows);
             end
             
-            clf;
+            cla;
             obj.FormatPlotters();
             
+            n_colors = size(obj.colors,1);
             for i = 1:obj.meta_statistics.n_networks
                 subplot(n_rows, n_cols, i);
                 obj.meta_statistics.networks{i}.plotter.use_labels = 0;
                 obj.meta_statistics.networks{i}.plotter.PlotMatrix();
-                title(obj.meta_statistics.names{i}, 'FontSize',10);
+                title(obj.meta_statistics.names{i}, 'FontSize',obj.font_size);
+                
+                if(~isempty(obj.colors) && obj.use_specific_colors)
+                    idx_col = mod(i,n_colors); if(idx_col==0); idx_col = n_colors; end;
+                    set(gca,'ycolor',obj.colors(idx_col,:));
+                    set(gca,'xcolor',obj.colors(idx_col,:));
+                end
             end
             
+           
+            
             set(gcf,'Position', [148         213        1142         746]);
+            
+            
 
         end
         
@@ -217,17 +213,13 @@ classdef MetaStatisticsPlotter;
                 pvalue = obj.p_value;   
             end
             
-            if(obj.nest_test == 1)
-                sig_indices = obj.meta_statistics.ntc_values.percentile >= 100*(1-pvalue/2.0);
-                no_sig_indices = obj.meta_statistics.ntc_values.percentile <= 50*pvalue;
-            elseif(obj.nest_test == 2)
-                sig_indices = obj.meta_statistics.nodf_values.percentile >= 100*(1-pvalue/2.0);
-                no_sig_indices = obj.meta_statistics.nodf_values.percentile <= 50*pvalue;
-            end
+            sig_indices = obj.meta_statistics.N_values.percentile > 100*(1-pvalue/2.0);
+            no_sig_indices = obj.meta_statistics.N_values.percentile < 50*pvalue;
             
-            clf;
+            cla;
             obj.FormatPlotters();
             
+            n_colors = size(obj.colors,1);
             for i = 1:obj.meta_statistics.n_networks
                 subplot(n_rows, n_cols, i);
                 obj.meta_statistics.networks{i}.plotter.use_labels = 0; %Do not show row/column labels
@@ -243,7 +235,13 @@ classdef MetaStatisticsPlotter;
                     end
                 end
                 
-                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',10);
+                if(~isempty(obj.colors) && obj.use_specific_colors)
+                    idx_col = mod(i,n_colors); if(idx_col==0); idx_col = n_colors; end;
+                    set(gca,'ycolor',obj.colors(idx_col,:));
+                    set(gca,'xcolor',obj.colors(idx_col,:));
+                end
+                
+                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',obj.font_size);
             end
             set(gcf,'Position', [148         213        1142         746]);
         end
@@ -273,17 +271,20 @@ classdef MetaStatisticsPlotter;
                 pvalue = obj.p_value;   
             end
             
-            sig_indices = obj.meta_statistics.qb_values.percentile >= 100*(1-pvalue/2.0);
-            no_sig_indices = obj.meta_statistics.qb_values.percentile <= 50*pvalue;
+            sig_indices = obj.meta_statistics.Qb_values.percentile >= 100*(1-pvalue/2.0);
+            no_sig_indices = obj.meta_statistics.Qb_values.percentile <= 50*pvalue;
             
-            clf;
+            cla;
             obj.FormatPlotters();
             
+            n_colors = size(obj.colors,1);
             for i = 1:obj.meta_statistics.n_networks
                 subplot(n_rows, n_cols, i);
                 obj.meta_statistics.networks{i}.plotter.use_labels = 0; %Do not show row/column labels
-                obj.meta_statistics.networks{i}.plotter.plot_iso_modules = 0;%No isocline inside modules
+                %tmp = obj.meta_statistics.networks{i}.plotter.use_isocline;
+                %obj.meta_statistics.networks{i}.plotter.use_isocline = 0;%No isocline inside modules
                 obj.meta_statistics.networks{i}.plotter.PlotModularMatrix();
+                %obj.meta_statistics.networks{i}.plotter.use_isocline = tmp;
                 col = 'black'; % Color for not significance
                 
                 if(obj.do_test_in_plots == 1)
@@ -294,7 +295,12 @@ classdef MetaStatisticsPlotter;
                     end
                 end
                 
-                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',10);
+                if(~isempty(obj.colors) && obj.use_specific_colors)
+                    idx_col = mod(i,n_colors); if(idx_col==0); idx_col = n_colors; end;
+                    set(gca,'ycolor',obj.colors(idx_col,:));
+                    set(gca,'xcolor',obj.colors(idx_col,:));
+                end
+                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',obj.font_size);
             end
             set(gcf,'Position', [148         213        1142         746]);
 
@@ -321,14 +327,14 @@ classdef MetaStatisticsPlotter;
                 n_cols = ceil(obj.meta_statistics.n_networks/n_rows);
             end
             
-            clf;
+            cla;
             obj.FormatPlotters();
             
             for i = 1:obj.meta_statistics.n_networks
                 subplot(n_rows, n_cols, i);
                 obj.meta_statistics.networks{i}.plotter.use_labels = 0;
                 obj.meta_statistics.networks{i}.plotter.PlotGraph();
-                title(obj.meta_statistics.names{i}, 'FontSize',10);
+                title(obj.meta_statistics.names{i}, 'FontSize',obj.font_size);
             end
             
             set(gcf,'Position', [148         213        1142         746]);
@@ -361,15 +367,10 @@ classdef MetaStatisticsPlotter;
                 pvalue = obj.p_value;   
             end
             
-            if(obj.nest_test == 1)
-                sig_indices = obj.meta_statistics.ntc_values.percentile >= 100*(1-pvalue/2.0);
-                no_sig_indices = obj.meta_statistics.ntc_values.percentile <= 50*pvalue;
-            elseif(obj.nest_test == 2)
-                sig_indices = obj.meta_statistics.nodf_values.percentile >= 100*(1-pvalue/2.0);
-                no_sig_indices = obj.meta_statistics.nodf_values.percentile <= 50*pvalue;
-            end
+            sig_indices = obj.meta_statistics.N_values.percentile >= 100*(1-pvalue/2.0);
+            no_sig_indices = obj.meta_statistics.N_values.percentile <= 50*pvalue;
                 
-            clf;
+            cla;
             obj.FormatPlotters();
             
             for i = 1:obj.meta_statistics.n_networks
@@ -386,7 +387,7 @@ classdef MetaStatisticsPlotter;
                     end
                 end
                 
-                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',10);
+                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',obj.font_size);
             end
             set(gcf,'Position', [148         213        1142         746]);
         end
@@ -417,9 +418,9 @@ classdef MetaStatisticsPlotter;
                 pvalue = obj.p_value;   
             end
             
-            sig_indices = obj.meta_statistics.qb_values.percentile >= 100*(1-pvalue/2.0);
-            no_sig_indices = obj.meta_statistics.qb_values.percentile <= 50*pvalue;
-            clf;
+            sig_indices = obj.meta_statistics.Qb_values.percentile >= 100*(1-pvalue/2.0);
+            no_sig_indices = obj.meta_statistics.Qb_values.percentile <= 50*pvalue;
+            cla;
             obj.FormatPlotters();
             for i = obj.idx_to_be_ploted 
                 subplot(n_rows, n_cols, i);
@@ -434,7 +435,7 @@ classdef MetaStatisticsPlotter;
                     end
                 end
                 
-                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',10);
+                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',obj.font_size);
             end
             set(gcf,'Position', [148         213        1142         746]);
         end
@@ -445,7 +446,7 @@ classdef MetaStatisticsPlotter;
     end
     
     methods(Access = 'protected')
-        
+                
         function obj = FormatPlotters(obj)
         % FormatPlotters - Format all the PlotWeb objects with the format
         % of the current MetaStatisticsPlotter object.
@@ -453,22 +454,38 @@ classdef MetaStatisticsPlotter;
         %   obj = FormatPlotters(obj) Format all the PlotWeb objects with the format
         %   of the current MetaStatisticsPlotter object.
         
-
+            n_colors = length(obj.colors); 
             for i = 1:obj.meta_statistics.n_networks
                
                 obj.meta_statistics.networks{i}.plotter.cell_color = obj.cell_color;
                 obj.meta_statistics.networks{i}.plotter.back_color = obj.back_color;
                 obj.meta_statistics.networks{i}.plotter.line_width = obj.line_width;
+                obj.meta_statistics.networks{i}.plotter.isocline_color = obj.isocline_color;
                 obj.meta_statistics.networks{i}.plotter.use_labels = obj.use_labels;
                 obj.meta_statistics.networks{i}.plotter.font_size = obj.font_size;
+                obj.meta_statistics.networks{i}.plotter.use_type_interaction = obj.use_type_interaction;                
                 obj.meta_statistics.networks{i}.plotter.use_isocline = obj.use_isocline;
+                
                 obj.meta_statistics.networks{i}.plotter.vertical_margin = obj.vertical_margin;
                 obj.meta_statistics.networks{i}.plotter.horizontal_proportion = obj.horizontal_proportion;
                 obj.meta_statistics.networks{i}.plotter.bead_color_rows = obj.bead_color_rows;
-                
+                obj.meta_statistics.networks{i}.plotter.use_module_format = obj.use_module_format;
                 obj.meta_statistics.networks{i}.plotter.bead_color_columns = obj.bead_color_columns;
                 obj.meta_statistics.networks{i}.plotter.link_color = obj.link_color;
                 obj.meta_statistics.networks{i}.plotter.link_width = obj.link_width;
+                
+                %Color cells according to specific colors
+                if(~isempty(obj.colors) && obj.use_type_interaction == false && obj.use_specific_colors)
+                    idx_col = mod(i,n_colors); if(idx_col==0); idx_col = n_colors; end;
+                    obj.meta_statistics.networks{i}.plotter.cell_color = obj.colors(idx_col,:);
+                    obj.meta_statistics.networks{i}.plotter.isocline_color = obj.colors(idx_col,:);
+                    obj.meta_statistics.networks{i}.plotter.division_color = obj.colors(idx_col,:);
+                elseif(~isempty(obj.colors) && obj.use_type_interaction == true && obj.use_specific_colors)
+                    idx_col = mod(i,n_colors); if(idx_col==0); idx_col = n_colors; end;
+                    obj.meta_statistics.networks{i}.plotter.isocline_color = obj.colors(idx_col,:);
+                    obj.meta_statistics.networks{i}.plotter.division_color = obj.colors(idx_col,:);
+                end
+                
                 
             end
             
@@ -491,8 +508,10 @@ classdef MetaStatisticsPlotter;
    
             
             if(nargin == 3)
-                pvalue = obj.p_value/2.0;
+                pvalue = obj.p_value;
             end
+            
+            set(gca,'fontsize',obj.font_size)
             
             %pvalue can be at most 1.0
             assert(pvalue <= 1.0);
@@ -500,7 +519,7 @@ classdef MetaStatisticsPlotter;
             sup_limit = 1 - (pvalue/2.0);
             inf_limit = pvalue/2.0;
             
-            [~,sorted_indexes] = sort(values); % I will plot in increasing NTC value
+            [~,sorted_indexes] = sort(values); % I will plot in increasing values
 
             %Get random values and sort according to sorted_indexes
             values = values(sorted_indexes);
@@ -514,7 +533,7 @@ classdef MetaStatisticsPlotter;
             low_bound = random_values(:,round(obj.meta_statistics.replicates * inf_limit));
 
             %Plot the data of the real matrices
-            clf;
+            cla;
             plot(1:obj.meta_statistics.n_networks, values,'o','MarkerFaceColor','red','MarkerEdgeColor','red');
             hold on;
             %Plot the data of the random values

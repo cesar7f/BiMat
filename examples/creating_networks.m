@@ -1,5 +1,3 @@
-%% SECTION TITLE
-% DESCRIPTIVE TEXT
 %% BiMat Use case for basic functionalities
 % This use case will introduce the user to the basic functionalities of the
 % BiMat software.
@@ -116,27 +114,6 @@ bp = Reader.READ_ADJACENCY_LIST('input_adja.txt.');
 bp.row_class = row_ids;
 bp.col_class = col_ids;
 
-%%
-% 
-%  PREFORMATTED
-%  TEXT
-% 
-
-%%
-% 
-% $$e^{\pi i} + 1 = 0$$
-% 
-
-%%
-% 
-%   for x = 1:10
-%       disp(x)
-%   end
-% 
-
-% SDFSDAFSDAFSDAFDS ASDF SAFD ASD FASDFSDA ASDFDSAF 
-%%
-% ASDFSAD $x^2+e^{\pi i}$ <http://www.mathworks.com MathWorks>
 
 
 

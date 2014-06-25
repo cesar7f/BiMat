@@ -13,15 +13,10 @@
 %     Journal of Biogeography 2006
 %
 % NestednessNTC Properties:
-%     matrix - Bipartite Adjacency Matrix
 %     T - T emperature
-%     N - Nestedness NTC value
 %     do_geometry - Flag to indicate the calculus of geometry
-%     n_rows - Number of row nodes
-%     n_cols - Number of column nodes
 %     index_rows - Register of the swaps in Rows.
 %     index_cols - Register of the swaps in Cols.
-%     done - Flag to indicate if the algorithm has been performed
 %     connectance - Fill of the matrix
 %     trials - Number of random initializations
 %     do_sorting - Sort the matrix before calculating the temperature
@@ -29,7 +24,6 @@
 % NestednessNTC Methods:
 %     NestednessNTC - Main Constructor
 %     SetMatrix - Change the adjacency matrix of the algorithm
-%     Detect - Main method for calculating NTC Nestedness Temperature Calculator
 %     Print - Print NTC nestedness information
 %     NTC - Calculate the NTC nestedness
 %     PERFECT_NESTED - Return a perfect nested matrix according to the NTC algorithm
@@ -37,19 +31,14 @@
 %     GET_ISOCLINE - Get the isocline function
 %
 % See also:
-%    NestednessNODF
-classdef NestednessNTC < handle
+%    NestednessNODF, Nestedness
+classdef NestednessNTC < Nestedness
 
     properties(GetAccess = 'public', SetAccess = 'protected')
-        matrix             = []    % Bipartite Adjacency Matrix
         T                  = 0;    % T emperature
-        N                  = 0;    % Nestedness NTC value
         do_geometry        = true; % Flag to indicate the calculus of geometry
-        n_rows             = 0;    % Number of row nodes
-        n_cols             = 0;    % Number of column nodes
         index_rows         = [];   % Register of the swaps in Rows.
         index_cols         = [];   % Register of the swaps in Cols.
-        done               = 0;    % Flag to indicate if the algorith has ben performed
         connectance        = 0;    % Fill of the matrix
         trials             = 5;    % Number of random initializations
         do_sorting         = true; % Sort the matrix before calculating the temperature
@@ -97,8 +86,8 @@ classdef NestednessNTC < handle
         %
         % See also:
         %    NestednessNODF
+            obj = obj@Nestedness(bipmatrix);
             
-            obj.matrix = bipmatrix > 0; %Normalize the matrix
             [obj.n_rows, obj.n_cols] = size(obj.matrix);
             obj.connectance = sum(sum(obj.matrix))/(obj.n_rows*obj.n_cols);   
                         
@@ -133,11 +122,41 @@ classdef NestednessNTC < handle
 
         end
 
-        function obj = Detect(obj)
-        % Detect - Main method for calculating NTC nestedness
+        
+        function str = Print(obj,filename)
+        % Print - Print NTC nestedness information
+        %
+        %   STR = Print(obj) Print the NTC information to screen and
+        %   return this information to the string STR
+        %
+        %   STR = Print(obj, FILE) Print the NTC information to screen and
+        %   text file FILE and return this information to the string STR   
+        %
+        % See also: 
+        %   Printer
+            
+            str = 'Nestedness NTC:\n';
+            str = [str, '\tNTC (Nestedness value):     \t', sprintf('%20.4f',obj.N), '\n'];
+            str = [str, '\tT (Temperature value):      \t', sprintf('%20.4f',obj.T), '\n'];
+           
+            fprintf(str);  
+            
+            if(nargin==2)
+                Printer.PRINT_TO_FILE(str,filename);
+            end
+            
+        end
+           
+    end
+
+    % GEOMETRY DEFINITION SECTION
+    methods(Access = 'protected')
+       
+        function obj = RunNestedAlgorithm(obj)
+        % RunNestedAlgorithm - Main method for calculating NTC nestedness
         % Temperature Calculator
         %
-        %   obj = Detect(obj) Calculates the nestedness of the
+        %   obj = RunNestedAlgorithm(obj) Calculates the nestedness of the
         %   matrix. Use obj.N after calling this method to get the
         %   nestedness value, and obj.T for getting the temperature value.
         
@@ -255,36 +274,8 @@ classdef NestednessNTC < handle
            %obj.PrintOutput();
             
         end
-        
-        function str = Print(obj,filename)
-        % Print - Print NTC nestedness information
-        %
-        %   STR = Print(obj) Print the NTC information to screen and
-        %   return this information to the string STR
-        %
-        %   STR = Print(obj, FILE) Print the NTC information to screen and
-        %   text file FILE and return this information to the string STR   
-        %
-        % See also: 
-        %   Printer
-            
-            str = 'Nestedness NTC:\n';
-            str = [str, '\tNTC (Nestedness value):     \t', sprintf('%16.4f',obj.N), '\n'];
-            str = [str, '\tT (Temperature value):      \t', sprintf('%16.4f',obj.T), '\n'];
-           
-            fprintf(str);  
-            
-            if(nargin==2)
-                Printer.PRINT_TO_FILE(str,filename);
-            end
-            
-        end
-           
-    end
 
-    % GEOMETRY DEFINITION SECTION
-    methods(Access = 'protected')
-       
+        
         function obj = CalculateMatrixGeometry(obj)
         % CalculateMatrixGeometry - Calculate all the geometry aspects
         % of the algorithm

@@ -67,12 +67,12 @@ classdef Printer < handle
             for i = 1:n_rows; fprintf(fidedges,'%i\n',i); end;
             for j = 1:n_cols; fprintf(fidedges,'%i\n',j+n_cols); end;
             
-            modules_done = obj.bipweb.modules.done;
+            modules_done = obj.bipweb.community.done;
             
-            row_modul = mod(find(obj.bipweb.modules.rr'==1),obj.bipweb.modules.N);
-            col_modul = mod(find(obj.bipweb.modules.tt'==1),obj.bipweb.modules.N);
-            row_modul = row_modul.*(row_modul>0)+(row_modul==0).*obj.bipweb.modules.N;
-            col_modul = col_modul.*(col_modul>0)+(col_modul==0).*obj.bipweb.modules.N;
+            row_modul = mod(find(obj.bipweb.community.rr'==1),obj.bipweb.community.N);
+            col_modul = mod(find(obj.bipweb.community.tt'==1),obj.bipweb.community.N);
+            row_modul = row_modul.*(row_modul>0)+(row_modul==0).*obj.bipweb.community.N;
+            col_modul = col_modul.*(col_modul>0)+(col_modul==0).*obj.bipweb.community.N;
             
             for i = 1:n_rows
                 for j = 1:n_cols
@@ -170,28 +170,20 @@ classdef Printer < handle
         %   obj = PrintStructureValues(obj,FILE) - Print the structure values
         %   of nestedness and modularity to screen and text file FILE.
         
-            if(obj.bipweb.modules.done == 0)
-                obj.bipweb.modules.Detect();
+            if(obj.bipweb.community.done == 0)
+                obj.bipweb.community.Detect();
             end
             
-            if(obj.bipweb.ntc.done == 0)
-                obj.bipweb.ntc.Detect();
+            if(obj.bipweb.nestedness.done == 0)
+                obj.bipweb.nestedness.Detect();
             end
             
-            str = 'Modularity\n';
-            str = [str, '\tUsed algorithm:             \t', sprintf('%16s',class(obj.bipweb.modules)), '\n'];
-            str = [str, '\tN (Number of modules):      \t', sprintf('%16i',obj.bipweb.modules.N), '\n'];
-            str = [str, '\tQb (Standard metric):       \t', sprintf('%16.4f',obj.bipweb.modules.Qb), '\n'];
-            str = [str, '\tQr (Ratio of int/ext inter):\t', sprintf('%16.4f',obj.bipweb.modules.Qr), '\n'];
-            
-            str = [str, 'Nestedness\n'];
-            str = [str, '\tNODF metric value:          \t', sprintf('%16.4f',obj.bipweb.nodf.N), '\n'];
-            str = [str, '\tNTC metric value:           \t', sprintf('%16.4f',obj.bipweb.ntc.N), '\n'];
-           
-            fprintf(str);  
-            
-            if(nargin==2)
-                Printer.PRINT_TO_FILE(str,filename);
+            if (nargin == 2);
+                obj.bipweb.community.Print(filename);
+                obj.bipweb.nestedness.Print(filename);
+            else
+                obj.bipweb.community.Print();
+                obj.bipweb.nestedness.Print();
             end
             
         end
@@ -209,42 +201,15 @@ classdef Printer < handle
                 obj.bipweb.statistics.TestCommunityStructure();
             end
             
-            if(obj.bipweb.statistics.nodf_done == 0)
-                obj.bipweb.statistics.TestNODF();
+            if(obj.bipweb.statistics.nested_done == 0)
+                obj.bipweb.statistics.TestNestedness();
             end
             
-            if(obj.bipweb.statistics.ntc_done == 0)
-                obj.bipweb.statistics.TestNTC();
+            if (nargin == 2);
+                obj.bipweb.statistics.Print(filename);
+            else
+                obj.bipweb.statistics.Print();
             end
-            
-            str = 'Modularity\n';
-            str = [str, '\t Used algorithm:\t', sprintf('%30s',obj.bipweb.statistics.qb_values.algorithm), '\n'];
-            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.qb_values.null_model)), '\n'];
-            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.qb_values.replicates), '\n'];
-            str = [str, '\t Qb value:      \t', sprintf('%30.4f',obj.bipweb.statistics.qb_values.value), '\n'];
-            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.qb_values.zscore), '\n'];
-            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.qb_values.percentile), '\n'];
-            
-            str = [str, 'NODF Nestedness\n'];
-            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.nodf_values.null_model)), '\n'];
-            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.nodf_values.replicates), '\n'];
-            str = [str, '\t NODF value:    \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_values.value), '\n'];
-            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_values.zscore), '\n'];
-            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.nodf_values.percentile), '\n'];
-            
-            str = [str, 'NTC Nestedness\n'];
-            str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.bipweb.statistics.ntc_values.null_model)), '\n'];
-            str = [str, '\t Replicates:    \t', sprintf('%30i',obj.bipweb.statistics.ntc_values.replicates), '\n'];
-            str = [str, '\t NTC value:     \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_values.value), '\n'];
-            str = [str, '\t z-score:       \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_values.zscore), '\n'];
-            str = [str, '\t percent:       \t', sprintf('%30.4f',obj.bipweb.statistics.ntc_values.percentile), '\n'];
-
-            fprintf(str);  
-            
-            if(nargin==2)
-                Printer.PRINT_TO_FILE(str,filename);
-            end
-            
         end
         
         function PrintStructureStatisticsOfModules(obj,filename)
