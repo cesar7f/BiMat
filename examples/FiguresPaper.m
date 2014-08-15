@@ -185,6 +185,56 @@ classdef FiguresPaper
 
         end
         
+         function bp = CreateFigureMainPaper(bp)
+        % Create all plots show in Figure 5. Due to the randomness in the
+        % algorithms, the figures may not look exactly as in the paper.
+        %
+        % 
+        
+            %Meta Analisis Figure
+            close all;
+            
+            % Do initial analysis if no bipartite object was passed
+            if nargin == 0
+                load moebus_use_case;
+                bp = Bipartite(moebus.weight_matrix);
+                bp.nestedness = NestednessNTC(bp.webmatrix); %Use NTC instead of default (NODF)
+                bp.community = AdaptiveBrim(bp.webmatrix); %Default algorithm
+                bp.community.Detect();
+                %focus only
+                bp.internal_statistics.idx_to_focus_on = 1:15;
+                bp.internal_statistics.TestInternalModules();
+            end
+            bp.plotter.font_size = 2.0;
+            
+            figure(1);
+            bp.plotter.use_module_format = false;
+            bp.plotter.isocline_color = 'black';
+            bp.plotter.division_color = 'black';
+            bp.plotter.link_width = 0.53;
+            bp.plotter.use_labels = false;
+            bp.plotter.PlotModularMatrix();
+            set(gcf,'position',[9    71   902   926]);
+            
+            figure(2);
+            bp.internal_statistics.meta_statistics.plotter.font_size = 16;
+            bp.internal_statistics.meta_statistics.plotter.PlotNestednessValues();
+            set(get(gca,'ylabel'),'fontsize',24)
+            set(gca,'fontsize',16);
+            
+            
+            figure(3);
+            %Plot cell color according to interaction type (strong/weak).
+            bp.internal_statistics.meta_statistics.plotter.use_type_interaction = true;
+            bp.internal_statistics.meta_statistics.plotter.font_size = 16;
+            bp.internal_statistics.meta_statistics.plotter.use_specific_colors = false;
+            bp.internal_statistics.meta_statistics.plotter.colors = bp.plotter.colors;
+            bp.internal_statistics.meta_statistics.plotter.isocline_color = 'black';
+            bp.internal_statistics.meta_statistics.plotter.PlotNestedMatrices();
+            set(gcf,'position',[880   116   951   563]);
+
+        end
+        
     end
     
 end

@@ -227,11 +227,14 @@ classdef MetaStatisticsPlotter < handle;
                 obj.meta_statistics.networks{i}.plotter.PlotNestedMatrix();
                 col = 'black'; % Color for not significance
                 
+                add_text = '';
                 if(obj.do_test_in_plots == 1)
                     if(sig_indices(i) == 1) % Color for significant modularity
                         col = 'red';
+                        add_text = ' (+)';
                     elseif(no_sig_indices(i) == 1)%Color for significant antimodularity 
                         col = 'blue';
+                        add_text = ' (-)';
                     end
                 end
                 
@@ -241,7 +244,8 @@ classdef MetaStatisticsPlotter < handle;
                     set(gca,'xcolor',obj.colors(idx_col,:));
                 end
                 
-                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',obj.font_size);
+                %title(obj.meta_statistics.names{i},'Color',col, 'FontSize',obj.font_size);
+                title([obj.meta_statistics.names{i}, add_text], 'FontSize',obj.font_size);
             end
             set(gcf,'Position', [148         213        1142         746]);
         end
