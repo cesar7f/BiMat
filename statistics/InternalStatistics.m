@@ -35,13 +35,11 @@ classdef InternalStatistics < handle
         col_diversity   = []; % Data structure for col labeling diversity
         row_class       = []; % Labeling of rows
         col_class       = []; % Labeling of columns
+        module_networks = {}; % Cell composed of bipartite network objects which corresponds to the internal modules of biweb
         meta_statistics = {}; % MetaStatistics object that is populated with all modules (communities) inside bipweb
         idx_to_focus_on = []; % Module indexes of where to focus the analysis. If empty all modules are evaluated.
     end
     
-    properties(Dependent)
-        module_networks = {}; % Cell composed of bipartite network objects which corresponds to the internal modules of biweb
-    end
     
     methods
         function obj = InternalStatistics(webbip)
@@ -259,17 +257,17 @@ classdef InternalStatistics < handle
     
     methods
        
-        function value = get.module_networks(obj)
-        % Just a get function to run modularity in case some calls this
-        % object.
-            
-            
-            if(obj.bipweb.community.done == 0)
-                obj.bipweb.community.Detect();
-            end
-            value = obj.bipweb.community.ExtractCommunityModules();
-            
-        end
+%         function value = get.module_networks(obj)
+%         % Just a get function to run modularity in case some calls this
+%         % object.
+%             
+%             
+%             if(obj.bipweb.community.done == 0)
+%                 obj.bipweb.community.Detect();
+%             end
+%             value = obj.bipweb.community.ExtractCommunityModules();
+%             
+%         end
         
     end
     

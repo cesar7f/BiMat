@@ -326,6 +326,12 @@ classdef Printer < handle
             headers{8} = 'Lr';
             headers{9} = 'Lc';
             
+            if(obj.bipweb.community.done == 0)
+                obj.bipweb.community.Detect();
+            end
+            
+            obj.bipweb.internal_statistics.module_networks = obj.bipweb.community.ExtractCommunityModules();
+            
             columns = (1:length(obj.bipweb.internal_statistics.module_networks))';
             
             columns = [columns cellfun(@(x) x.n_rows, obj.bipweb.internal_statistics.module_networks)];
