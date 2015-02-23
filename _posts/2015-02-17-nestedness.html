@@ -1,0 +1,91 @@
+---
+layout: page
+title: "Nestedness"
+category: alg
+date: 2013-06-06 11:01:37
+order: 0
+---
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+--><div class="content"><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Functions</a></li><li><a href="#3">Example 1: Calculating Modularity</a></li><li><a href="#6">Example 2: Accesing detailed results</a></li></ul></div><h2>Description<a name="1"></a></h2><p>Modularity is a ...</p><div><ul><li><b>NODF:</b></li><li><b>NTC:</b></li></ul></div><h2>Functions<a name="2"></a></h2><h2>Example 1: Calculating Modularity<a name="3"></a></h2><p>The next example shows how to detect nestedness using the default algorithm:</p><pre class="codeinput">matrix = MatrixFunctions.NESTED_MATRIX(20);
+bp = Bipartite(matrix);
+bp.nestedness.Detect();
+</pre><pre class="codeoutput">Nestedness NODF:
+	NODF (Nestedness value):    	              1.0000
+	NODF (Rows value):          	              1.0000
+	NODF (Columns value):       	              1.0000
+</pre><p>We can also change the default algorithm before calculating nestedness, choosing among one of the two options described before:</p><pre class="codeinput">bp.nestedness = NestednessNTC(matrix);
+bp.nestedness.Detect();
+</pre><pre class="codeoutput">Nestedness NTC:
+	NTC (Nestedness value):     	              1.0000
+	T (Temperature value):      	              0.0000
+</pre><p>Further, there is no need to work directly with a <tt>Bipartite</tt> instance. The user can also chose to work with a <tt>Nestedness</tt> instance instead:</p><pre class="codeinput"><span class="comment">%By creating an instance and then calculating nestedness</span>
+nes = NestednessNODF(matrix);
+nes.Detect();
+<span class="comment">%Or by calling a static method:</span>
+nes2 = Nestedness.NODF(matrix);
+</pre><pre class="codeoutput">Nestedness NODF:
+	NODF (Nestedness value):    	              1.0000
+	NODF (Rows value):          	              1.0000
+	NODF (Columns value):       	              1.0000
+Nestedness NODF:
+	NODF (Nestedness value):    	              1.0000
+	NODF (Rows value):          	              1.0000
+	NODF (Columns value):       	              1.0000
+</pre><h2>Example 2: Accesing detailed results<a name="6"></a></h2><p>Altough by calculating the nestedness we can already see what are the nestedness results, sometimes we may need to know detailed values. By just typing the name of the <tt>Nestedness</tt> instance we have access to these values:</p><pre class="codeinput">nes2
+</pre><pre class="codeoutput">
+nes2 = 
+
+  NestednessNODF with properties:
+
+                   N_rows: 1
+                   N_cols: 1
+                        N: 1
+                   matrix: [20x20 logical]
+                   n_rows: 0
+                   n_cols: 0
+    independent_rows_cols: 1
+                     done: 1
+            print_results: 0
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Modularity
+
+%% Description
+% Modularity is a ...
+%
+% * *NODF:*
+% * *NTC:*
+
+%% Functions
+
+%% Example 1: Calculating Modularity
+% The next example shows how to detect nestedness using the default algorithm:
+%
+matrix = MatrixFunctions.NESTED_MATRIX(20);
+bp = Bipartite(matrix);
+bp.nestedness.Detect();
+%%
+% We can also change the default algorithm before calculating nestedness,
+% choosing among one of the two options described before:
+bp.nestedness = NestednessNTC(matrix);
+bp.nestedness.Detect();
+%%
+% Further, there is no need to work directly with a |Bipartite| instance. The user can
+% also chose to work with a |Nestedness| instance instead:
+%By creating an instance and then calculating nestedness
+nes = NestednessNODF(matrix);
+nes.Detect();
+%Or by calling a static method:
+nes2 = Nestedness.NODF(matrix);
+
+%% Example 2: Accesing detailed results
+% Altough by calculating the nestedness we can already see what are the
+% nestedness results, sometimes we may need to know detailed values. By
+% just typing the name of the |Nestedness| instance we have access
+% to these values:
+nes2
+##### SOURCE END #####
+-->

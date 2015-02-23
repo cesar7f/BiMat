@@ -1,0 +1,138 @@
+---
+layout: page
+title: "Install & Setup"
+category: doc
+date: 2013-06-06 11:01:37
+order: 0
+---
+
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+--><div class="content"><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Example</a></li></ul></div><h2>Description<a name="1"></a></h2><p>In statistics, it a common task to analyze the statistical significance of a value in which we have interest. Most of the time this task is done by comparing the value in question with a null model. In our case, to analyze the statistical significance of the values of modularity and nestedness giving by a bipartite network we need to compare them with an ensamble of random networks (our null model). There exist many ways of creating bipartite Random Networks, and BiMat implement some of the most common ones:</p><div><ul><li><b>Equiprobable:</b></li><li><b>Average:</b></li><li><b>Rows Average:</b></li><li><b>Column Average:</b></li><li><b>Fixed Totals:</b></li></ul></div><h2>Example<a name="2"></a></h2><p>The next example shows how to create null model:</p><pre class="codeinput"><span class="comment">%Original matrices that will be used as test</span>
+nested_matrix = MatrixFunctions.NESTED_MATRIX(20);
+modular_matrix = MatrixFunctions.BLOCK_MATRIX(2,10);
+
+<span class="comment">%Setting the seed for reproducibility:</span>
+RandStream.setGlobalStream(RandStream(<span class="string">'mt19937ar'</span>,<span class="string">'seed'</span>,100));
+
+<span class="comment">%Null models from the original nested matrix</span>
+nested_equiprobable_matrix = NullModels.EQUIPROBABLE(nested_matrix);
+nested_average_matrix = NullModels.AVERAGE(nested_matrix);
+nested_row_average_matrix = NullModels.AVERAGE_ROWS(nested_matrix);
+
+modular_equiprobable_matrix = NullModels.EQUIPROBABLE(modular_matrix);
+modular_average_matrix = NullModels.AVERAGE(modular_matrix);
+modular_row_average_matrix = NullModels.AVERAGE_ROWS(modular_matrix);
+
+
+<span class="comment">%Some plot format for all plots</span>
+plot_format = PlotFormat();
+plot_format.use_labels = false;
+plot_format.back_color = [0.6000,0.7686,1.0000];
+plot_format.cell_color = <span class="string">'white'</span>;
+font_size = 20;
+
+<span class="comment">%Plotting</span>
+figure(1);
+set(gcf,<span class="string">'position'</span>, [22,52,1373,664]);
+
+subplot(2,4,1);
+ylabel(<span class="string">'Nested'</span>, <span class="string">'FontSize'</span>, font_size);
+title(<span class="string">'Original matrix'</span>, <span class="string">'FontSize'</span>, font_size);
+PlotWebs.PLOT_MATRIX(nested_matrix, plot_format);
+subplot(2,4,2);
+title(<span class="string">'Equiprobable'</span>, <span class="string">'FontSize'</span>, font_size);
+PlotWebs.PLOT_MATRIX(nested_equiprobable_matrix, plot_format);
+subplot(2,4,3);
+title(<span class="string">'Average'</span>, <span class="string">'FontSize'</span>, font_size);
+PlotWebs.PLOT_MATRIX(nested_average_matrix, plot_format);
+subplot(2,4,4);
+title(<span class="string">'Rows Average'</span>, <span class="string">'FontSize'</span>, font_size);
+PlotWebs.PLOT_MATRIX(nested_row_average_matrix, plot_format);
+
+subplot(2,4,5);
+ylabel(<span class="string">'Modular'</span>, <span class="string">'FontSize'</span>, font_size);
+PlotWebs.PLOT_MATRIX(modular_matrix, plot_format);
+subplot(2,4,6);
+PlotWebs.PLOT_MATRIX(modular_equiprobable_matrix, plot_format);
+subplot(2,4,7);
+PlotWebs.PLOT_MATRIX(modular_average_matrix, plot_format);
+subplot(2,4,8);
+PlotWebs.PLOT_MATRIX(modular_row_average_matrix, plot_format);
+</pre><img vspace="5" hspace="5" src="null_models_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Null Models
+
+%% Description
+% In statistics, it a common task to analyze the statistical significance of a
+% value in which we have interest. Most of the time this task is done by comparing the
+% value in question with a null model. In our case, to analyze the statistical
+% significance of the values of
+% modularity and nestedness giving by a bipartite network we need to
+% compare them with an ensamble of random networks (our null model). There
+% exist many ways of creating bipartite Random Networks, and BiMat
+% implement some of the most common ones:
+%
+% * *Equiprobable:*
+% * *Average:*
+% * *Rows Average:*
+% * *Column Average:*
+% * *Fixed Totals:*
+
+%% Example
+% The next example shows how to create null model:
+
+%Original matrices that will be used as test
+nested_matrix = MatrixFunctions.NESTED_MATRIX(20);
+modular_matrix = MatrixFunctions.BLOCK_MATRIX(2,10);
+
+%Setting the seed for reproducibility:
+RandStream.setGlobalStream(RandStream('mt19937ar','seed',100));
+
+%Null models from the original nested matrix
+nested_equiprobable_matrix = NullModels.EQUIPROBABLE(nested_matrix);
+nested_average_matrix = NullModels.AVERAGE(nested_matrix);
+nested_row_average_matrix = NullModels.AVERAGE_ROWS(nested_matrix);
+
+modular_equiprobable_matrix = NullModels.EQUIPROBABLE(modular_matrix);
+modular_average_matrix = NullModels.AVERAGE(modular_matrix);
+modular_row_average_matrix = NullModels.AVERAGE_ROWS(modular_matrix);
+
+
+%Some plot format for all plots
+plot_format = PlotFormat();
+plot_format.use_labels = false;
+plot_format.back_color = [0.6000,0.7686,1.0000];
+plot_format.cell_color = 'white';
+font_size = 20;
+
+%Plotting
+figure(1);
+set(gcf,'position', [22,52,1373,664]);
+
+subplot(2,4,1);
+ylabel('Nested', 'FontSize', font_size);
+title('Original matrix', 'FontSize', font_size);
+PlotWebs.PLOT_MATRIX(nested_matrix, plot_format);
+subplot(2,4,2);
+title('Equiprobable', 'FontSize', font_size);
+PlotWebs.PLOT_MATRIX(nested_equiprobable_matrix, plot_format);
+subplot(2,4,3);
+title('Average', 'FontSize', font_size);
+PlotWebs.PLOT_MATRIX(nested_average_matrix, plot_format);
+subplot(2,4,4);
+title('Rows Average', 'FontSize', font_size);
+PlotWebs.PLOT_MATRIX(nested_row_average_matrix, plot_format);
+
+subplot(2,4,5);
+ylabel('Modular', 'FontSize', font_size);
+PlotWebs.PLOT_MATRIX(modular_matrix, plot_format);
+subplot(2,4,6);
+PlotWebs.PLOT_MATRIX(modular_equiprobable_matrix, plot_format);
+subplot(2,4,7);
+PlotWebs.PLOT_MATRIX(modular_average_matrix, plot_format);
+subplot(2,4,8);
+PlotWebs.PLOT_MATRIX(modular_row_average_matrix, plot_format);
+##### SOURCE END #####
+-->

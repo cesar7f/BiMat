@@ -1,0 +1,256 @@
+---
+layout: page
+title: "Network Statistics"
+category: stats
+date: 2013-06-06 11:01:37
+order: 0
+---
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+--><div class="content"><!--introduction--><p>As described in the null models section, modularity and nestedness values lack of statistical significance if they are not compared with an appropiate null model. Nor only that, an appropiate ensamble of those random networks need to be created in order to analyze those networks. Altought the user can use <tt>BiMat</tt> null models for designing his own statistical tests, <tt>BiMat</tt> comes already with an <tt>StatisticalTest</tt> that helps the user to perform such tests. <tt>BiMat</tt> comes with statistical test for both modularity and nestedness. These tests can be executed directly on an instance of the <tt>Bipartite</tt> class directly (where the property <tt>statistics</tt> is an instance of the <tt>StatisticalTest</tt> class.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example: Working directly on a <tt>Bipartite</tt> instance</a></li><li><a href="#7">Example: Working using the functional approach</a></li></ul></div><h2>Example: Working directly on a <tt>Bipartite</tt> instance<a name="1"></a></h2><p>This example will show the usual flow to evaluate the significance of modularity and nestedness on an specific matrix. We will use one of the phage bacteria matrices (<a href="http://www.sciencedirect.com/science/article/pii/S0168160509006576">Zinno 2010</a>) collected on <a href="http://www.pnas.org/content/108/28/E288.abstract">Flores et al 2012</a>.</p><pre class="codeinput"><span class="comment">%loading and creating data</span>
+load <span class="string">phage_bacteria_matrices.mat</span>;
+bp = Bipartite(phage_bacteria_matrices.matrices{38}); <span class="comment">%Matrices 38 corresponds to Zinno 2010</span>
+<span class="comment">%A quick visual of how the data looks like:</span>
+pformat = PlotFormat();
+pformat.use_labels = false;
+pformat.back_color = [110,110,20]/255;
+pformat.cell_color = <span class="string">'white'</span>;
+pformat.use_isocline_module = false;
+bp.plotter.SetPlotFormat(pformat);
+
+font_size = 16;
+
+figure(1); set(gcf,<span class="string">'Position'</span>, [38,64,1290,435]);
+subplot(1,3,1); bp.plotter.PlotMatrix; title(<span class="string">'Original'</span>,<span class="string">'FontSize'</span>,font_size);
+subplot(1,3,2); bp.plotter.PlotNestedMatrix; title(<span class="string">'Nested'</span>,<span class="string">'FontSize'</span>,font_size);xlabel(<span class="string">'Zinno 2010'</span>,<span class="string">'FontSize'</span>,font_size+6);
+subplot(1,3,3); bp.plotter.PlotModularMatrix; title(<span class="string">'Modular'</span>,<span class="string">'FontSize'</span>,font_size);
+</pre><img vspace="5" hspace="5" src="network_statistics_01.png" alt=""> <p>By just looking at the last plots, we can infer that this matrix have a strong community structure pattern, while nestedness is not apparent. In order to confirm these observations, we can finally perform a nested and modular tests on this matrix (using default values):</p><pre class="codeinput">bp.statistics.TestCommunityStructure();
+</pre><pre class="codeoutput">Evaluating Modularity in random matrices: 1 - 10
+Evaluating Modularity in random matrices: 11 - 20
+Evaluating Modularity in random matrices: 21 - 30
+Evaluating Modularity in random matrices: 31 - 40
+Evaluating Modularity in random matrices: 41 - 50
+Evaluating Modularity in random matrices: 51 - 60
+Evaluating Modularity in random matrices: 61 - 70
+Evaluating Modularity in random matrices: 71 - 80
+Evaluating Modularity in random matrices: 81 - 90
+Evaluating Modularity in random matrices: 91 - 100
+</pre><pre class="codeinput">bp.statistics.TestNestedness();
+</pre><pre class="codeoutput">Evaluating Nestedness in random matrices: 1 - 10
+Evaluating Nestedness in random matrices: 11 - 20
+Evaluating Nestedness in random matrices: 21 - 30
+Evaluating Nestedness in random matrices: 31 - 40
+Evaluating Nestedness in random matrices: 41 - 50
+Evaluating Nestedness in random matrices: 51 - 60
+Evaluating Nestedness in random matrices: 61 - 70
+Evaluating Nestedness in random matrices: 71 - 80
+Evaluating Nestedness in random matrices: 81 - 90
+Evaluating Nestedness in random matrices: 91 - 100
+</pre><p>As is possible to see, <tt>BiMat</tt> shows the status of the current evaluation, which in this case was performed using 100 random matrices (the default value). In order to print the results, once again, the user (as usual) only need to call the <tt>Print</tt> method:</p><pre class="codeinput">bp.statistics.Print;
+</pre><pre class="codeoutput">Modularity
+	 Used algorithm:	                  AdaptiveBrim
+	 Null model:    	       NullModels.EQUIPROBABLE
+	 Replicates:    	                           100
+	 Qb value:      	                        0.6781
+	     mean:      	                        0.5690
+	     std:       	                        0.0295
+	     z-score:   	                        3.7011
+	     t-score:   	                       37.0114
+	     percentil: 	                      100.0000
+	 Qr value:      	                        0.6735
+	     mean:      	                        0.4380
+	     std:       	                        0.0913
+	     z-score:   	                        2.5786
+	     t-score:   	                       25.7857
+	     percentil: 	                       98.0000
+Nestedness
+	 Used algorithm:	                NestednessNODF
+	 Null model:    	       NullModels.EQUIPROBABLE
+	 Replicates:    	                           100
+	 Nestedness value:	                        0.1247
+	     mean:      	                        0.0934
+	     std:       	                        0.0127
+	     z-score:   	                        2.4575
+	     t-score:   	                       24.5751
+	     percentil: 	                      100.0000
+</pre><p>The output just shows the configuration of each evaluation, which in this case was performed using the default values, which may not be a strong statistical test. Let's repeat the experiment using a larger number of random matrices and a different null model:</p><pre class="codeinput"><span class="comment">%The null model will be the AVERAGE one with 1000 replicates:</span>
+bp.statistics.DoNulls(1000, @NullModels.AVERAGE);
+bp.statistics.TestCommunityStructure();
+bp.statistics.TestNestedness();
+</pre><pre class="codeoutput">Evaluating Modularity in random matrices: 1 - 100
+Evaluating Modularity in random matrices: 101 - 200
+Evaluating Modularity in random matrices: 201 - 300
+Evaluating Modularity in random matrices: 301 - 400
+Evaluating Modularity in random matrices: 401 - 500
+Evaluating Modularity in random matrices: 501 - 600
+Evaluating Modularity in random matrices: 601 - 700
+Evaluating Modularity in random matrices: 701 - 800
+Evaluating Modularity in random matrices: 801 - 900
+Evaluating Modularity in random matrices: 901 - 1000
+Evaluating Nestedness in random matrices: 1 - 100
+Evaluating Nestedness in random matrices: 101 - 200
+Evaluating Nestedness in random matrices: 201 - 300
+Evaluating Nestedness in random matrices: 301 - 400
+Evaluating Nestedness in random matrices: 401 - 500
+Evaluating Nestedness in random matrices: 501 - 600
+Evaluating Nestedness in random matrices: 601 - 700
+Evaluating Nestedness in random matrices: 701 - 800
+Evaluating Nestedness in random matrices: 801 - 900
+Evaluating Nestedness in random matrices: 901 - 1000
+</pre><p>And finally printing the results:</p><pre class="codeinput">bp.statistics.Print();
+</pre><pre class="codeoutput">Modularity
+	 Used algorithm:	                  AdaptiveBrim
+	 Null model:    	            NullModels.AVERAGE
+	 Replicates:    	                          1000
+	 Qb value:      	                        0.6781
+	     mean:      	                        0.5463
+	     std:       	                        0.0485
+	     z-score:   	                        2.7196
+	     t-score:   	                       86.0027
+	     percentil: 	                       99.3000
+	 Qr value:      	                        0.6735
+	     mean:      	                        0.4105
+	     std:       	                        0.1098
+	     z-score:   	                        2.3950
+	     t-score:   	                       75.7362
+	     percentil: 	                       98.8000
+Nestedness
+	 Used algorithm:	                NestednessNODF
+	 Null model:    	            NullModels.AVERAGE
+	 Replicates:    	                          1000
+	 Nestedness value:	                        0.1247
+	     mean:      	                        0.1088
+	     std:       	                        0.0250
+	     z-score:   	                        0.6372
+	     t-score:   	                       20.1487
+	     percentil: 	                       74.8000
+</pre><h2>Example: Working using the functional approach<a name="7"></a></h2><p>Sometimes the user just want to do a quick analysis, without the extra functionalities that working with a <tt>Bipartite</tt> instance provides. For those cases, the user can just execute the functional calls of the <tt>StatisticalTest</tt> class on a specific matrix. Using the previous matrix as an example:</p><pre class="codeinput">matrix = phage_bacteria_matrices.matrices{38};
+stest_modul = StatisticalTest.TEST_COMMUNITY_STRUCTURE(matrix,200,@NullModels.AVERAGE,@LeadingEigenvector);
+</pre><pre class="codeoutput">Evaluating Modularity in random matrices: 1 - 20
+Evaluating Modularity in random matrices: 21 - 40
+Evaluating Modularity in random matrices: 41 - 60
+Evaluating Modularity in random matrices: 61 - 80
+Evaluating Modularity in random matrices: 81 - 100
+Evaluating Modularity in random matrices: 101 - 120
+Evaluating Modularity in random matrices: 121 - 140
+Evaluating Modularity in random matrices: 141 - 160
+Evaluating Modularity in random matrices: 161 - 180
+Evaluating Modularity in random matrices: 181 - 200
+Modularity
+	 Used algorithm:	            LeadingEigenvector
+	 Null model:    	            NullModels.AVERAGE
+	 Replicates:    	                           200
+	 Qb value:      	                        0.6822
+	     mean:      	                        0.5551
+	     std:       	                        0.0544
+	     z-score:   	                        2.3358
+	     t-score:   	                       33.0338
+	     percentil: 	                       98.5000
+	 Qr value:      	                        0.7143
+	     mean:      	                        0.4937
+	     std:       	                        0.1105
+	     z-score:   	                        1.9972
+	     t-score:   	                       28.2450
+	     percentil: 	                       95.5000
+</pre><pre class="codeinput">stest_nest = StatisticalTest.TEST_NESTEDNESS(matrix,200,@NullModels.EQUIPROBABLE,@NestednessNODF);
+</pre><pre class="codeoutput">Evaluating Nestedness in random matrices: 1 - 20
+Evaluating Nestedness in random matrices: 21 - 40
+Evaluating Nestedness in random matrices: 41 - 60
+Evaluating Nestedness in random matrices: 61 - 80
+Evaluating Nestedness in random matrices: 81 - 100
+Evaluating Nestedness in random matrices: 101 - 120
+Evaluating Nestedness in random matrices: 121 - 140
+Evaluating Nestedness in random matrices: 141 - 160
+Evaluating Nestedness in random matrices: 161 - 180
+Evaluating Nestedness in random matrices: 181 - 200
+Nestedness
+	 Used algorithm:	                NestednessNODF
+	 Null model:    	       NullModels.EQUIPROBABLE
+	 Replicates:    	                           200
+	 Nestedness value:	                        0.1247
+	     mean:      	                        0.0929
+	     std:       	                        0.0125
+	     z-score:   	                        2.5301
+	     t-score:   	                       35.7810
+	     percentil: 	                       99.0000
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Network Statistics
+% As described in the null models section, modularity and nestedness values
+% lack of statistical significance if they are not compared with an
+% appropiate null model. Nor only that, an appropiate ensamble of those
+% random networks need to be created in order to analyze those networks.
+% Altought the user can use |BiMat| null models for designing his own
+% statistical tests, |BiMat| comes already with an |StatisticalTest| that
+% helps the user to perform such tests.
+% |BiMat| comes with statistical test for both modularity and nestedness.
+% These tests can be executed directly on an instance of the |Bipartite|
+% class directly (where the property |statistics| is an instance of the
+% |StatisticalTest| class.
+
+
+%% Example: Working directly on a |Bipartite| instance
+% This example will show the usual flow to evaluate the significance of
+% modularity and nestedness on an specific matrix. We will use one of the
+% phage bacteria matrices 
+% (<http://www.sciencedirect.com/science/article/pii/S0168160509006576 Zinno 2010>) collected on 
+% <http://www.pnas.org/content/108/28/E288.abstract Flores et al 2012>.
+%loading and creating data
+load phage_bacteria_matrices.mat;
+bp = Bipartite(phage_bacteria_matrices.matrices{38}); %Matrices 38 corresponds to Zinno 2010
+%A quick visual of how the data looks like:
+pformat = PlotFormat();
+pformat.use_labels = false;
+pformat.back_color = [110,110,20]/255;
+pformat.cell_color = 'white';
+pformat.use_isocline_module = false;
+bp.plotter.SetPlotFormat(pformat);
+
+font_size = 16;
+
+figure(1); set(gcf,'Position', [38,64,1290,435]);
+subplot(1,3,1); bp.plotter.PlotMatrix; title('Original','FontSize',font_size);
+subplot(1,3,2); bp.plotter.PlotNestedMatrix; title('Nested','FontSize',font_size);xlabel('Zinno 2010','FontSize',font_size+6);
+subplot(1,3,3); bp.plotter.PlotModularMatrix; title('Modular','FontSize',font_size);
+
+%% 
+% By just looking at the last plots, we can infer that this matrix have a
+% strong community structure pattern, while nestedness is not apparent. In
+% order to confirm these observations, we can finally perform a nested and
+% modular tests on this matrix (using default values):
+bp.statistics.TestCommunityStructure();
+%%
+bp.statistics.TestNestedness();
+%%
+% As is possible to see, |BiMat| shows the status of the current
+% evaluation, which in this case was performed using 100 random matrices
+% (the default value). In order to print the results, once again, the user
+% (as usual) only need to call the |Print| method:
+bp.statistics.Print;
+%%
+% The output just shows the configuration of each evaluation, which in this
+% case was performed using the default values, which may not be a strong
+% statistical test. Let's repeat the experiment using a larger number of
+% random matrices and a different null model:
+%The null model will be the AVERAGE one with 1000 replicates:
+bp.statistics.DoNulls(1000, @NullModels.AVERAGE);
+bp.statistics.TestCommunityStructure();
+bp.statistics.TestNestedness();
+%%
+% And finally printing the results:
+bp.statistics.Print();
+
+%% Example: Working using the functional approach
+% Sometimes the user just want to do a quick analysis, without the extra
+% functionalities that working with a |Bipartite| instance provides. For
+% those cases, the user can just execute the functional calls of the
+% |StatisticalTest| class on a specific matrix. Using the previous matrix
+% as an example:
+matrix = phage_bacteria_matrices.matrices{38};
+stest_modul = StatisticalTest.TEST_COMMUNITY_STRUCTURE(matrix,200,@NullModels.AVERAGE,@LeadingEigenvector);
+%%
+stest_nest = StatisticalTest.TEST_NESTEDNESS(matrix,200,@NullModels.EQUIPROBABLE,@NestednessNODF);
+
+##### SOURCE END #####
+-->
