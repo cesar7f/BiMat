@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Null models"
-category: alg
+category: stats
 date: 2013-06-06 11:01:37
 order: 0
 ---
@@ -59,7 +59,10 @@ subplot(2,4,7);
 PlotWebs.PLOT_MATRIX(modular_average_matrix, plot_format);
 subplot(2,4,8);
 PlotWebs.PLOT_MATRIX(modular_row_average_matrix, plot_format);
-</pre><img vspace="5" hspace="5" src="null_models_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+
+</pre>
+![My helpful screenshot]({{ site.url }}/figures/null_models_01.png)
+<img vspace="5" hspace="5" src="null_models_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Null Models
 
