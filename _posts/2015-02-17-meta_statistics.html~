@@ -1,8 +1,9 @@
 ---
 layout: page
-title: Meta Statistics
-category: posts
-comments: true
+title: "Meta Statistics"
+category: stats
+date: 2013-06-06 11:01:37
+order: 0
 ---
 <!--
 This HTML was auto-generated from MATLAB code.

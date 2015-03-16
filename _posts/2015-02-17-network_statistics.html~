@@ -25,7 +25,7 @@ figure(1); set(gcf,<span class="string">'Position'</span>, [38,64,1290,435]);
 subplot(1,3,1); bp.plotter.PlotMatrix; title(<span class="string">'Original'</span>,<span class="string">'FontSize'</span>,font_size);
 subplot(1,3,2); bp.plotter.PlotNestedMatrix; title(<span class="string">'Nested'</span>,<span class="string">'FontSize'</span>,font_size);xlabel(<span class="string">'Zinno 2010'</span>,<span class="string">'FontSize'</span>,font_size+6);
 subplot(1,3,3); bp.plotter.PlotModularMatrix; title(<span class="string">'Modular'</span>,<span class="string">'FontSize'</span>,font_size);
-</pre><img vspace="5" hspace="5" src="network_statistics_01.png" alt=""> <p>By just looking at the last plots, we can infer that this matrix have a strong community structure pattern, while nestedness is not apparent. In order to confirm these observations, we can finally perform a nested and modular tests on this matrix (using default values):</p><pre class="codeinput">bp.statistics.TestCommunityStructure();
+</pre><img vspace="5" hspace="5" src="../figures/network_statistics_01.png" alt=""> <p>By just looking at the last plots, we can infer that this matrix have a strong community structure pattern, while nestedness is not apparent. In order to confirm these observations, we can finally perform a nested and modular tests on this matrix (using default values):</p><pre class="codeinput">bp.statistics.TestCommunityStructure();
 </pre><pre class="codeoutput">Evaluating Modularity in random matrices: 1 - 10
 Evaluating Modularity in random matrices: 11 - 20
 Evaluating Modularity in random matrices: 21 - 30

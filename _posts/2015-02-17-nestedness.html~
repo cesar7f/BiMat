@@ -10,8 +10,33 @@ This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
 --><div class="content"><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Example 1: Calculating Nestedness</a></li><li><a href="#5">Example 2: Accesing detailed results</a></li><li><a href="#7">Example 3: Nested vs Antinested pattern</a></li></ul></div><h2>Description<a name="1"></a></h2><p>Nestedness describes the extent to which interactions form ordered subsets of each other. There are several indices for quantifying nestedness <tt>bimat</tt> implements two of the most commonly used methods, namely, NTC (Nestedness Temperature Calculator) (see <a href="http://link.springer.com/article/10.1007%2FBF00317508">Atmar et al 1993</a>) and NODF (for Nestedness metric based on Overlap and Decreasing Fill) (see <a href="http://onlinelibrary.wiley.com/doi/10.1111/j.0030-1299.2008.16644.x/abstract">Almeida-Neto et al 2008</a>).</p><p>
 
-<h3>NODF</h3></p>
-<p>The NODF measure normalizes for matrix size, and thus allows matrices of different sizes to be compared. The nestedness range is $0 \le NODF \le 1$, where 0 indicates an homogeneous matrix having ones in every position and 1 corresponds to a perfectly nested structure. NODF is based on two properties: decreasing fill and paired overlap. NODF measures nestedness across rows by assigning a value $M_{ij}^{\text{row}}$ to each pair $i$, $j$ of rows in the interaction matrix: 
+<h4>NestednesNODF</h4></p>
+<p>The NODF measure normalizes for matrix size, and thus allows matrices of different sizes to be compared. The nestedness range is $0 \le NODF \le 1$, where 0 indicates an homogeneous matrix having ones in every position and 1 corresponds to a perfectly nested structure. NODF is based on two properties: decreasing fill and paired overlap. NODF measures nestedness across rows by assigning a value $M_{ij}^{\text{row}}$ to each pair $i$, $j$ of rows in the interaction matrix:</p>
+\begin{equation}
+M_{ij}^{\text{row}} = \begin{cases}
+			0 & \text{if $k_i \le k_j$}\\
+         n_{ij}/\min(k_i,k_j) & \text{otherwise,}
+		\end{cases}
+\label{eq.Mrows}
+\end{equation}
+<p>
+where $k_i$ is the number of ones in row $i$, $k_j$ is the number of ones in row $j$, and $n_{ij}$ is the number of shared interactions between rows $i$ and $j$ (so-called paired overlap). Notice that positive contributions to the NODF require pairs of columns satisfying the decreasing fill property, that is, when $k_i &gt; k_j$. A similar term  $M_{ij}^{\text{col}}$  is used to compute column  contributions.  The total nestedness is the sum of columns and row contributions: 
+</p>
+\begin{equation}
+N_{NODF} = \frac{\sum_{ij} M_{ij}^{\text{row}} + \sum_{ij} M_{ij}^{\text{col}}}
+		{ m(m-1) /2 + n(n-1)/2}.
+\end{equation}
+<tt>MATLAB</tt> vectorization capabilities allows for very efficient calculation of $M_{ij}^{\text{row}}$ (and its column version):
+\begin{equation}
+M_{ij}^{\text{row}} = \frac{(\mathbf{r}_i \cdot \mathbf{r}_j) \left(1-\delta(k_i,k_j)\right)} {\min(k_i,k_j)},
+\end{equation}	
+
+where $\mathbf{r_i}$ is a vector that represents the row $i$ of the adjacency matrix, and
+$\delta(k_i,k_j)=1$ if and only if $k_i=k_j$. 
+By using this notation, $M_{ij}^{\text{row}}$ can be expressed in terms of  matrix multiplications that exploit the
+implicit parallelism provided by Matlab (see code for details).
+
+<h3>Temperature Calculator (NTC)</h3><p>A `temperature', $T$, of the interaction matrix is estimated by resorting rows and columns such that the largest quantity of interactions falls above the isocline (a curve that will divide the interaction from the non-interaction zone of a perfectly nested matrix of the same size and connectance). In doing so, the value of $T$ quantifies the extent to which interactions only take place in the upper left ($T\approx0$), or are equally distributed between the upper left and the lower right ($T\approx100$). Perfectly nested interaction matrices can be resorted to lie exclusively in the upper left portion and hence have a temperature of 0. The value of temperature depends on the size, connectance and structure of the network. Because the temperature value quantifies departures from perfect nestedness, we define the nestedness, $N_{NTC}$, of a matrix to range from 0 to 1, $N_{NTC}=(100-T)/100$, such that $N_{NTC}=1$ when $T=0$ (in the case of perfect nestedness) and $N_{NTC}=0$ when $T=100$ (in the case when interactions form a ``checkerboard'' when visualized in matrix format).</p><h2>Example 1: Calculating Nestedness<a name="2"></a></h2><p>The next example shows how to detect nestedness using the default algorithm:</p>
 
 <pre class="codeinput">matrix = MatrixFunctions.NESTED_MATRIX(20);
 bp = Bipartite(matrix);
@@ -60,7 +85,10 @@ ans =
 
      1
 
-</pre><h2>Example 3: Nested vs Antinested pattern<a name="7"></a></h2><p>In this example we will calculate the nestedness of three different degrees of nestedness:</p><pre class="codeinput"><span class="comment">%Creating the matrices</span>
+</pre><h2>Example 3: Degrees of nestedness<a name="7"></a></h2>
+<p>In this example we will calculate the nestedness of three different degrees of nestedness: (i) and anti nested pattern (which is a perfect modular pattern),
+(ii) a pattern with some degree of nestedness, and (iii) a perfect nested pattern:</p>
+<pre class="codeinput"><span class="comment">%Creating the matrices</span>
 matrix_nested = MatrixFunctions.NESTED_MATRIX(20); <span class="comment">%perfect nested</span>
 matrix_modular = MatrixFunctions.BLOCK_MATRIX(2,10); <span class="comment">%perfect anti nested</span>
 matrix_middle = MatrixFunctions.MIX_MATRICES(matrix_nested,matrix_modular); <span class="comment">%a combination</span>
@@ -109,26 +137,5 @@ subplot(2,3,6);
 PlotWebs.PLOT_NESTED_MATRIX(matrix_nested, plot_format);
 xlabel([<span class="string">'$N_{NTC} = '</span>, num2str(ntc_nested.N),<span class="string">'$, $N_{NODF} = '</span>,num2str(nodf_nested.N),<span class="string">'$'</span>],<span class="keyword">...</span>
     <span class="string">'FontSize'</span>,14, <span class="string">'interpreter'</span>,<span class="string">'latex'</span>);
-</pre><pre class="codeoutput">Nestedness NTC:
-	NTC (Nestedness value):     	              1.0000
-	T (Temperature value):      	              0.0000
-Nestedness NTC:
-	NTC (Nestedness value):     	              0.0220
-	T (Temperature value):      	             97.7991
-Nestedness NTC:
-	NTC (Nestedness value):     	              0.6050
-	T (Temperature value):      	             39.5011
-Nestedness NODF:
-	NODF (Nestedness value):    	              1.0000
-	NODF (Rows value):          	              1.0000
-	NODF (Columns value):       	              1.0000
-Nestedness NODF:
-	NODF (Nestedness value):    	              0.0000
-	NODF (Rows value):          	              0.0000
-	NODF (Columns value):       	              0.0000
-Nestedness NODF:
-	NODF (Nestedness value):    	              0.5463
-	NODF (Rows value):          	              0.5777
-	NODF (Columns value):       	              0.5149
-</pre><img vspace="5" hspace="5" src="nest_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div>
+</pre><img vspace="5" hspace="5" src="../figures/nest_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div>
 

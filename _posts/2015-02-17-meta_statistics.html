@@ -92,11 +92,11 @@ meta_stat.Print;
 meta_stat.plotter.p_value = 0.05; <span class="comment">%Default value</span>
 <span class="comment">%plot the results</span>
 figure(1);meta_stat.plotter.PlotNestednessValues();
-</pre><img vspace="5" hspace="5" src="meta_statistics_01.png" alt=""> <p>Finally, we can get a better idea of the results by plotting the nested matrices.</p><pre class="codeinput">meta_stat.plotter.back_color = [255 229 204]/255;
+</pre><img vspace="5" hspace="5" src="../figures/meta_statistics_01.png" alt=""> <p>Finally, we can get a better idea of the results by plotting the nested matrices.</p><pre class="codeinput">meta_stat.plotter.back_color = [255 229 204]/255;
 meta_stat.plotter.cell_color = [96 96 96]/255;
 meta_stat.plotter.isocline_color = [200 100 0]/255;
 figure(2); meta_stat.plotter.PlotNestedMatrices;
-</pre><img vspace="5" hspace="5" src="meta_statistics_02.png" alt=""> <p>As we can see, most of the matrices are nested (the ones with (+) on the label name. They are nested under the <tt>p_value = 0.05</tt> that we chose before using a two side test. This means that the nested matrices (+) are have a value larger than 97.5 % of their corresponding random networks. The user must know that we just repeated part of the results of a very famous paper on the field. If he has the interest, we would like to recommend him to read the original paper <a href="http://www.pnas.org/content/100/16/9383.full">Bascompte et al 2003</a>.</p><p>Finally, we must say that the user can continue the analysis for modularity. The next lines could complete the work:</p><pre class="language-matlab">meta_stat.do_community = true;
+</pre><img vspace="5" hspace="5" src="../figures/meta_statistics_02.png" alt=""> <p>As we can see, most of the matrices are nested (the ones with (+) on the label name. They are nested under the <tt>p_value = 0.05</tt> that we chose before using a two side test. This means that the nested matrices (+) are have a value larger than 97.5 % of their corresponding random networks. The user must know that we just repeated part of the results of a very famous paper on the field. If he has the interest, we would like to recommend him to read the original paper <a href="http://www.pnas.org/content/100/16/9383.full">Bascompte et al 2003</a>.</p><p>Finally, we must say that the user can continue the analysis for modularity. The next lines could complete the work:</p><pre class="language-matlab">meta_stat.do_community = true;
 meta_stat.modularity_algorithm = @AdaptiveBrim;
 meta_stat.DoMetaAnalyisis();
 figure(3); meta_stat.plotter.PlotModularValues();
