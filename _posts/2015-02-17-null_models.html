@@ -61,8 +61,16 @@ subplot(2,4,8);
 PlotWebs.PLOT_MATRIX(modular_row_average_matrix, plot_format);
 
 </pre>
-![My helpful screenshot]({{ site.url }}/figures/null_models_01.png)
-<img vspace="5" hspace="5" src="{{ site.url }}/figures/null_models_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+
+{% highlight matlab  %}
+%By creating an instance and then calculating nestedness
+nes = NestednessNODF(matrix);
+nes.Detect();
+%Or by calling a static method:
+nes2 = Nestedness.NODF(matrix);
+{% endhighlight %}
+
+<img vspace="5" hspace="5" src="../figures/null_models_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Null Models
 

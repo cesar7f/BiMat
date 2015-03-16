@@ -31,7 +31,6 @@ sections: [
 # path (e.g. on GitHub pages) leave off the trailing slash, e.g. /my-project
 #baseurl: '/jekyll-docs-template'
 baseurl: '/BiMat'
-url: '/BiMat'
 
 # Dates are not included in permalinks
 permalink: none
