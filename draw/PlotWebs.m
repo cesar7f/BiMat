@@ -18,6 +18,8 @@
 %     ax - Axis of the plot
 %   MATRIX LAYOUT
 %     cell_color - Cell color
+%     use_empty_cell - Flag to indicate if we want to plot empty cells
+%     cell_empty_color - Color of the empty cell 
 %     back_color - Back color
 %     margin - Margin between cells
 %     isocline_color - Color of the isocline
@@ -27,6 +29,7 @@
 %     color_interactions - Color of interactions. Used only if use_type_interaction = true
 %     use_module_format - Flag to give appropiate color format to modules
 %     use_type_interaction - Flag to color cells according to weight (only if discrete)
+%     use_isocline_module - Flag to indicate if isocline will be plotted inside module sorting
 %   GRAPH LAYOUT
 %     radius - Radius of the nodes for graph layouts.
 %     vertical_margin - Vertical margin between nodes for graph layouts.
@@ -85,6 +88,8 @@ classdef PlotWebs < handle;
     properties
        
         cell_color           = [0 0 0];  % Cell color
+        use_empty_cell       = false;    % Flag to indicate if we want to plot empty cells
+        cell_empty_color     = 'white';  % Color of the empty cell        
         back_color           = [1 1 1];  % Back color
         margin               = 0.12;     % Margin between cells
         isocline_color       = 'red';    % Color of the isocline
@@ -94,6 +99,8 @@ classdef PlotWebs < handle;
         color_interactions   = [];       % Color of interactions. Used only if use_type_interaction = true
         use_type_interaction = false;    % Flag to color cells according to weight (only if discrete)
         use_module_format    = true;     % Flag to give appropiate color format to modules
+        use_isocline_module  = false;    % Flag to indicate if isocline will be plotted inside module sorting
+        use_module_division = true;     % Plot Divisions for modules
 
     end
     
@@ -126,7 +133,7 @@ classdef PlotWebs < handle;
     % PUBLIC METHODS
     methods
        
-        function obj = PlotWebs(bipmatrix_or_biweb)
+        function obj = PlotWebs(bipmatrix_or_biweb,plot_format)
         % PlotWebs - Main Constructor
         %
         %   bp = PlotWebs(bipmatrix_or_biweb) Create a PlotWebs object
@@ -142,6 +149,10 @@ classdef PlotWebs < handle;
                 obj.webmatrix = bipmatrix_or_biweb;
             end
             
+            if(nargin == 2)
+                obj.SetPlotFormat(plot_format)
+            end
+            
             [obj.n_rows obj.n_cols] = size(obj.matrix);
             
             if(length(unique(obj.webmatrix))>2)
@@ -154,6 +165,49 @@ classdef PlotWebs < handle;
             
         end  
         
+        function obj = SetPlotFormat(obj, plot_format)
+           
+            if(~isa(plot_format,'PlotFormat'))
+               throw(MException('PlotWebs:SetPlotFormat', 'You must send a PlotFormat object')); 
+            end
+            
+            % GENERAL LAYOUT PROPERTIES
+            obj.use_labels           = plot_format.use_labels;
+            obj.font_size            = plot_format.font_size;
+            obj.colors               = plot_format.colors;
+            obj.interpreter          = plot_format.interpreter;
+            obj.ax                   = plot_format.ax;
+    
+            % MATRIX LAYOUT PROPERTIES
+            obj.cell_color           = plot_format.cell_color;
+            obj.use_empty_cell       = plot_format.use_empty_cell;
+            obj.cell_empty_color     = plot_format.cell_empty_color;
+            obj.back_color           = plot_format.back_color;
+            obj.margin               = plot_format.margin;
+            obj.isocline_color       = plot_format.isocline_color;
+            obj.division_color       = plot_format.division_color;
+            obj.line_width           = plot_format.line_width;
+            obj.use_isocline         = plot_format.use_isocline;
+            obj.color_interactions   = plot_format.color_interactions;
+            obj.use_type_interaction = plot_format.use_type_interaction;
+            obj.use_module_format    = plot_format.use_module_format;
+    
+            % GRAPH LAYOUT PROPERTIES
+            obj.radius                = plot_format.radius;
+            obj.vertical_margin       = plot_format.vertical_margin;
+            obj.horizontal_proportion = plot_format.horizontal_proportion;
+            obj.bead_color_rows       = plot_format.bead_color_rows;
+            obj.bead_color_columns    = plot_format.bead_color_columns;
+            obj.link_color            = plot_format.link_color;
+            obj.link_width            = plot_format.link_width;
+            
+            if(isempty(obj.colors))
+                obj.colors = colormap(jet(64));%colormap('jet');
+                obj.colors = obj.colors([23,2,13,42,57,20,15,11,9,16,3,28,26,24,46,59,41,18,56,40,17,48,27,53,6,62,5,60,14,32,64,19,36,58,39,21,4,8,35,30,50,63,25,51,55,34,61,37,47,44,54,43,38,12,52,33,31,1,22,29,10,45,49,7],:);
+            end
+            
+        end
+        
         function PlotGraph(obj)
         % PlotGraph - Plot a original sorting graph layout
         %
@@ -165,13 +219,19 @@ classdef PlotWebs < handle;
             obj.index_rows = 1:obj.n_rows;
             obj.index_cols = 1:obj.n_cols;            
             
-            local_matrix = obj.matrix;
+            local_matrix = obj.webmatrix;
             
             hold on;
             for i = 1:obj.n_rows
                 for j = 1:obj.n_cols
-                    if(local_matrix(i,j)==1)
-                        plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.link_color,'LineWidth',obj.link_width);
+                    if(local_matrix(i,j))
+                        if(obj.use_type_interaction)
+                            %plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.link_color,'LineWidth',obj.link_width);
+                            plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.color_interactions(obj.webmatrix(i,j),:),'LineWidth',obj.link_width);
+                        else
+                            plot([1 x2],[obj.row_pos(i) obj.col_pos(j)],'Color',obj.link_color,'LineWidth',obj.link_width);
+                        end
+                        
                     end
                 end
             end
@@ -240,7 +300,10 @@ classdef PlotWebs < handle;
                 obj.biweb = Bipartite(obj.matrix);
             end
             if(obj.biweb.community.done == 0)
+                tmp = obj.biweb.community.print_results;
+                obj.biweb.community.print_results = 0;
                 obj.biweb.community.Detect();
+                obj.biweb.community.print_results = tmp;
             end
             
             obj.index_rows = obj.biweb.community.index_rows;
@@ -299,10 +362,14 @@ classdef PlotWebs < handle;
                         else
                             obj.DrawCell(i,j,obj.cell_color);
                         end
+                    else
+                        if(obj.use_empty_cell == true)
+                            obj.DrawCell(i,j,obj.cell_empty_color);
+                        end
                     end
                 end
             end
-            
+          
             obj.ApplyBasicFormat();
             
         end
@@ -325,6 +392,10 @@ classdef PlotWebs < handle;
                             obj.DrawCell(i,j,obj.color_interactions(local_matrix(i,j),:));
                         else
                             obj.DrawCell(i,j,obj.cell_color);
+                        end
+                    else
+                        if(obj.use_empty_cell == true)
+                            obj.DrawCell(i,j,obj.cell_empty_color);
                         end
                     end
                 end
@@ -352,7 +423,10 @@ classdef PlotWebs < handle;
                 obj.biweb = Bipartite(obj.matrix);
             end
             if(obj.biweb.community.done == 0)
+                tmp = obj.biweb.community.print_results;
+                obj.biweb.community.print_results = 0;
                 obj.biweb.community.Detect();
+                obj.biweb.community.print_results = tmp;
             end
             
             obj.index_rows = obj.biweb.community.index_rows;
@@ -366,22 +440,23 @@ classdef PlotWebs < handle;
             
             start_y = 1;
             start_x = obj.n_cols;
-            
-            for i = 1:obj.biweb.community.N
-               
-                dx = length(find(col_mod==i));
-                dy = length(find(row_mod==i));
-                if(dx>0 && dy>0)
-                    if(obj.use_module_format)
-                        idx_col = mod(i,n_col); if(idx_col==0); idx_col = n_col; end;
-                        obj.MakeDivision(start_y+dy-1,start_x-dx+1,dy,dx,obj.colors(idx_col,:),obj.back_color);
-                    else
-                        obj.MakeDivision(start_y+dy-1,start_x-dx+1,dy,dx,obj.division_color,obj.back_color);
+            if(obj.use_module_division == true)
+                for i = 1:obj.biweb.community.N
+
+                    dx = length(find(col_mod==i));
+                    dy = length(find(row_mod==i));
+                    if(dx>0 && dy>0)
+                        if(obj.use_module_format)
+                            idx_col = mod(i,n_col); if(idx_col==0); idx_col = n_col; end;
+                            obj.MakeDivision(start_y+dy-1,start_x-dx+1,dy,dx,obj.colors(idx_col,:),obj.back_color);
+                        else
+                            obj.MakeDivision(start_y+dy-1,start_x-dx+1,dy,dx,obj.division_color,obj.back_color);
+                        end
                     end
+                    start_x = start_x-dx;
+                    start_y = start_y+dy;
+
                 end
-                start_x = start_x-dx;
-                start_y = start_y+dy;
-                
             end
             
             inter_ones = 0;
@@ -405,12 +480,16 @@ classdef PlotWebs < handle;
                             end
                         end
                         
+                    else
+                        if(obj.use_empty_cell == true)
+                            obj.DrawCell(i,j,obj.cell_empty_color);
+                        end
                     end
                 end
 
             end
 
-            if(obj.use_isocline)
+            if(obj.use_isocline_module)
                 matrices = obj.biweb.community.ExtractCommunityMatrices();
                 start_y = obj.n_rows;
                 start_x = obj.n_cols;
@@ -720,63 +799,81 @@ classdef PlotWebs < handle;
             print(filejpg,'-djpeg2'); 
         end
         
-        function plotter = PLOT_MATRIX(matrix)
+        function plotter = PLOT_MATRIX(matrix, plot_format)
         % PLOT_MATRIX - Plot a matrix layout of a bipartite network
         %
         %   PW = PLOT_MATRIX(MATRIX) Plot a bipartite network with bipartite
         %   adjacency matrix MATRIX in matrix layout using the original
         %   sorting and returns a PlotWebs object PW
             plotter = PlotWebs(matrix);
+            if(nargin==2)
+                plotter.SetPlotFormat(plot_format);
+            end
             plotter.PlotMatrix();
         end
         
-        function plotter = PLOT_NESTED_MATRIX(matrix)
+        function plotter = PLOT_NESTED_MATRIX(matrix, plot_format)
         % PLOT_NESTED_MATRIX - Plot a nested matrix layout of a bipartite network
         %
         %   PW = PLOT_NESTED_MATRIX(MATRIX) Plot a bipartite network with bipartite
         %   adjacency matrix MATRIX in matrix layout using the nested
         %   sorting and returns a PlotWebs object PW
             plotter = PlotWebs(matrix);
+            if(nargin==2)
+                plotter.SetPlotFormat(plot_format);
+            end
             plotter.PlotNestedMatrix();
         end
         
-        function plotter = PLOT_MODULAR_MATRIX(matrix)
+        function plotter = PLOT_MODULAR_MATRIX(matrix, plot_format)
         % PLOT_MODULAR_MATRIX - Plot a modular matrix layout of a bipartite network
         %
         %   PW = PLOT_MODULAR_MATRIX(MATRIX) Plot a bipartite network with bipartite
         %   adjacency matrix MATRIX in matrix layout using the modular
         %   sorting and returns a PlotWebs object PW            
             plotter = PlotWebs(matrix);
+            if(nargin==2)
+                plotter.SetPlotFormat(plot_format);
+            end
             plotter.PlotModularMatrix();
         end
         
-        function plotter = PLOT_GRAPH(matrix)
+        function plotter = PLOT_GRAPH(matrix, plot_format)
         % PLOT_GRAPH - Plot a graph layout of a bipartite network
         %
         %   PW = PLOT_GRAPH(MATRIX) Plot a bipartite network with bipartite
         %   adjacency matrix MATRIX in graph layout using the original
         %   sorting and returns a PlotWebs object PW             
             plotter = PlotWebs(matrix);
+            if(nargin==2)
+                plotter.SetPlotFormat(plot_format);
+            end
             plotter.PlotGraph();
         end
         
-        function plotter = PLOT_NESTED_GRAPH(matrix)
+        function plotter = PLOT_NESTED_GRAPH(matrix, plot_format)
         % PLOT_NESTED_GRAPH - Plot a nested graph layout of a bipartite network
         %
         %   PW = PLOT_NESTED_GRAPH(MATRIX) Plot a bipartite network with bipartite
         %   adjacency matrix MATRIX in graph layout using the nested
         %   sorting and returns a PlotWebs object PW              
             plotter = PlotWebs(matrix);
+            if(nargin==2)
+                plotter.SetPlotFormat(plot_format);
+            end
             plotter.PlotNestedGraph();
         end
         
-        function plotter = PLOT_MODULAR_GRAPH(matrix)
+        function plotter = PLOT_MODULAR_GRAPH(matrix, plot_format)
         % PLOT_MODULAR_GRAPH - Plot a modular graph layout of a bipartite network
         %
         %   PW = PLOT_MODULAR_GRAPH(MATRIX) Plot a bipartite network with bipartite
         %   adjacency matrix MATRIX in graph layout using the modular
         %   sorting and returns a PlotWebs object PW              
             plotter = PlotWebs(matrix);
+            if(nargin==2)
+                plotter.SetPlotFormat(plot_format);
+            end
             plotter.PlotModularGraph();
         end      
         

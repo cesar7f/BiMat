@@ -69,6 +69,9 @@ classdef MetaStatisticsPlotter < handle;
         colors                = {};       % Spefic color for each matrix
         use_specific_colors   = false;    % Use specific color for each matrix
         use_module_format     = true;     % Flag to give color to modules
+        use_empty_cell      = false;    % Flag to indicate if we want to plot empty cells
+        cell_empty_color     = 'white';  % Color of the empty cell
+        use_module_division = true;     % Plot Divisions for modules
     end
     
     % GRAPH LAYOUT
@@ -289,13 +292,17 @@ classdef MetaStatisticsPlotter < handle;
                 %obj.meta_statistics.networks{i}.plotter.use_isocline = 0;%No isocline inside modules
                 obj.meta_statistics.networks{i}.plotter.PlotModularMatrix();
                 %obj.meta_statistics.networks{i}.plotter.use_isocline = tmp;
+                
                 col = 'black'; % Color for not significance
                 
+                add_text = '';
                 if(obj.do_test_in_plots == 1)
                     if(sig_indices(i) == 1) % Color for significant modularity
                         col = 'red';
+                        add_text = ' (+)';
                     elseif(no_sig_indices(i) == 1)%Color for significant antimodularity 
                         col = 'blue';
+                        add_text = ' (-)';
                     end
                 end
                 
@@ -304,7 +311,11 @@ classdef MetaStatisticsPlotter < handle;
                     set(gca,'ycolor',obj.colors(idx_col,:));
                     set(gca,'xcolor',obj.colors(idx_col,:));
                 end
-                title(obj.meta_statistics.names{i},'Color',col, 'FontSize',obj.font_size);
+                
+                %title(obj.meta_statistics.names{i},'Color',col, 'FontSize',obj.font_size);
+                title([obj.meta_statistics.names{i}, add_text], 'FontSize',obj.font_size);
+                
+                
             end
             set(gcf,'Position', [148         213        1142         746]);
 
@@ -470,6 +481,10 @@ classdef MetaStatisticsPlotter < handle;
                 obj.meta_statistics.networks{i}.plotter.use_type_interaction = obj.use_type_interaction;                
                 obj.meta_statistics.networks{i}.plotter.use_isocline = obj.use_isocline;
                 
+                obj.meta_statistics.networks{i}.plotter.use_empty_cell = obj.use_empty_cell;
+                obj.meta_statistics.networks{i}.plotter.cell_empty_color = obj.cell_empty_color;
+                obj.meta_statistics.networks{i}.plotter.use_module_division = obj.use_module_division;
+                
                 obj.meta_statistics.networks{i}.plotter.vertical_margin = obj.vertical_margin;
                 obj.meta_statistics.networks{i}.plotter.horizontal_proportion = obj.horizontal_proportion;
                 obj.meta_statistics.networks{i}.plotter.bead_color_rows = obj.bead_color_rows;
@@ -549,7 +564,7 @@ classdef MetaStatisticsPlotter < handle;
             %Write the labels
             set(gca,'xticklabel',[]);
             for i=1:obj.meta_statistics.n_networks
-                tmph=text(i,-0.01,names_matrix(i));
+                tmph=text(i,-0.03,names_matrix(i));
                 set(tmph,'HorizontalAlignment','right');
                 set(tmph,'rotation',90);
                 set(tmph,'fontsize',obj.font_size);
@@ -565,9 +580,9 @@ classdef MetaStatisticsPlotter < handle;
             set(gca,'Units','pixels');
             set(gcf,'Position', [91   135   859   505+150])
             apos = get(gca,'position');
-            apos(2) = apos(2) + 82;
+            apos(2) = apos(2) + 160;
             set(gca,'position',apos);
-            set(gcf,'position',[91   135   859   596]);
+            set(gcf,'position',[91   135   859   680]);
         end
         
     end

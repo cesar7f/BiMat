@@ -22,6 +22,7 @@ classdef Options
         ALLOW_ISOLATED_NODES = 1; %Create random networks that can or can not have empty rows or column nodes
         TRIALS_FOR_NON_EMPTY_NODES = 1000; %When ALLOW_ISOLATED_NODES = 0, this is the maximum number of random networks with empty rows/columns before giving up and relaxing that constraint
         INCLUDE_EMPTY_NODES = 1; %Keep  rows and columns from the matrix that are empty
+        SWAP_FIXED_FACTOR = 100; %During the fixed null model we perform N_EDGES by SWAP_FIXED_FACTOR swaps
         REPLICATES = 100;  %Number of random networks (or permutations )during statistical tests
     end
       

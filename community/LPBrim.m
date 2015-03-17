@@ -56,7 +56,7 @@ classdef LPBrim < BipartiteModularity
             
             %Tunne the result by applying the BRIM algorithm in the found
             %configuration.
-            [obj.rr_component obj.tt_component obj.Qb] = BipartiteModularity.BRIM(obj.rr_component, obj.bb_component,obj.tt_component,sum(obj.matrix_component(:)));
+            [obj.rr_component obj.tt_component, obj.Qb] = BipartiteModularity.BRIM(obj.rr_component, obj.bb_component,obj.tt_component,sum(obj.matrix_component(:)));
             %obj.BRIM();
                         
             

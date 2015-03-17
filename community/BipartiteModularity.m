@@ -49,10 +49,6 @@ classdef BipartiteModularity < handle
 
     properties
         matrix               = [];  %Boolean Bipartite adjacency matrix
-        rr                   = [];  %Row community matrix. Size = n_rows*N
-        tt                   = [];  %Column community matrix. Size = n_cols*N
-        rr_sorted            = [];  %$$rr$$ sorted by community size (=rr(index_rows))
-        tt_sorted            = [];  %tt sorted by community size (=tt(index_cols))
         n_rows               = 0;   %Number of rows
         n_cols               = 0;   %Number of columns
         n_edges              = 0;   %Number of edges
@@ -66,12 +62,16 @@ classdef BipartiteModularity < handle
         row_modules          = [];  %Module index for rows
         col_modules          = [];  %Module index for columns
         done                 = 0;   %The algorithm has been performed
-        webmatrix            = [];  %Same than matrix but not neccesearly boolean.
         optimize_by_component= 0;   %Otimize modularity by component, nor by the entire network.
         print_results        = Options.PRINT_RESULTS % Flag to indicate if result output will be generated
     end
     
     properties(Access = protected) %Used for calculating modularity in a single graph component
+        webmatrix            = [];  %Same than matrix but not neccesearly boolean.
+        rr                   = [];  %Row community matrix. Size = n_rows*N
+        tt                   = [];  %Column community matrix. Size = n_cols*N
+        rr_sorted            = [];  %$$rr$$ sorted by community size (=rr(index_rows))
+        tt_sorted            = [];  %tt sorted by community size (=tt(index_cols))
         matrix_component      = [];
         bb_component          = [];
         rr_component          = [];

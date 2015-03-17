@@ -11,7 +11,10 @@
 %    TYPE_MATRIX - Return a matrix with only certain type of interactions
 %    TYPE_MATRIX_NON_ZERO - Return a matrix with only certain type of interactions and delete all empty rows and columns.
 %    BIPARTITE_TO_UNIPARTITE - Return the unipartite version of matrix
-%    NESTED_MATRIX - Gest an square perfect nested matrix
+%    NESTED_MATRIX - Get a square perfect nested matrix
+% MIX_MATRICES - Mix two matrices randomly
+%    BLOCK_MATRIX - Get an square matrix with n blocks
+%    NEGATE_MATRIX - Negates a boolean matrix
 %    GET_BIGGEST_EIGENVALUE - Get the biggest eigenvalue of a bipartite matrix
 %    RANDOM_SUBMATRIX - Get a random submatrix of the bipartite matrix
 %    MATRIX_UNION - Create a bipartite matrix by the union of two bipartite matrices.
@@ -175,13 +178,68 @@ classdef MatrixFunctions < handle
         end
         
         function matrix = NESTED_MATRIX(n)
-        % NESTED_MATRIX - Gest an square perfect nested matrix
+        % NESTED_MATRIX - Get an square perfect nested matrix
         %
         %   matrix = NESTED_MATRIX(n) Get an square perfect matrix of size
         %   n by n.
         %
             matrix = flipud(tril(ones(n)));
             
+        end
+        
+        function matrix = BLOCK_MATRIX(n,s)
+        % BLOCK_MATRIX - Get an square matrix of n blocks
+        %
+        %   matrix = BLOCK_MATRIX(n,s ) Get a square matrix with n blocks
+        %   of size s x s
+        %
+            block_matrix = ones(s,s);
+            matrix = kron(eye(n),block_matrix);
+        end
+        
+        function matrix = MIX_MATRICES(matrix_1,matrix_2, p)
+        % MIX_MATRICES - Mix two matrices randomly
+        %
+        %   matrix = MIX_MATRICES(MATRIX_1,MATRIX_2) Get a matrix in
+        %   which each element of MATRIX_1 stays with probability 0.5 or is
+        %   replaced by the corresponding element in MATRIX_2 with the same
+        %   probability
+        %
+        %   matrix = MIX_MATRICES(MATRIX_1,MATRIX_2,p) Get a matrix in
+        %   which each element of MATRIX_1 stays with probability p or is
+        %   replaced by the corresponding element in MATRIX_2 with
+        %   probability 1-p
+        %
+        
+            if(nargin == 2)
+                p = 0.5;
+            end
+            
+            assert(sum(size(matrix_1) == size(matrix_2))==2);
+            assert(p <= 1); assert(p >= 0);
+            
+            rand_matrix = rand(size(matrix_1));
+        
+            matrix = (rand_matrix <= p).*matrix_1 + ...
+                (rand_matrix >= p).*matrix_2;
+            
+            
+        end
+        
+        function matrix = NEGATE_MATRIX(matrix, prob)
+        % NEGATE_MATRIX - Negates a boolean matrix
+        %
+        %   matrix = NEGATE_MATRIX(MATRIX) Returns a matrix in which
+        %   each element of a boolean matrix is neggated 
+        %
+        %   matrix = NEGATE_MATRIX(MATRIX,prob) Returns a matrix in which
+        %   each element of a boolean matrix is neggated with probability prob 
+        
+            if(nargin == 1)
+                prob = 1.0;
+            end
+        
+            matrix = matrix - abs(rand(size(matrix) < prob));
         end
         
         function max_eig = GET_BIGGEST_EIGENVALUE(matrix)

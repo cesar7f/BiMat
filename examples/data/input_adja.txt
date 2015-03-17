@@ -1,0 +1,13 @@
+insect_1 2 flower_1
+insect_1 2 grass_1
+insect_1 2 grass_2
+insect_2 1 flower_1
+insect_2 2 flower_2
+insect_2 2 grass_1
+insect_2 1 grass_2
+insect_3 2 flower_1
+insect_3 2 grass_2
+bird_1 1 flower_2
+bird_1 2 grass_1
+bird_1 2 grass_2
+bird_2 1 grass_1

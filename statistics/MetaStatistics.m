@@ -91,8 +91,12 @@ classdef MetaStatistics < handle
                 end
             else
                 for i = 1:obj.n_networks
-                    obj.networks{i}.name = sprintf('Network %i',i);
-                    obj.names{i} = sprintf('Network %i',i);
+                    if(strcmp('No name', obj.networks{i}.name) == 1)
+                        obj.networks{i}.name = sprintf('Network %i',i);
+                        obj.names{i} = sprintf('Network %i',i);
+                    else
+                        obj.names{i} = obj.networks{i}.name;
+                    end
                 end
             end
             

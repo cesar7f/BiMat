@@ -5,6 +5,7 @@
 %    AVERAGE - Create a random matrix with average probability in rows and columns.
 %    AVERAGE_ROWS - Create a random matrix with average probability in rows
 %    AVERAGE_COLS - Create a random matrix with average probability in columns
+%    FIXED - Create a random matrix that respect the exact degree sequence
 %    NULL_MODEL - Create a cell of random matrices
 %
 % See also:
@@ -197,6 +198,47 @@ classdef NullModels < handle
             end   
         end
         
+        function matrix = FIXED(matrix)
+        % FIXED - Create a random matrix that respect the exact degree
+        % sequence
+        %
+        %   random_matrix = FIXED(matrix) Create a random matrix that respect the exact degree
+        %   sequence. In other words, each node will continue to have the
+        %   exact same number of edges.
+        
+            assert(sum(sum(matrix==0 + matrix==1))==numel(matrix));
+
+            num_edges = sum(matrix(:));
+
+            
+            n_swap_edges_factor = 100;
+            n_swap_edges = n_swap_edges_factor * num_edges;
+
+            [irows, icols] = ind2sub(size(matrix),find(matrix>0));
+            [~,idx] = sort(irows);
+            edges = [irows(idx), icols(idx)];
+            for j = 1:n_swap_edges
+                idx_to_swap = ceil(num_edges*rand(2,1));
+                e_1 = idx_to_swap(1); e_2 = idx_to_swap(2);
+
+                if(matrix(edges(e_1,1), edges(e_2,2)) == 1 || ...
+                   matrix(edges(e_2,1), edges(e_1,2)) == 1)
+                    continue;
+                end
+
+                matrix(edges(e_1,1),edges(e_1,2)) = 0;
+                matrix(edges(e_2,1),edges(e_2,2)) = 0;
+
+                edge_temp = edges(e_1,:);
+                edges(e_1,2) = edges(e_2,2);
+                edges(e_2,2) = edge_temp(2);
+
+                matrix(edges(e_1,1),edges(e_1,2)) = 1;
+                matrix(edges(e_2,1),edges(e_2,2)) = 1;
+            end
+        
+        end
+        
         function rmatrices = NULL_MODEL(adjmatrix,model,replicates)
         % NULL_MODEL - Create a cell of random matrices
         %
@@ -221,6 +263,7 @@ classdef NullModels < handle
             if(strcmp(func2str(model),'NullModels.AVERAGE')); nullmodel = 2; end;
             if(strcmp(func2str(model),'NullModels.AVERAGE_ROWS')); nullmodel = 3; end;
             if(strcmp(func2str(model),'NullModels.AVERAGE_COLS')); nullmodel = 4; end;
+            if(strcmp(func2str(model),'NullModels.FIXED')); nullmodel = 5; end;
             
             rmatrices = cell(1,replicates);
             
@@ -234,6 +277,8 @@ classdef NullModels < handle
                     case 3
                         rmatrices{i} = NullModels.AVERAGE_ROWS(n_rows,n_cols,p_rows);
                     case 4
+                        rmatrices{i} = NullModels.AVERAGE_COLS(n_rows,n_cols,p_cols);
+                    case 5
                         rmatrices{i} = NullModels.AVERAGE_COLS(n_rows,n_cols,p_cols);
                 end
             end

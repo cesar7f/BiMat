@@ -153,7 +153,10 @@ classdef StatisticalTest < handle
             nestedness = obj.bipweb.nestedness;
             
             if(nestedness.done == 0)
+                tmp = nestedness.print_results;
+                nestedness.print_results = false;
                 nestedness.Detect();
+                nestedness.print_results = tmp;
                 N_val = obj.bipweb.nestedness.N;
             else
                 N_val = obj.bipweb.nestedness.N;
@@ -203,7 +206,10 @@ classdef StatisticalTest < handle
             
             %Calculate the modularity of the Bipartite object
             if(obj.bipweb.community.done == 0)
+                tmp = obj.bipweb.community.print_results;
+                obj.bipweb.community.print_results = false;
                 obj.bipweb.community.Detect(100);
+                obj.bipweb.community.print_results = tmp;
             end
             
             wQr = obj.bipweb.community.Qr;
@@ -280,12 +286,14 @@ classdef StatisticalTest < handle
                 str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.Qb_values.mean), '\n'];
                 str = [str, '\t     std:       \t', sprintf('%30.4f',obj.Qb_values.std), '\n'];
                 str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.Qb_values.zscore), '\n'];
+                str = [str, '\t     t-score:   \t', sprintf('%30.4f',obj.Qb_values.tscore), '\n'];
                 str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.Qb_values.percentile), '\n'];
                 
                 str = [str, '\t Qr value:      \t', sprintf('%30.4f',obj.Qr_values.value), '\n'];
                 str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.Qr_values.mean), '\n'];
                 str = [str, '\t     std:       \t', sprintf('%30.4f',obj.Qr_values.std), '\n'];
                 str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.Qr_values.zscore), '\n'];
+                str = [str, '\t     t-score:   \t', sprintf('%30.4f',obj.Qr_values.tscore), '\n'];
                 str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.Qr_values.percentile), '\n'];
             end
             
@@ -298,6 +306,7 @@ classdef StatisticalTest < handle
                 str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.N_values.mean), '\n'];
                 str = [str, '\t     std:       \t', sprintf('%30.4f',obj.N_values.std), '\n'];
                 str = [str, '\t     z-score:   \t', sprintf('%30.4f',obj.N_values.zscore), '\n'];
+                str = [str, '\t     t-score:   \t', sprintf('%30.4f',obj.N_values.tscore), '\n'];
                 str = [str, '\t     percentil: \t', sprintf('%30.4f',obj.N_values.percentile), '\n'];
             end
             
@@ -335,12 +344,15 @@ classdef StatisticalTest < handle
         %     
             n = length(random_values);
             me = mean(random_values);
-            zscore = (real_value - mean(random_values))/std(random_values);
             stad = std(random_values);
+            zscore = (real_value - me)/stad;
+            tscore = (real_value - me)/(stad/sqrt(n));
+            
             percent = 100.0*sum(real_value>random_values+0.00001)/n;
             
             out.value = real_value; out.mean = me; out.std = stad;
             out.zscore = zscore; out.percentile = percent;
+            out.tscore = tscore;
             out.random_values = sort(random_values);
             
         end
@@ -377,6 +389,8 @@ classdef StatisticalTest < handle
             elseif(nargin==2)
                 null_model = Options.DEFAULT_NULL_MODEL;
                 modul_algorithm = Options.MODULARITY_ALGORITHM;
+            elseif(nargin==3)
+                modul_algorithm = Options.MODULARITY_ALGORITHM;
             end
             
             bp = Bipartite(matrix);
@@ -388,32 +402,41 @@ classdef StatisticalTest < handle
             stest.Print();
         end
         
-        function stest = TEST_NESTEDNESS(matrix,replicates,null_model)
+        function stest = TEST_NESTEDNESS(matrix,replicates,null_model,nested_algorithm)
         % TEST_NESTEDNESS - Perform a test of the nestedness in a
         % bipartite matrix
         %
         %   stest = TEST_NESTEDNESS(MATRIX) Perform a statistical
         %   analysis of Nestedness in MATRIX using default values for null
-        %   model, modularity algorithm, and replicates. It returns a
+        %   model, nested algorithm, and replicates. It returns a
         %   StatisticalTest object.
         %
-        %   obj = TEST_NESTEDNESS(MATRIX,REPLICATES) Perform a statistical
+        %   stest = TEST_NESTEDNESS(MATRIX,REPLICATES) Perform a statistical
         %   analysis of Nestedness in MATRIX using REPLICATES random matrices
         %
-        %   obj = TEST_NESTEDNESS(MATRIX,REPLICATES,NULL_MODEL)
+        %   stest = TEST_NESTEDNESS(MATRIX,REPLICATES,NULL_MODEL)
         %   Perform an statistical analysis of Nestedness NODF in MATRIX unsing
         %   NULL_MODEL as null model.
+        %
+        %   stest = TEST_NESTEDNESS(MATRIX,REPLICATES,NULL_MODEL,NESTED_ALGORITHM)
+        %   Perform an statistical analysis of modularity in MATRIX unsing
+        %   MODUL_ALGORITHM as modularity algorithm.
         %
         % See also:
         %   NullModels, Options.REPLICATES, Options.DEFAULT_NULL_MODEL    
             if(nargin==1)
                 replicates = Options.REPLICATES;
                 null_model = Options.DEFAULT_NULL_MODEL;
+                nested_algorithm = Options.NESTEDNESS_ALGORITHM;
             elseif(nargin==2)
                 null_model = Options.DEFAULT_NULL_MODEL;
+                nested_algorithm = Options.NESTEDNESS_ALGORITHM;
+            elseif(nargin==3)
+                nested_algorithm = Options.NESTEDNESS_ALGORITHM;
             end
             
             bp = Bipartite(matrix);
+            bp.nestedness = nested_algorithm(matrix);
             stest = StatisticalTest(bp);
             stest.DoNulls(replicates,null_model);
             stest.TestNestedness();
