@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  Configuration
-date:   2013-06-03 21:12:57
+date:   25-02-17 21:12:57
 category: inst
 order: 0
 ---
@@ -19,14 +19,13 @@ the default parameters of <tt>BiMat</tt>
 significance in <tt>BiMat</tt>. Notice that the user can perform a one-tail test by just duplicating 
 the values below:
   * <tt>P_VALUE = 0.05</tt>: The $p$-value for testing statistical significance using a percentile test approach.
-	Anything above the percentile $100(1-p/2)$ will be significant, while anything below 
-	the percentile $100(p/2)$ will be anti-significant.
+	Anything outside the percentile range $[100(p/2), 100(1-p/2)]$ will be considered statistically significant.
   * <tt>Z_SCORE = 1.96</tt>: The $z$-score for testing statistical significance using a $z$-test approach.
-	Anything above $|z|$ will be considered significant, while anything below $-|z|$ will be considered
-	anti-significant.  $z=1.96$ has been chosen in order to correspond to $p=0.05$.
-* **Null Models:**
+	Anything outside the $z$-score range $[-|z|,|z|]$ will be considered statistically significant. Notice that the default value
+	corresponds to a 5% two tailed test.
+* **Null Models:**sdsdss
   * <tt>DEFAULT_NULL_MODEL = @NullModels.EQUIPROBABLE</tt>: The default function for creating random
-	networks. % (see corresponding section for a description of each null model).
+	networks. (see [Null Models]({% post_url /2015-02-17-null_models %}) corresponding section for a description of each null model).
   * <tt>ALLOW_ISOLATED_NODES = true</tt>: When the network is sparse, a random network may be created
 	with nodes with no links at all (matrix with empty rows or columns). <tt>BiMat</tt> by default allow
 	this kind of random networks for performing the statistical test. However, the user may want to
