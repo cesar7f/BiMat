@@ -17,21 +17,20 @@ the default parameters of <tt>BiMat</tt>
 
 * **Statistical Significance:** A two-tail test is the default way of testing for
 significance in <tt>BiMat</tt>. Notice that the user can perform a one-tail test by just duplicating 
-the values below:
+the values below:<br><br>
   * <tt>P_VALUE = 0.05</tt>: The $p$-value for testing statistical significance using a percentile test approach.
-	Anything outside the percentile range $[100(p/2), 100(1-p/2)]$ will be considered statistically significant.
+	Anything outside the percentile range $[100(p/2), 100(1-p/2)]$ will be considered statistically significant.<br><br>
   * <tt>Z_SCORE = 1.96</tt>: The $z$-score for testing statistical significance using a $z$-test approach.
 	Anything outside the $z$-score range $[-|z|,|z|]$ will be considered statistically significant. Notice that the default value
-	corresponds to a 5% two tailed test.
-* **Null Models:**{{baseurl}}
+	corresponds to a 5% two tailed test.<br><br>
+* **Null Models:**<br><br>
   * <tt>DEFAULT_NULL_MODEL = @NullModels.EQUIPROBABLE</tt>: The default function for creating random
-	networks. (see [Null Models](/BiMat/stats/null_models.html) corresponding section for a description of each null model).
+	networks. (see [Null Models](/BiMat/stats/null_models.html "Null Models") for detailed description of the avalaible null models in <tt>BiMat</tt>).<br><br> 
   * <tt>ALLOW_ISOLATED_NODES = true</tt>: When the network is sparse, a random network may be created
-	with nodes with no links at all (matrix with empty rows or columns). <tt>BiMat</tt> by default allow
-	this kind of random networks for performing the statistical test. However, the user may want to
-	change this value to <tt>false</tt> and like this avoid the creation of this kind of random networks.
-	However, the user must be aware that the time required for creating a random network without empty nodes 
-	will growth with the sparsity of the matrix.
+	with nodes with no links at all (matrix with empty rows or columns). <tt>BiMat</tt> by default  
+	allows these kinds of random networks for performing the statistical test. However, the user may want to 
+	change this value to <tt>false</tt>to avoid the creation of this kind of random networks. However, the user must be aware
+	that the time required for creating a random network without empty nodes will grow with the sparsity of the matrix.<br><br>
   * <tt>TRIALS_FOR_NON_EMPTY_NODES = 1000</tt>: This value is only used when the user changes
 	the value of the previous parameter to <tt>false</tt>. In some extreme cases (a very sparse network),
 	<tt>BiMat</tt> will not be able to find a random network without empty nodes. Hence, in order to avoid infinite
@@ -43,12 +42,12 @@ the values below:
 	Warning: Not possible to create a matrix with non isolated nodes.
 	The random matrix was created without this constraint instead.
 	Consider to modify Options.ALLOW_ISOLATED_NODES and/or Options.INCLUDE_EMPTY_NODES
-	</pre>
+	</pre><br><br>
   * <tt>INCLUDE_EMPTY_NODES = true</tt>: Sometimes the user may have data with empty nodes (a matrix
 	with empty rows and/or columns). Depending on the value of this parameter <tt>BiMat</tt> will chose 
 	between keeping these nodes (<tt>true</tt>)  or deleting them from the adjacency matrix (<tt>false</tt>).
 	Further, the user must be aware that including or not empty nodes will have an effect during the statistical
-	tests of his data.
+	tests of his data.<br><br>
   * <tt>REPLICATES = 100</tt>: The amount of replicates that <tt>BiMat</tt> performs in order to test
 	for statistical significance. The value of <tt>100</tt> was chosen with the idea of getting quick
 	results. However, the user must be aware that this value is no appropriate for accurate
