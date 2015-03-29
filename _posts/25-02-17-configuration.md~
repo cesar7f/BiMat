@@ -25,7 +25,7 @@ the values below:
 	corresponds to a 5% two tailed test.
 * **Null Models:**sdsdss
   * <tt>DEFAULT_NULL_MODEL = @NullModels.EQUIPROBABLE</tt>: The default function for creating random
-	networks. (see [Null Models]({% post_url /2015-02-17-null_models %}) corresponding section for a description of each null model).
+	networks. 
   * <tt>ALLOW_ISOLATED_NODES = true</tt>: When the network is sparse, a random network may be created
 	with nodes with no links at all (matrix with empty rows or columns). <tt>BiMat</tt> by default allow
 	this kind of random networks for performing the statistical test. However, the user may want to
