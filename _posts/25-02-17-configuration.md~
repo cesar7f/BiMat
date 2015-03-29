@@ -23,9 +23,9 @@ the values below:
   * <tt>Z_SCORE = 1.96</tt>: The $z$-score for testing statistical significance using a $z$-test approach.
 	Anything outside the $z$-score range $[-|z|,|z|]$ will be considered statistically significant. Notice that the default value
 	corresponds to a 5% two tailed test.
-* **Null Models:**sdsdss
+* **Null Models:**{{baseurl}}
   * <tt>DEFAULT_NULL_MODEL = @NullModels.EQUIPROBABLE</tt>: The default function for creating random
-	networks. (see [Null Models]({% post_url /2015-02-17-null_models %}) corresponding section for a description of each null model).
+	networks. (see [Null Models](/BiMat/stats/null_models.html) corresponding section for a description of each null model).
   * <tt>ALLOW_ISOLATED_NODES = true</tt>: When the network is sparse, a random network may be created
 	with nodes with no links at all (matrix with empty rows or columns). <tt>BiMat</tt> by default allow
 	this kind of random networks for performing the statistical test. However, the user may want to
