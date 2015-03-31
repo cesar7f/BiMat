@@ -38,7 +38,7 @@ bp.plotter.PlotMatrix;
 subplot(1,2,2);
 bp.plotter.link_width = 2.0;
 bp.plotter.PlotGraph;
-</pre><img vspace="5" hspace="5" src="../figures/bipartite_class_01.png" alt=""> <p>The colors in the matrix cells and graph links correspond to the different values in the adjacency matrix input. As already mentioned, these values are only used for plotting, not for calculating modularity or nestedness (in which the boolean version of the matrix is used).</p><p><h3>Creating Bipartite objects from text files</h3></p><p>An additional way of creating a <tt>Bipartite</tt> object is by using the static functions from the <tt>Reader.m</tt> class. Currently two different formats are available. The first input format will contain only the information of the adjacency matrix (you will need to add row/column labels and ids if you need it). A file example for creating the last data will be:</p><pre>2 0 2 2
+</pre><img vspace="5" hspace="5" src="bipartite_class_01.png" alt=""> <p>The colors in the matrix cells and graph links correspond to the different values in the adjacency matrix input. As already mentioned, these values are only used for plotting, not for calculating modularity or nestedness (in which the boolean version of the matrix is used).</p><p><h3>Creating Bipartite objects from text files</h3></p><p>An additional way of creating a <tt>Bipartite</tt> object is by using the static functions from the <tt>Reader.m</tt> class. Currently two different formats are available. The first input format will contain only the information of the adjacency matrix (you will need to add row/column labels and ids if you need it). A file example for creating the last data will be:</p><pre>2 0 2 2
 1 2 2 1
 2 0 0 2
 0 1 2 2

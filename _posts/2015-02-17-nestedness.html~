@@ -10,7 +10,7 @@ This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
 --><div class="content"><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Example 1: Calculating Nestedness</a></li><li><a href="#5">Example 2: Accesing detailed results</a></li><li><a href="#7">Example 3: Different degrees of nestedness</a></li></ul></div><h2>Description<a name="1"></a></h2><p>Nestedness describes the extent to which interactions form ordered subsets of each other. There are several indices for quantifying nestedness <tt>bimat</tt> implements two of the most commonly used methods, namely, NTC (Nestedness Temperature Calculator) (see <a href="http://link.springer.com/article/10.1007%2FBF00317508">Atmar et al 1993</a>) and NODF (for Nestedness metric based on Overlap and Decreasing Fill) (see <a href="http://onlinelibrary.wiley.com/doi/10.1111/j.0030-1299.2008.16644.x/abstract">Almeida-Neto et al 2008</a>)</p><p><h3>NODF</h3></p><p>The NODF measure normalizes for matrix size, and thus allows matrices of different sizes to be compared. The nestedness range is $0 \le NODF \le 1$, where 0 indicates a matrix of blocks (i.e perfect modular, identity, checkerboard) and 1 corresponds to a perfectly nested structure. NODF is based on two properties: decreasing fill and paired overlap. NODF measures nestedness across rows by assigning a value $M_{ij}^{\text{row}}$ to each pair $i$, $j$ of rows in the interaction matrix: 
 
-\begin{equation}
+begin{equation}
 M_{ij}^{\text{row}} = \begin{cases}
 			0 & \text{if $k_i \le k_j$}\\
          n_{ij}/\min(k_i,k_j) & \text{otherwise,}
