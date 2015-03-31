@@ -3,7 +3,7 @@
 % will need to add |BiMat| to the |Matlab| path either temporally or permanently:
 %
 % *Temporal path:* Add the |BiMat| directory (and sub-directories) to the
-% \matlab path. The user will need to type the next lines everytime he start a new |Matlab| session:
+% \matlab path. The user will need to type the next lines everytime he starts a new |Matlab| session:
 %Replace next line with your appropiate path'
 bimat_user_path = 'mypackages/bimat';
 g=genpath(bimat_user_path);

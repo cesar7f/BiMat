@@ -187,6 +187,23 @@ classdef MatrixFunctions < handle
             
         end
         
+        function matrix = CHECKERBOARD(n,m)
+        % CHECKERBOARD - Get checkerboard matrix
+        %
+        %   matrix = CHECKERBOARD(n,m) Get an checkerboard matrix of size
+        %   n,m
+        %    
+            matrix = zeros(n,m);
+            for i = 1:n
+                for j = 1:m
+                    if(mod(i+j,2) == 0)
+                        matrix(i,j) = 1.0;
+                    end
+                end
+            end
+        
+        end
+        
         function matrix = BLOCK_MATRIX(n,s)
         % BLOCK_MATRIX - Get an square matrix of n blocks
         %

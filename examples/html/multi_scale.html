@@ -7,7 +7,7 @@ comments: true
 <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
---><div class="content"><!--introduction--><p>An ecological network may look modular or nested depending on the scale at which it is observed (see <a href="http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html">Flores et al 2013</a> for an example). In other words, if wee focus at the global scale of the network we may infer that the network is modular and not nested. However, if we go to the inner community modules (after performing one of the modularity algorithms) we may discover that they are actually nested. Performing this kind of analysis may be exhaustive, specially if nothing is to be found. However, <tt>BiMat</tt> provides a the tools for performing a first exploratory analysis that we call Multi-scale Statistics.</p><p>Under this kind of analysis, <tt>BiMat</tt> first find what are the modular structure of the network. Once we found what are the modules, <tt>BiMat</tt> treat them as independent networks by performing a meta-statistics analsyis on them. Finally, if the user have available data about node classification, this data can be used by <tt>BiMat</tt> to analyze if the modular structure may be explained by node classification (i.e. nodes from the same class may be clustered inside the same module).</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example: Moebus Meta-scale analysis</a></li></ul></div><h2>Example: Moebus Meta-scale analysis<a name="1"></a></h2><p>In this example we will describe how to perform this kind of statistical analysis in a network that is large enought. This network is composed of 286 bacteria vs 215 phages that represents the largest cross-infection study to date. The phages and bacteria strains were collected across multiple geographical locations across the Atlantic ocean (and we will use this locations as node classes). We will see that this network is modular at the global scale (entire network) but the modules are inded nested. For more information about the analysis of this dataset, the user may want to read our original paper: <a href="http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html">Flores et al 2013</a>).</p><p><h3>Creating the Bipartite object</h3></p><p>We need to start by creating our <tt>Bipartite</tt> object</p><pre class="codeinput">load <span class="string">moebus_data.mat</span>;
+--><div class="content"><!--introduction--><p>An ecological network may look modular or nested depending on the scale at which it is observed (see <a href="http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html">Flores et al 2013</a> for an example). For example, if we focus at the global scale of the network we may infer that the network is modular and not nested. However, if we go to the inner community modules (after performing one of the modularity algorithms) we may discover that they are actually nested. Performing this kind of analysis may be exhausting, specially if nothing is to be found. However, <tt>BiMat</tt> provides the tools for performing a first exploratory analysis that we call Multi-scale Statistics.</p><p>Under this kind of analysis, <tt>BiMat</tt> first find what are the modular structure of the network. Once we found what are the modules, <tt>BiMat</tt> treat them as independent networks by performing a meta-statistics analsyis on them. Finally, if the user have available data about node classification, this data can be used by <tt>BiMat</tt> to analyze if the modular structure may be explained by node classification (i.e. nodes from the same class may be clustered inside the same module). In order to do that <tt>BiMat</tt> can make use of two kind of diversity indexes that can be applied to row and/or column modules:</p><div><ul><li><b>Simpson's Index of Diversity</b> : @1 - \frac{\sum_{i=1}^c n_i (n_i -1)}{N (N-1)}@</li><li><b>Shannon's Index of Diversity</b>: @-\sum_{i=1}^c \frac{n_i}{N} \log \frac{n_i}{N}@</li></ul></div><p>where (assuming it will be used on the row species) @c@ is the number of modules, @n_i@ the number of row species belonging to module @i@, and @N@ the number of row species.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example: Moebus Meta-scale analysis</a></li></ul></div><h2>Example: Moebus Meta-scale analysis<a name="1"></a></h2><p>In this example we will describe how to perform this kind of statistical analysis in a network that is large enough. This network is composed of 286 bacteria vs 215 phages that represents the largest cross-infection study to date. The phages and bacteria strains were collected across multiple geographical locations across the Atlantic ocean (and we will use this locations as node classes). We will see that this network is modular at the global scale (entire network) but the modules are inded nested. For more information about the analysis of this dataset, the user may want to read our original paper: <a href="http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html">Flores et al 2013</a>.</p><p><h3>Creating the Bipartite object</h3></p><p>We need to start by creating our <tt>Bipartite</tt> object</p><pre class="codeinput">load <span class="string">moebus_data.mat</span>;
 </pre><p>The loaded data contains the bipartite adjacency matrix of the Moebus and Nattkemper study, where 1's and 2's in the matrix represent either clear or turbid lysis spots. It also contains the labels for both bacteria and phages and their geographical location (classes) from which they were isolated across the Atlantic Ocean.</p><pre class="codeinput">bp = Bipartite(moebus.weight_matrix);    <span class="comment">% Create the main object</span>
 bp.row_labels = moebus.bacteria_labels;  <span class="comment">% Updating node labels</span>
 bp.col_labels = moebus.phage_labels;
@@ -21,7 +21,7 @@ bp.col_class = moebus.phage_stations;
 	 Number of Interactions:  	  1332
 	 Size:                    	 61490
 	 Connectance or fill:     	 0.022
-</pre><p><h3>Performing some modularity and nestedness analysis</h3></p><p>We can now perform the standar modularity and nestedness calculation. For modularity:</p><pre class="codeinput">bp.community = LeadingEigenvector(bp.matrix);
+</pre><p><h3>Performing some modularity and nestedness analysis</h3></p><p>We can now perform the standard modularity and nestedness calculation. For modularity:</p><pre class="codeinput">bp.community = LeadingEigenvector(bp.matrix);
 <span class="comment">% The next flag is exclusive of Newman Algorithm and what it does is to</span>
 <span class="comment">% performn a final tuning after each sub-division (see Newman 2006).</span>
 bp.community.DoKernighanLinTunning = true; <span class="comment">% Default value</span>
@@ -65,7 +65,7 @@ bp.plotter.PlotModularMatrix();
 title([<span class="string">'$Q = $'</span>,num2str(bp.community.Qb),<span class="string">' $c = $'</span>, num2str(bp.community.N)],<span class="keyword">...</span>
     <span class="string">'interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'fontsize'</span>,23);
 xlabel(<span class="string">'Modular Sorting'</span>,<span class="string">'fontsize'</span>,26);
-</pre><img vspace="5" hspace="5" src="multi_scale_01.png" alt=""> <p><h3>Multi-scale part</h3></p><p>It it evident that the entire network is modular (a result confirmed by the use of the modularity significance detection suite). Of relevance here is that internal nodes seems to have nested structure, e.g., there is triangular pattern with most of the links above the isocline. Hence, the Moebus network may have multi-scale structure properties (indeed, this was already demonstrated in <a href="http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html">Flores et al 2013</a>)). Using BiMAT, we can evaluate the internal structure of modules. For example, to evaluate nestedness, <tt>BiMat</tt> makes use of the <tt>InternalStatistics</tt> class by treating each of the modules independent networks:</p><pre class="codeinput"><span class="comment">%Focus on the first 15 modules</span>
+</pre><img vspace="5" hspace="5" src="multi_scale_01.png" alt=""> <p><h3>Multi-scale part</h3></p><p>It is evident that the entire network is modular (a result confirmed by the use of the modularity significance detection suite). Of relevance here is that internal nodes seems to have nested structure, e.g., there is triangular pattern with most of the links above the isocline. Hence, the Moebus network may have multi-scale structure properties (indeed, this was already demonstrated in <a href="http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html">Flores et al 2013</a>)). Using BiMAT, we can evaluate the internal structure of modules. For example, to evaluate nestedness, <tt>BiMat</tt> makes use of the <tt>InternalStatistics</tt> class by treating each of the modules independent networks:</p><pre class="codeinput"><span class="comment">%Focus on the first 15 modules</span>
 bp.internal_statistics.idx_to_focus_on = 1:15;
 <span class="comment">%Perform a default internal analysis</span>
 bp.internal_statistics.TestInternalModules();
@@ -96,32 +96,32 @@ bp.printer.PrintColumnModuleDiversity();
 </pre><pre class="codeoutput">Diversity index:    	  Diversity.SHANNON_INDEX
 Random permutations:	                     1000
 Module,index value,  zscore,percent
-     1,     2.4873, -1.9045,    3.4
-     2,     1.9722, -1.4933,    4.4
-     3,     2.2497, -5.9307,      0
-     4,     1.4791, -6.2447,      0
-     5,     1.8174, -6.0637,      0
-     6,     1.6094, 0.56682,     28
-     7,     1.0906, -8.8771,      0
-     8,     1.0042, -5.9143,      0
-     9,     1.4942, -3.0427,    0.3
-    10,     1.7479,-0.52576,   10.8
-    11,    0.45056, -8.6063,      0
-    12,     1.7678, -2.8179,      1
-    13,     1.3322, -1.1571,      3
-    14,      1.677, -2.4393,    0.9
-    15,     1.0397, -1.8735,      1
-    16,     1.0986, 0.32045,    9.5
+     1,     2.4873, -1.9234,    2.8
+     2,     1.9722, -1.5282,    3.6
+     3,     2.2497, -5.9533,      0
+     4,     1.4791, -5.7535,      0
+     5,     1.8174, -6.1189,      0
+     6,     1.6094, 0.59588,   28.7
+     7,     1.0906, -8.9942,      0
+     8,     1.0042, -5.5915,      0
+     9,     1.4942, -2.9425,    0.2
+    10,     1.7479,-0.51217,   10.7
+    11,    0.45056, -8.4525,      0
+    12,     1.7678, -3.0172,    0.2
+    13,     1.3322, -1.3108,      3
+    14,      1.677, -2.4457,    0.7
+    15,     1.0397, -2.0111,    0.8
+    16,     1.0986, 0.30702,    8.8
     17,          0,     NaN,      0
     18,          0,     NaN,      0
     19,          0,     NaN,      0
-    20,    0.63651, -2.9879,    0.1
+    20,    0.63651, -3.0214,    0.1
     21,          0,     NaN,      0
     22,          0,     NaN,      0
-    23,          0, -5.3276,      0
-    24,    0.69315, 0.20928,    4.2
+    23,          0, -5.4972,      0
+    24,    0.69315, 0.19035,    3.5
     25,          0,     NaN,      0
-    26,          0, -5.0991,      0
+    26,          0,  -5.029,      0
     27,          0,     NaN,      0
     28,          0,     NaN,      0
     29,          0,     NaN,      0
@@ -143,19 +143,19 @@ Module,index value,  zscore,percent
     45,          0,     NaN,      0
     46,          0,     NaN,      0
     47,          0,     NaN,      0
-    48,          0, -5.7835,      0
+    48,          0, -5.3276,      0
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Multi-Scale Statistics
 % An ecological network may look modular or nested depending on the scale
 % at which it is observed 
 % (see <http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html Flores et al
-% 2013> for an example). In other words, if wee focus at the global scale
+% 2013> for an example). For example, if we focus at the global scale
 % of the network we may infer that the network is modular and not nested.
 % However, if we go to the inner community modules (after performing one of the
 % modularity algorithms) we may discover that they are actually nested.
-% Performing this kind of analysis may be exhaustive, specially if nothing
-% is to be found. However, |BiMat| provides a the tools for performing a
+% Performing this kind of analysis may be exhausting, specially if nothing
+% is to be found. However, |BiMat| provides the tools for performing a
 % first exploratory analysis that we call Multi-scale Statistics.
 %
 % Under this kind of analysis, |BiMat| first find what are the modular
@@ -164,11 +164,19 @@ Module,index value,  zscore,percent
 % analsyis on them. Finally, if the user have available data about node
 % classification, this data can be used by |BiMat| to analyze if the
 % modular structure may be explained by node classification (i.e. nodes from
-% the same class may be clustered inside the same module). 
+% the same class may be clustered inside the same module). In order to do
+% that |BiMat| can make use of two kind of diversity indexes that can be applied to
+% row and/or column modules:
 %
+% * *Simpson's Index of Diversity* : @1 - \frac{\sum_{i=1}^c n_i (n_i -1)}{N (N-1)}@ 
+% * *Shannon's Index of Diversity*: @-\sum_{i=1}^c \frac{n_i}{N} \log \frac{n_i}{N}@
+%
+% where (assuming it will be used on the row species) @c@ is the number of modules,
+% @n_i@ the number of row species
+% belonging to module @i@, and @N@ the number of row species.
 %% Example: Moebus Meta-scale analysis
 % In this example we will describe how to perform this kind of statistical
-% analysis in a network that is large enought. This network is composed
+% analysis in a network that is large enough. This network is composed
 % of 286 bacteria vs 215 phages that represents the largest cross-infection
 % study to date. The phages and bacteria
 % strains were collected across multiple geographical locations across the
@@ -176,7 +184,7 @@ Module,index value,  zscore,percent
 % We will see that this network is modular at the global scale (entire
 % network) but the modules are inded nested.
 % For more information about the analysis of this dataset, the user may
-% want to read our original paper: <http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html Flores et al 2013>).
+% want to read our original paper: <http://www.nature.com/ismej/journal/v7/n3/abs/ismej2012135a.html Flores et al 2013>.
 %
 % <html><h3>Creating the Bipartite object</h3></html>
 %
@@ -200,7 +208,7 @@ bp.printer.PrintGeneralProperties();
 %
 % <html><h3>Performing some modularity and nestedness analysis</h3></html>
 %
-% We can now perform the standar modularity and nestedness calculation.
+% We can now perform the standard modularity and nestedness calculation.
 % For modularity:
 bp.community = LeadingEigenvector(bp.matrix);
 % The next flag is exclusive of Newman Algorithm and what it does is to
@@ -255,7 +263,7 @@ xlabel('Modular Sorting','fontsize',26);
 %
 % <html><h3>Multi-scale part</h3></html>
 %
-% It it evident that the entire network is modular (a result 
+% It is evident that the entire network is modular (a result 
 % confirmed by the use of the modularity significance detection suite). 
 % Of relevance here is that
 % internal nodes seems to have nested structure, e.g.,

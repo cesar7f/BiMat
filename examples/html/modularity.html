@@ -7,15 +7,16 @@ comments: true
 <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
---><div class="content"><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Example 1: Calculating Modularity</a></li><li><a href="#5">Example 2: Accesing detailed results</a></li><li><a href="#9">Example 3: Optimizing at the component level</a></li></ul></div><h2>Description<a name="1"></a></h2><p>Modularity indicates the presence of dense clusters of related nodes embedded within the network. In many systems, we can find a partition of nodes into specific communities or modules. This modularity metric an be expressed for a bipartite network as: <a href="latex">latex</a> \begin{equation} Q = \frac{1}{E} \sum_{ij} \left( B_{ij} - \frac{k_i d_j}{E} \right) \delta(g_i,h_j), \end{equation} <a href="/latex">/latex</a> where <img src="modularity_eq91731.png" alt="$B_ij$"> is the element in the bipartite matrix representing a link (1) or no link (0) between nodes <img src="modularity_eq28128.png" alt="$i$"> and <img src="modularity_eq31413.png" alt="$j$">, <img src="modularity_eq33874.png" alt="$g_i$"> and <img src="modularity_eq50612.png" alt="$h_i$"> are the module indexes of nodes <img src="modularity_eq28128.png" alt="$i$"> (that belongs to set <img src="modularity_eq85930.png" alt="$R$">) and <img src="modularity_eq31413.png" alt="$j$"> (that belongs to set <img src="modularity_eq22407.png" alt="$C$">), <img src="modularity_eq39054.png" alt="$k_i$"> is the degree of node <img src="modularity_eq28128.png" alt="$i$">, <img src="modularity_eq88394.png" alt="$d_j$"> is the degree of node <img src="modularity_eq31413.png" alt="$j$"> and <img src="modularity_eq85525.png" alt="$E$"> is the number of links in the network. <tt>BiMat</tt> contains three algorithms to maximize the last equation, all of them containing different heuristics.</p><div><ul><li><tt>AdaptiveBrim</tt>: The algorithm uses the BRIM algorithm   with an heuristic for looking the optimal value of modules. This heuristic consists   in multiply the number of modules <img src="modularity_eq05153.png" alt="$N$"> by a factor of two at each interaction as long   as the modularity value <img src="modularity_eq36832.png" alt="$Q_b$"> continues to increase, at which time the heuristic   perform a bisection method between the last values <img src="modularity_eq05153.png" alt="$N$"> that were visited.</li><li><tt>LPBrim</tt>: The algorithm is a combination between the BRIM and   LP algorithms. The heuristic of this algorithms consist in searching for the   best module configuration by first using the LP algorithm. The BRIM algorithm   is used at the end to refine the results.</li><li><tt>LeadingEigenvector</tt>: Altough this algorithm was defined for unipartite   networks, for certain bipartite networks, this algorithm can give the   best optimization.   equation, when defined in the unipartite version for two modules, can be expressed   as a linear combination of the normalized eigenvectors of the modularity matrix. Therefore,   this method divides the network in two modules by choosing the eigenvector with the   largest eigenvalue, such that negative and positive components of this eigenvector   specifies the division. To implement this algorithm,   <tt>BiMat</tt> first converts the bipartite matrix into its unipartite version.</li></ul></div><h2>Example 1: Calculating Modularity<a name="2"></a></h2><p>The next example shows how to detect modularity using the default algorithm:</p><pre class="codeinput">matrix = MatrixFunctions.BLOCK_MATRIX(2,10);
+--><div class="content"><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Example 1: Calculating Modularity</a></li><li><a href="#5">Example 2: Accesing detailed results</a></li><li><a href="#9">Example 3: Optimizing at the component level</a></li></ul></div><h2>Description<a name="1"></a></h2><p>Modularity indicates the presence of dense clusters of related nodes embedded within the network. In many systems, we can find a partition of nodes into specific communities or modules. This modularity metric can be expressed for a bipartite network as: <a href="latex">latex</a> \begin{equation} Q_b = \frac{1}{E} \sum_{ij} \left( B_{ij} - \frac{k_i d_j}{E} \right) \delta(g_i,h_j), \end{equation} <a href="/latex">/latex</a> where @B_ij@ is the element in the bipartite matrix representing a link (1) or no link (0) between nodes @i@ and @j@, @g_i@ and @h_i@ are the module indexes of nodes @i@ (that belongs to set @R@) and @j@ (that belongs to set @C@), @k_i@ is the degree of node @i@, @d_j@ is the degree of node @j@ and @E@ is the number of links in the network. <tt>BiMat</tt> contains three algorithms to maximize the last equation, all of them containing different heuristics.</p><div><ul><li><tt>AdaptiveBrim</tt>: The algorithm uses the BRIM algorithm   with an heuristic to look for the optimal value of modules. This heuristic consists   in multiply the number of modules @N@ by a factor of two at each interaction as long   as the modularity value @Q_b@ continues to increase, at which time the heuristic   perform a bisection method between the last values @N@ that were visited.</li><li><tt>LPBrim</tt>: The algorithm is a combination between the BRIM and   LP algorithms. The heuristic of this algorithm consists in searching for the   best module configuration by first using the LP algorithm. The BRIM algorithm   is used at the end to refine the results.</li><li><tt>LeadingEigenvector</tt>: Although this algorithm was defined for unipartite   networks, for certain bipartite networks, this algorithm can give the   highest modularity value.   The bipartite modularity equation, when defined in the unipartite version for two modules, can be expressed   as a linear combination of the normalized eigenvectors of the modularity matrix. Therefore,   this method divides the network in two modules by choosing the eigenvector with the   largest eigenvalue, such that negative and positive components of this eigenvector   specifies the division. To implement this algorithm,   <tt>BiMat</tt> first converts the bipartite matrix into its unipartite version   and the initial step.</li></ul></div><p>In addition to optimize the standard modularity @Q_b@ \bimat also evaluates (after optimizing @Q_b@) an a posteriori measure of modularity @Q_r@ introduced in <a href="http://f1000research.com/articles/2-130/v3">Poisot 2013</a> and defined as: <a href="latex">latex</a> \begin{equation} Q_r = 2\times\frac{W}{E}-1 %% This version returns values in 0;1 \end{equation} <a href="/latex">/latex</a> where @W = \sum_{ij} B_{ij} \delta(g_i,h_j)@ is the number of edges that are inside modules. Alternatively, @Q_r \equiv \frac{W-T}{W+T}@ where @T@ is the number of edges that are between modules.  In other words, this quantity maps the relative difference of edges that are within modules to those between modules on a scale from 1 (all edges are within modules) to @-1@ (all edges are between modules). This measure allows to compare the output of different algorithms.</p><h2>Example 1: Calculating Modularity<a name="2"></a></h2><p>The next example shows how to detect modularity using the default algorithm:</p><pre class="codeinput">matrix = MatrixFunctions.BLOCK_MATRIX(2,10);
 bp = Bipartite(matrix);
+bp.plotter.PlotMatrix();
 bp.community.Detect();
 </pre><pre class="codeoutput">Modularity:
 	Used algorithm:             	        AdaptiveBrim
 	N (Number of modules):      	                   2
 	Qb (Standard metric):       	              0.5000
 	Qr (Ratio of int/ext inter):	              1.0000
-</pre><p>We can also change the default algorithm before detecting the community structure, choosing among one of the three options described before:</p><pre class="codeinput">bp.community = LPBrim(matrix);
+</pre><img vspace="5" hspace="5" src="modularity_01.png" alt=""> <p>We can also change the default algorithm before detecting the community structure, choosing among one of the three options described before:</p><pre class="codeinput">bp.community = LPBrim(matrix);
 bp.community.Detect();
 </pre><pre class="codeoutput">Modularity:
 	Used algorithm:             	              LPBrim
@@ -45,24 +46,49 @@ com2 =
   LeadingEigenvector with properties:
 
     DoKernighanLinTunning: 1
-                   matrix: [20x20 logical]
-                   n_rows: 20
-                   n_cols: 20
-                  n_edges: 200
-                       bb: [20x20 double]
-               index_rows: [20x1 double]
-               index_cols: [20x1 double]
-                   trials: 20
                        Qb: 0.5000
                        Qr: 1
                         N: 2
+                   matrix: [20x20 logical]
               row_modules: [20x1 double]
               col_modules: [20x1 double]
+                       bb: [20x20 double]
+                   n_rows: 20
+                   n_cols: 20
+                  n_edges: 200
+               index_rows: [20x1 double]
+               index_cols: [20x1 double]
+                   trials: 20
                      done: 1
     optimize_by_component: 0
             print_results: 0
 
-</pre><pre class="codeinput"><span class="comment">%Number of modules</span>
+</pre><p>The description of these properties is showed in the next table:</p><p>
+<table class="tftable" border="1">
+<tr><th>Property</th><th>Algorithm</th><th>Description</th></tr>
+<tr> <td><tt>Qb</tt></td> <td>All</td> <td>standard modularity value between 0 and 1</td> </tr>
+<tr> <td><tt>Qr</tt></td> <td>All</td> <td>a-posteriori modularity value between 0 and 1</td> </tr>
+<tr> <td><tt>N</tt></td> <td>All</td> <td>number of modules</td> </tr>
+<tr> <td><tt>matrix</tt></td> <td>All</td> <td>bipartite adjacency matrix</td> </tr>
+<tr> <td><tt>row_modules</tt></td> <td>All</td> <td>module index for each row</td> </tr>
+<tr> <td><tt>col_modules</tt></td> <td>All</td> <td>module index for each column</td> </tr>
+<tr> <td><tt>bb</tt></td> <td>All</td> <td>modularity matrix</td> </tr>
+<tr> <td><tt>n_rows</tt></td> <td>All</td> <td>number of rows</td> </tr>
+<tr> <td><tt>n_cols</tt></td> <td>All</td> <td>number of columns</td> </tr>
+<tr> <td><tt>n_edges</tt></td> <td>All</td> <td>number of edges</td> </tr>
+<tr> <td><tt>index_rows</tt></td> <td>All</td> <td>row indexes after sorting by modules</td> </tr>
+<tr> <td><tt>index_cols</tt></td> <td>All</td> <td>column indexes after sorting by modules</td> </tr>
+<tr> <td><tt>done</tt></td> <td>All</td> <td>if modularity has been already detected</td> </tr>
+<tr> <td><tt>optimize_by_component</tt></td> <td>All</td> <td>should modularity be optimized by isolated component first? (default <tt>false</tt>)</td> </tr>
+<tr> <td><tt>print_results</tt></td> <td>All</td> <td>if results will be printed after detection (default <tt>true</tt>)</td> </tr>
+<tr> <td><tt>trials</tt></td> <td><tt>AdaptiveBrim/LPBrim</tt></td> <td>number of initialization trials (default see <tt>Options.TRIALS_MODULARITY)</tt></td> </tr>
+<tr> <td><tt>prob_reassigment</tt></td> <td><tt>AdaptiveBrim</tt></td> <td>probability of reassigment when new modules are created (default 0.5)</td> </tr>
+<tr> <td><tt>expansion_factor</tt></td> <td><tt>AdaptiveBrim</tt></td> <td>factor of expansion for creating new modules (default 2.0)</td> </tr>
+<tr> <td><tt>red_labels</tt></td> <td><tt>LPBrim</tt></td> <td>Similar than <tt>row_modules</tt></td> </tr>
+<tr> <td><tt>col_labels</tt></td> <td><tt>LPBrim</tt></td> <td>Similar than <tt>col_modules</tt></td> </tr>
+<tr> <td><tt>DoKernighanLinTunning</tt></td> <td><tt>LeadingEigenvector</tt></td> <td>execute Kernighan tunning after modularity detection? (default <tt>true</tt>)</tt></td> </tr>
+</table>
+</p><p>Now, we can access a property by just typing it:</p><pre class="codeinput"><span class="comment">%Number of modules</span>
 com2.N
 </pre><pre class="codeoutput">
 ans =
@@ -113,9 +139,9 @@ bp2.plotter.SetPlotFormat(plotFormat);
 bp2.plotter.PlotModularMatrix();
 title([<span class="string">'$Q = '</span>, num2str(bp2.community.Qb),<span class="string">'$, $N = '</span>,num2str(bp2.community.N),<span class="string">'$'</span>],<span class="keyword">...</span>
     <span class="string">'FontSize'</span>,16, <span class="string">'interpreter'</span>,<span class="string">'latex'</span>);
-xlabel(<span class="string">'Optimizaing by isolated components'</span>,<span class="string">'FontSize'</span>, 20);
+xlabel(<span class="string">'Optimizing by isolated components'</span>,<span class="string">'FontSize'</span>, 20);
 set(gcf,<span class="string">'position'</span>, [70, 223, 1224, 673]);
-</pre><img vspace="5" hspace="5" src="modularity_01.png" alt=""> <p>We can see that the default optimization gives a higher modularity value (we are optimizing at the entire matrix) but lower number of nodes than the component optimization. By optimizing at the component level, we do not have any more the constraint of the entire network optimization and therefore it is possible to break into more modules. However, the reported value is still the value of the entire network partition.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="modularity_02.png" alt=""> <p>We can see that the default optimization gives a higher modularity value (we are optimizing at the entire matrix) but lower number of modules than the component optimization. By optimizing at the component level, we do not have any more the constraint of the entire network optimization and therefore it is possible to break into more modules. However, the reported value is still the value of the entire network partition.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Modularity
 
@@ -123,45 +149,62 @@ set(gcf,<span class="string">'position'</span>, [70, 223, 1224, 673]);
 % Modularity indicates the presence of dense clusters of related nodes embedded 
 % within the network. In many systems, we can 
 % find a partition of nodes into specific communities or modules.  
-% This modularity metric an be expressed for a bipartite network as:
+% This modularity metric can be expressed for a bipartite network as:
 % <latex>
 % \begin{equation}
-% Q = \frac{1}{E} \sum_{ij} \left( B_{ij} - \frac{k_i d_j}{E} \right) \delta(g_i,h_j),
+% Q_b = \frac{1}{E} \sum_{ij} \left( B_{ij} - \frac{k_i d_j}{E} \right) \delta(g_i,h_j),
 % \end{equation}
 % </latex>
-% where $B_ij$ is the element in the bipartite matrix representing a link
+% where @B_ij@ is the element in the bipartite matrix representing a link
 % (1)
-% or no link (0) between nodes $i$ and $j$, $g_i$ and $h_i$ are the module indexes of nodes $i$ (that belongs to set
-% $R$) and $j$ (that belongs to set $C$), $k_i$ is the degree of node $i$, $d_j$ is
-% the degree of node $j$ and $E$ is the number of links in the network.  
+% or no link (0) between nodes @i@ and @j@, @g_i@ and @h_i@ are the module indexes of nodes @i@ (that belongs to set
+% @R@) and @j@ (that belongs to set @C@), @k_i@ is the degree of node @i@, @d_j@ is
+% the degree of node @j@ and @E@ is the number of links in the network.  
 % |BiMat| contains three algorithms to maximize the last equation, all of
 % them containing different heuristics. 
 %
 % * |AdaptiveBrim|: The algorithm uses the BRIM algorithm
-%   with an heuristic for looking the optimal value of modules. This heuristic consists
-%   in multiply the number of modules $N$ by a factor of two at each interaction as long
-%   as the modularity value $Q_b$ continues to increase, at which time the heuristic 
-%   perform a bisection method between the last values $N$ that were visited.
+%   with an heuristic to look for the optimal value of modules. This heuristic consists
+%   in multiply the number of modules @N@ by a factor of two at each interaction as long
+%   as the modularity value @Q_b@ continues to increase, at which time the heuristic 
+%   perform a bisection method between the last values @N@ that were visited.
 % * |LPBrim|: The algorithm is a combination between the BRIM and
-%   LP algorithms. The heuristic of this algorithms consist in searching for the
+%   LP algorithms. The heuristic of this algorithm consists in searching for the
 %   best module configuration by first using the LP algorithm. The BRIM algorithm
 %   is used at the end to refine the results.
-% * |LeadingEigenvector|: Altough this algorithm was defined for unipartite
+% * |LeadingEigenvector|: Although this algorithm was defined for unipartite
 %   networks, for certain bipartite networks, this algorithm can give the
-%   best optimization.
-%   equation, when defined in the unipartite version for two modules, can be expressed
+%   highest modularity value.
+%   The bipartite modularity equation, when defined in the unipartite version for two modules, can be expressed
 %   as a linear combination of the normalized eigenvectors of the modularity matrix. Therefore,
 %   this method divides the network in two modules by choosing the eigenvector with the
 %   largest eigenvalue, such that negative and positive components of this eigenvector 
 %   specifies the division. To implement this algorithm,
-%   |BiMat| first converts the bipartite matrix into its unipartite version.
-
+%   |BiMat| first converts the bipartite matrix into its unipartite version
+%   and the initial step.
+%
+% In addition to optimize the standard modularity @Q_b@ \bimat also evaluates
+% (after optimizing @Q_b@) an a posteriori measure of modularity @Q_r@
+% introduced in <http://f1000research.com/articles/2-130/v3 Poisot 2013> and defined as:
+% <latex>
+% \begin{equation}
+% Q_r = 2\times\frac{W}{E}-1 %% This version returns values in 0;1
+% \end{equation}
+% </latex>
+% where @W = \sum_{ij} B_{ij} \delta(g_i,h_j)@ is the number of edges that
+% are inside modules. Alternatively, @Q_r \equiv \frac{W-T}{W+T}@ where
+% @T@ is the number of edges that are between modules.  In other words, 
+% this quantity maps the relative difference of edges that are
+% within modules to those between modules on a scale 
+% from 1 (all edges are within modules) to @-1@ (all edges are between modules). 
+% This measure allows to compare the output of different algorithms.
 
 %% Example 1: Calculating Modularity
 % The next example shows how to detect modularity using the default algorithm:
 %
 matrix = MatrixFunctions.BLOCK_MATRIX(2,10);
 bp = Bipartite(matrix);
+bp.plotter.PlotMatrix();
 bp.community.Detect();
 %%
 % We can also change the default algorithm before detecting the community
@@ -185,6 +228,36 @@ com2 = BipartiteModularity.LEADING_EIGENVECTOR(matrix);
 %A list of all properties
 com2
 %%
+% The description of these properties is showed in the next table:
+%
+% <html>
+% <table class="tftable" border="1">
+% <tr><th>Property</th><th>Algorithm</th><th>Description</th></tr>
+% <tr> <td><tt>Qb</tt></td> <td>All</td> <td>standard modularity value between 0 and 1</td> </tr>
+% <tr> <td><tt>Qr</tt></td> <td>All</td> <td>a-posteriori modularity value between 0 and 1</td> </tr>
+% <tr> <td><tt>N</tt></td> <td>All</td> <td>number of modules</td> </tr>
+% <tr> <td><tt>matrix</tt></td> <td>All</td> <td>bipartite adjacency matrix</td> </tr>
+% <tr> <td><tt>row_modules</tt></td> <td>All</td> <td>module index for each row</td> </tr>
+% <tr> <td><tt>col_modules</tt></td> <td>All</td> <td>module index for each column</td> </tr>
+% <tr> <td><tt>bb</tt></td> <td>All</td> <td>modularity matrix</td> </tr>
+% <tr> <td><tt>n_rows</tt></td> <td>All</td> <td>number of rows</td> </tr>
+% <tr> <td><tt>n_cols</tt></td> <td>All</td> <td>number of columns</td> </tr>
+% <tr> <td><tt>n_edges</tt></td> <td>All</td> <td>number of edges</td> </tr>
+% <tr> <td><tt>index_rows</tt></td> <td>All</td> <td>row indexes after sorting by modules</td> </tr>
+% <tr> <td><tt>index_cols</tt></td> <td>All</td> <td>column indexes after sorting by modules</td> </tr>
+% <tr> <td><tt>done</tt></td> <td>All</td> <td>if modularity has been already detected</td> </tr>
+% <tr> <td><tt>optimize_by_component</tt></td> <td>All</td> <td>should modularity be optimized by isolated component first? (default <tt>false</tt>)</td> </tr>
+% <tr> <td><tt>print_results</tt></td> <td>All</td> <td>if results will be printed after detection (default <tt>true</tt>)</td> </tr>
+% <tr> <td><tt>trials</tt></td> <td><tt>AdaptiveBrim/LPBrim</tt></td> <td>number of initialization trials (default see <tt>Options.TRIALS_MODULARITY)</tt></td> </tr>
+% <tr> <td><tt>prob_reassigment</tt></td> <td><tt>AdaptiveBrim</tt></td> <td>probability of reassigment when new modules are created (default 0.5)</td> </tr>
+% <tr> <td><tt>expansion_factor</tt></td> <td><tt>AdaptiveBrim</tt></td> <td>factor of expansion for creating new modules (default 2.0)</td> </tr>
+% <tr> <td><tt>red_labels</tt></td> <td><tt>LPBrim</tt></td> <td>Similar than <tt>row_modules</tt></td> </tr>
+% <tr> <td><tt>col_labels</tt></td> <td><tt>LPBrim</tt></td> <td>Similar than <tt>col_modules</tt></td> </tr>
+% <tr> <td><tt>DoKernighanLinTunning</tt></td> <td><tt>LeadingEigenvector</tt></td> <td>execute Kernighan tunning after modularity detection? (default <tt>true</tt>)</tt></td> </tr>
+% </table>
+% </html>
+%
+% Now, we can access a property by just typing it:
 %Number of modules
 com2.N
 %%
@@ -224,14 +297,16 @@ bp2.plotter.SetPlotFormat(plotFormat);
 bp2.plotter.PlotModularMatrix();
 title(['$Q = ', num2str(bp2.community.Qb),'$, $N = ',num2str(bp2.community.N),'$'],...
     'FontSize',16, 'interpreter','latex');
-xlabel('Optimizaing by isolated components','FontSize', 20);
+xlabel('Optimizing by isolated components','FontSize', 20);
 set(gcf,'position', [70, 223, 1224, 673]);
 %%
 % We can see that the default optimization gives a higher modularity value
-% (we are optimizing at the entire matrix) but lower number of nodes than
+% (we are optimizing at the entire matrix) but lower number of modules than
 % the component optimization. By optimizing at the component level, we do
 % not have any more the constraint of the entire network optimization and
 % therefore it is possible to break into more modules. However, the
 % reported value is still the value of the entire network partition.
+
+
 ##### SOURCE END #####
 -->

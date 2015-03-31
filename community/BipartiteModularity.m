@@ -48,19 +48,19 @@
 classdef BipartiteModularity < handle
 
     properties
-        matrix               = [];  %Boolean Bipartite adjacency matrix
-        n_rows               = 0;   %Number of rows
-        n_cols               = 0;   %Number of columns
-        n_edges              = 0;   %Number of edges
-        bb                   = [];  %Original - Null (matrix - kidj/num_edges)
-        index_rows           = [];  %Register of the swaps in Rows.
-        index_cols           = [];  %Register of the swaps in Cols.
-        trials               = Options.TRIALS_MODULARITY; %Number of trials to find the best modularity configuration
         Qb                   = 0;   %Standard Modularity function (1/num_edges) * Trace(rr' * bb * tt)
         Qr                   = 0;   %Percentage of interactions inside modules
         N                    = 0;   %Number of modules
+        matrix               = [];  %Boolean Bipartite adjacency matrix
         row_modules          = [];  %Module index for rows
         col_modules          = [];  %Module index for columns
+        bb                   = [];  %Original - Null (matrix - kidj/num_edges)
+        n_rows               = 0;   %Number of rows
+        n_cols               = 0;   %Number of columns
+        n_edges              = 0;   %Number of edges
+        index_rows           = [];  %Register of the swaps in Rows.
+        index_cols           = [];  %Register of the swaps in Cols.
+        trials               = Options.TRIALS_MODULARITY; %Number of trials to find the best modularity configuration
         done                 = 0;   %The algorithm has been performed
         optimize_by_component= 0;   %Otimize modularity by component, nor by the entire network.
         print_results        = Options.PRINT_RESULTS % Flag to indicate if result output will be generated

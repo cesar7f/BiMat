@@ -7,7 +7,7 @@ comments: true
 <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
---><div class="content"><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Example 1: Calculating Nestedness</a></li><li><a href="#5">Example 2: Accesing detailed results</a></li><li><a href="#7">Example 3: Nested vs Antinested pattern</a></li></ul></div><h2>Description<a name="1"></a></h2><p>Nestedness describes the extent to which interactions form ordered subsets of each other. There are several indices for quantifying nestedness <tt>bimat</tt> implements two of the most commonly used methods, namely, NTC (Nestedness Temperature Calculator) (see <a href="http://link.springer.com/article/10.1007%2FBF00317508">Atmar et al 1993</a>) and NODF (for Nestedness metric based on Overlap and Decreasing Fill) (see <a href="http://onlinelibrary.wiley.com/doi/10.1111/j.0030-1299.2008.16644.x/abstract">Almeida-Neto et al 2008</a>)</p><p><h3>NODF</h3></p><p>The NODF measure normalizes for matrix size, and thus allows matrices of different sizes to be compared. The nestedness range is @0 \le NODF \le 1@, where 0 indicates an homogeneous matrix having ones in every position and 1 corresponds to a perfectly nested structure. NODF is based on two properties: decreasing fill and paired overlap. NODF measures nestedness across rows by assigning a value @M_{ij}^{\text{row}}@ to each pair @i@, @j@ of rows in the interaction matrix: \begin{equation} M_{ij}^{\text{row}} = \begin{cases} 0 &amp; \text{if <img src="nest_eq55900.png" alt="$k_i \le k_j$">}\\ n_{ij}/\min(k_i,k_j) &amp; \text{otherwise} \end{cases} \end{equation} where @k_i@ is the number of ones in row @i@, @k_j@ is the number of ones in row @j@, and @n_{ij}@ is the number of shared interactions between rows @i@ and @j@ (so-called paired overlap). Notice that positive contributions to the NODF require pairs of columns satisfying the decreasing fill property, that is, when @k_i &gt; k_j@. A similar term  @M_{ij}^{\text{col}}@  is used to compute column  contributions.  The total nestedness is the sum of columns and row contributions: \begin{equation} N_{NODF} = \frac{\sum_{ij} M_{ij}^{\text{row}} + \sum_{ij} M_{ij}^{\text{col}}} { \left [ {{m(m-1)} \over {2}} \right ] + \left [ {{n(n-1)} \over {2}} \right ] }. \label{eq.nodf} \end{equation}</p><p><tt>Matlab</tt> vectorization capabilities allows for very efficient calculation of  (\ref{eq.Mrows}) (and its column version): \begin{equation} M_{ij}^{\text{row}} = \frac{(\mathbf{r}_i \cdot \mathbf{r}_j) \left(1-\delta(k_i,k_j)\right)} {\min(k_i,k_j)}, \end{equation} where @\mathbf{r_i}@ is a vector that represents the row @i@ of the adjacency matrix, and @\delta(k_i,k_j)=1@ if and only if @k_i=k_j@. By using this notation, (\ref{eq.nodf}) can be expressed in terms of  matrix multiplications that exploit the implicit parallelism provided by Matlab (see code for details). Tests indicate that a vectorised formulation of @N_{NODF}@  outperforms sequential  approaches (e.g., using loops) by a factor of over 50 times.</p><p><h3>Temperature Calculator (NTC)</h3></p><p>A `temperature', @T@, of the interaction matrix is estimated by resorting rows and columns such that the largest quantity of interactions falls above the isocline (a curve that will divide the interaction from the non-interaction zone of a perfectly nested matrix of the same size and connectance). In doing so, the value of @T@ quantifies the extent to which interactions only take place in the upper left (@T\approx0@), or are equally distributed between the upper left and the lower right (@T\approx100@). Perfectly nested interaction matrices can be resorted to lie exclusively in the upper left portion and hence have a temperature of 0. The value of temperature depends on the size, connectance and structure of the network. Because the temperature value quantifies departures from perfect nestedness, we define the nestedness, @N_{NTC}@, of a matrix to range from 0 to 1, @N_{NTC}=(100-T)/100@, such that @N_{NTC}=1@ when @T=0@ (in the case of perfect nestedness) and @N_{NTC}=0@ when @T=100@ (in the case when interactions form a ``checkerboard'' when visualized in matrix format).</p><h2>Example 1: Calculating Nestedness<a name="2"></a></h2><p>The next example shows how to detect nestedness using the default algorithm:</p><pre class="codeinput">matrix = MatrixFunctions.NESTED_MATRIX(20);
+--><div class="content"><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Example 1: Calculating Nestedness</a></li><li><a href="#5">Example 2: Accesing detailed results</a></li><li><a href="#7">Example 3: Different degrees of nestedness</a></li></ul></div><h2>Description<a name="1"></a></h2><p>Nestedness describes the extent to which interactions form ordered subsets of each other. There are several indices for quantifying nestedness <tt>bimat</tt> implements two of the most commonly used methods, namely, NTC (Nestedness Temperature Calculator) (see <a href="http://link.springer.com/article/10.1007%2FBF00317508">Atmar et al 1993</a>) and NODF (for Nestedness metric based on Overlap and Decreasing Fill) (see <a href="http://onlinelibrary.wiley.com/doi/10.1111/j.0030-1299.2008.16644.x/abstract">Almeida-Neto et al 2008</a>)</p><p><h3>NODF</h3></p><p>The NODF measure normalizes for matrix size, and thus allows matrices of different sizes to be compared. The nestedness range is @0 \le NODF \le 1@, where 0 indicates a matrix of blocks (i.e perfect modular, identity, checkerboard) and 1 corresponds to a perfectly nested structure. NODF is based on two properties: decreasing fill and paired overlap. NODF measures nestedness across rows by assigning a value @M_{ij}^{\text{row}}@ to each pair @i@, @j@ of rows in the interaction matrix: \begin{equation} M_{ij}^{\text{row}} = \begin{cases} 0 &amp; \text{if <img src="nest_eq55900.png" alt="$k_i \le k_j$">}\\ n_{ij}/\min(k_i,k_j) &amp; \text{otherwise} \end{cases} \end{equation} where @k_i@ is the number of ones in row @i@, @k_j@ is the number of ones in row @j@, and @n_{ij}@ is the number of shared interactions between rows @i@ and @j@ (so-called paired overlap). Notice that positive contributions to the NODF require pairs of columns satisfying the decreasing fill property, that is, when @k_i &gt; k_j@. A similar term  @M_{ij}^{\text{col}}@  is used to compute column  contributions.  The total nestedness is the sum of columns and row contributions: \begin{equation} N_{NODF} = \frac{\sum_{ij} M_{ij}^{\text{row}} + \sum_{ij} M_{ij}^{\text{col}}} { \left [ {{m(m-1)} \over {2}} \right ] + \left [ {{n(n-1)} \over {2}} \right ] }. \label{eq.nodf} \end{equation}</p><p><tt>Matlab</tt> vectorization capabilities allows for very efficient calculation of  (\ref{eq.Mrows}) (and its column version): \begin{equation} M_{ij}^{\text{row}} = \frac{(\mathbf{r}_i \cdot \mathbf{r}_j) \left(1-\delta(k_i,k_j)\right)} {\min(k_i,k_j)}, \end{equation} where @\mathbf{r_i}@ is a vector that represents the row @i@ of the adjacency matrix, and @\delta(k_i,k_j)=1@ if and only if @k_i=k_j@. By using this notation, (\ref{eq.nodf}) can be expressed in terms of  matrix multiplications that exploit the implicit parallelism provided by Matlab (see code for details). Tests indicate that a vectorised formulation of @N_{NODF}@  outperforms sequential  approaches (e.g., using loops) by a factor of over 50 times.</p><p><h3>Temperature Calculator (NTC)</h3></p><p>A `temperature', @T@, of the interaction matrix is estimated by resorting rows and columns such that the largest quantity of interactions falls above the isocline (a curve that will divide the interaction from the non-interaction zone of a perfectly nested matrix of the same size and connectance). In doing so, the value of @T@ quantifies the extent to which interactions only take place in the upper left (@T\approx0@), or are equally distributed between the upper left and the lower right (@T\approx100@). Perfectly nested interaction matrices can be resorted to lie exclusively in the upper left portion and hence have a temperature of 0. The value of temperature depends on the size, connectance and structure of the network. Because the temperature value quantifies departures from perfect nestedness, we define the nestedness, @N_{NTC}@, of a matrix to range from 0 to 1, @N_{NTC}=(100-T)/100@, such that @N_{NTC}=1@ when @T=0@ (in the case of perfect nestedness) and @N_{NTC}=0@ when @T=100@ (in the case when interactions form a ``checkerboard'' when visualized in matrix format).</p><h2>Example 1: Calculating Nestedness<a name="2"></a></h2><p>The next example shows how to detect nestedness using the default algorithm:</p><pre class="codeinput">matrix = MatrixFunctions.NESTED_MATRIX(20);
 bp = Bipartite(matrix);
 bp.nestedness.Detect();
 </pre><pre class="codeoutput">Nestedness NODF:
@@ -38,25 +38,43 @@ nes2 =
 
   NestednessNODF with properties:
 
-                   N_rows: 1
-                   N_cols: 1
-                        N: 1
-                   matrix: [20x20 logical]
-                   n_rows: 0
-                   n_cols: 0
-    independent_rows_cols: 1
-                     done: 1
-            print_results: 0
+           N_rows: 1
+           N_cols: 1
+                N: 1
+           matrix: [20x20 logical]
+           n_rows: 0
+           n_cols: 0
+             done: 1
+    print_results: 0
 
-</pre><p>Nestedness value (always between 0 and 1)</p><pre class="codeinput">nes2.N
+</pre><p>The description of these properties is showed in the next table:</p><p>
+<table class="tftable" border="1">
+<tr><th>Property</th><th>Algorithm</th><th>Description</th></tr>
+<tr> <td><tt>N</tt></td> <td>Both</td> <td>nestedness value between 0 and 1</td> </tr>
+<tr> <td><tt>matrix</tt></td> <td>Both</td> <td>bipartite adjacency matrix</td> </tr>
+<tr> <td><tt>n_rows</tt></td> <td>Both</td> <td>number of rows</td> </tr>
+<tr> <td><tt>n_cols</tt></td> <td>Both</td> <td>number of columns</td> </tr>
+<tr> <td><tt>done</tt></td> <td>Both</td> <td>if nestedness has been already detected</td> </tr>
+<tr> <td><tt>print_results</tt></td> <td>Both</td> <td>if results will be printed after detection (default <tt>true</tt>)</td> </tr>
+<tr> <td><tt>N_rows</tt></td> <td><tt>NestednessNODF</tt></td> <td>nestedness value for rows between 0 and 1</td> </tr>
+<tr> <td><tt>N_cols</tt></td> <td><tt>NestednessNODF</tt></td> <td>nestedness value for columns between 0 and 1</td> </tr>
+<tr> <td><tt>T</tt></td> <td><tt>NestednessNTC</tt></td> <td>Temperature value between 0 and 1</td> </tr>
+<tr> <td><tt>do_geometry</tt></td> <td><tt>NestednessNTC</tt></td> <td>perform geometry calculation? (default <tt>true</tt>)</td> </tr>
+<tr> <td><tt>index_rows</tt></td> <td><tt>NestednessNTC</tt></td> <td>row indexes after sorting</td> </tr>
+<tr> <td><tt>index_cols</tt></td> <td><tt>NestednessNTC</tt></td> <td>colum indexes after sorting</td> </tr>
+<tr> <td><tt>connectance</tt></td> <td><tt>NestednessNTC</tt></td> <td>connectance (fill) value between 0 and 1</td> </tr>
+<tr> <td><tt>trials</tt></td> <td><tt>NestednessNTC</tt></td> <td>number of random initializations (default 5)</td> </tr>
+<tr> <td><tt>do_sorting</tt></td> <td><tt>NestednessNTC</tt></td> <td>sort matrix before calculating temperature? (default <tt>true</tt>)</td> </tr>
+</table>
+</p><p>Now, we can access a property by just typing it:</p><pre class="codeinput">nes2.N
 </pre><pre class="codeoutput">
 ans =
 
      1
 
-</pre><h2>Example 3: Nested vs Antinested pattern<a name="7"></a></h2><p>In this example we will calculate the nestedness of three different degrees of nestedness:</p><pre class="codeinput"><span class="comment">%Creating the matrices</span>
+</pre><h2>Example 3: Different degrees of nestedness<a name="7"></a></h2><p>In this example we will calculate the nestedness of three different degrees of nestedness:</p><pre class="codeinput"><span class="comment">%Creating the matrices</span>
 matrix_nested = MatrixFunctions.NESTED_MATRIX(20); <span class="comment">%perfect nested</span>
-matrix_modular = MatrixFunctions.BLOCK_MATRIX(2,10); <span class="comment">%perfect anti nested</span>
+matrix_modular = MatrixFunctions.CHECKERBOARD(20,20); <span class="comment">%imperfect nested</span>
 matrix_middle = MatrixFunctions.MIX_MATRICES(matrix_nested,matrix_modular); <span class="comment">%a combination</span>
 
 ntc_nested = Nestedness.NTC(matrix_nested);
@@ -107,11 +125,11 @@ xlabel([<span class="string">'$N_{NTC} = '</span>, num2str(ntc_nested.N),<span c
 	NTC (Nestedness value):     	              1.0000
 	T (Temperature value):      	              0.0000
 Nestedness NTC:
-	NTC (Nestedness value):     	              0.0220
-	T (Temperature value):      	             97.7991
+	NTC (Nestedness value):     	              0.0317
+	T (Temperature value):      	             96.8287
 Nestedness NTC:
-	NTC (Nestedness value):     	              0.6050
-	T (Temperature value):      	             39.5011
+	NTC (Nestedness value):     	              0.5383
+	T (Temperature value):      	             46.1694
 Nestedness NODF:
 	NODF (Nestedness value):    	              1.0000
 	NODF (Rows value):          	              1.0000
@@ -121,10 +139,10 @@ Nestedness NODF:
 	NODF (Rows value):          	              0.0000
 	NODF (Columns value):       	              0.0000
 Nestedness NODF:
-	NODF (Nestedness value):    	              0.5463
-	NODF (Rows value):          	              0.5777
-	NODF (Columns value):       	              0.5149
-</pre><img vspace="5" hspace="5" src="nest_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+	NODF (Nestedness value):    	              0.5738
+	NODF (Rows value):          	              0.5760
+	NODF (Columns value):       	              0.5715
+</pre><img vspace="5" hspace="5" src="nest_01.png" alt=""> <p>We can see in the plot three different degrees of nestedness using the original sorting (the input without any sorting), and nestedness sorting (in this sorting rows and columns are sorted in decreasing order of their sum totals). First thing to notice is that nestedness sorting only has an effect in matrices that are neither perfectly nested nor imperfectly nested. Further, while <tt>NestednessNTC</tt> gives a perfect 1 for the perfect nested matrix, it does not give a value of 0 for the imperfect one. The reason behind this number is the way in which <tt>NestednessNTC</tt> is calculated (which is very sensitive to the final cell positions).</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Modularity
 
@@ -141,8 +159,8 @@ Nestedness NODF:
 % <html><h3>NODF</h3></html>
 %
 % The NODF measure normalizes for matrix size, and thus allows matrices of different sizes to be compared. 
-% The nestedness range is @0 \le NODF \le 1@, where 0 indicates an homogeneous matrix having ones
-% in every position and 1 corresponds to a perfectly nested structure. 
+% The nestedness range is @0 \le NODF \le 1@, where 0 indicates a matrix of blocks (i.e perfect modular, identity, checkerboard)
+% and 1 corresponds to a perfectly nested structure. 
 % NODF is based on two properties: decreasing fill and paired overlap.  
 % NODF measures nestedness across rows by assigning a value @M_{ij}^{\text{row}}@ to each pair
 % @i@, @j@ of rows in the interaction matrix:	
@@ -220,15 +238,38 @@ nes2 = Nestedness.NODF(matrix);
 % to these values:
 nes2
 %%
-% Nestedness value (always between 0 and 1)
+% The description of these properties is showed in the next table:
+%
+% <html>
+% <table class="tftable" border="1">
+% <tr><th>Property</th><th>Algorithm</th><th>Description</th></tr>
+% <tr> <td><tt>N</tt></td> <td>Both</td> <td>nestedness value between 0 and 1</td> </tr>
+% <tr> <td><tt>matrix</tt></td> <td>Both</td> <td>bipartite adjacency matrix</td> </tr>
+% <tr> <td><tt>n_rows</tt></td> <td>Both</td> <td>number of rows</td> </tr>
+% <tr> <td><tt>n_cols</tt></td> <td>Both</td> <td>number of columns</td> </tr>
+% <tr> <td><tt>done</tt></td> <td>Both</td> <td>if nestedness has been already detected</td> </tr>
+% <tr> <td><tt>print_results</tt></td> <td>Both</td> <td>if results will be printed after detection (default <tt>true</tt>)</td> </tr>
+% <tr> <td><tt>N_rows</tt></td> <td><tt>NestednessNODF</tt></td> <td>nestedness value for rows between 0 and 1</td> </tr>
+% <tr> <td><tt>N_cols</tt></td> <td><tt>NestednessNODF</tt></td> <td>nestedness value for columns between 0 and 1</td> </tr>
+% <tr> <td><tt>T</tt></td> <td><tt>NestednessNTC</tt></td> <td>Temperature value between 0 and 1</td> </tr>
+% <tr> <td><tt>do_geometry</tt></td> <td><tt>NestednessNTC</tt></td> <td>perform geometry calculation? (default <tt>true</tt>)</td> </tr>
+% <tr> <td><tt>index_rows</tt></td> <td><tt>NestednessNTC</tt></td> <td>row indexes after sorting</td> </tr>
+% <tr> <td><tt>index_cols</tt></td> <td><tt>NestednessNTC</tt></td> <td>colum indexes after sorting</td> </tr>
+% <tr> <td><tt>connectance</tt></td> <td><tt>NestednessNTC</tt></td> <td>connectance (fill) value between 0 and 1</td> </tr>
+% <tr> <td><tt>trials</tt></td> <td><tt>NestednessNTC</tt></td> <td>number of random initializations (default 5)</td> </tr>
+% <tr> <td><tt>do_sorting</tt></td> <td><tt>NestednessNTC</tt></td> <td>sort matrix before calculating temperature? (default <tt>true</tt>)</td> </tr>
+% </table>
+% </html>
+%
+% Now, we can access a property by just typing it:
 nes2.N
 
-%% Example 3: Nested vs Antinested pattern
+%% Example 3: Different degrees of nestedness
 % In this example we will calculate the nestedness of three different
 % degrees of nestedness:
 %Creating the matrices
 matrix_nested = MatrixFunctions.NESTED_MATRIX(20); %perfect nested
-matrix_modular = MatrixFunctions.BLOCK_MATRIX(2,10); %perfect anti nested
+matrix_modular = MatrixFunctions.CHECKERBOARD(20,20); %imperfect nested
 matrix_middle = MatrixFunctions.MIX_MATRICES(matrix_nested,matrix_modular); %a combination
 
 ntc_nested = Nestedness.NTC(matrix_nested);
@@ -275,5 +316,17 @@ subplot(2,3,6);
 PlotWebs.PLOT_NESTED_MATRIX(matrix_nested, plot_format);
 xlabel(['$N_{NTC} = ', num2str(ntc_nested.N),'$, $N_{NODF} = ',num2str(nodf_nested.N),'$'],...
     'FontSize',14, 'interpreter','latex');
+
+%%
+% We can see in the plot three different degrees of nestedness
+% using the original sorting (the input without any sorting), and
+% nestedness sorting (in this sorting rows and columns are sorted in
+% decreasing order of their sum totals). First thing to notice is that
+% nestedness sorting only has an effect in matrices that are neither
+% perfectly nested nor imperfectly nested. Further, while |NestednessNTC| 
+% gives a perfect 1 for the perfect nested matrix, it does not give a value of 0
+% for the imperfect one. The reason behind this number is the way in which
+% |NestednessNTC| is calculated (which is very sensitive to the final cell
+% positions).
 ##### SOURCE END #####
 -->

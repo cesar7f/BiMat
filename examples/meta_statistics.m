@@ -1,8 +1,8 @@
 %% Meta Statistics
 % Some times the user may be in need of not only evaluating nestedness and/or
 % modularity in a single bipartite network, but in a set of related
-% networks. There exist many examples in the literature of how these kind
-% of analysis are perfored 
+% networks. There exists many examples in the literature of how these kinds 
+% of analysis are performed 
 % (i.e. see <http://www.pnas.org/content/108/28/E288.abstract Flores et al
 % 2011> for Phage-bacteria and
 % <http://www.pnas.org/content/100/16/9383.full Bascompte et al 2003> for
@@ -10,7 +10,7 @@
 % |BiMat| comes with a couple of classes that the user can use in order to
 % perform this kind of analysis. The name of these classes are
 % |MetaStatistics| and |MetaStatisticsPlotter|. The main functionality of
-% the first one is to take as inputo a entire set of bipartite networks and
+% the first one is to take as input an entire set of bipartite networks and
 % perform modularity and nested analysis among them. Finally, the second
 % class is used in order to have a better visual understanding of the
 % results.
@@ -20,7 +20,7 @@
 % This example will show how to perform this kind of analysis. In order to
 % do that, we will use seed-dispersal bipartite networks. These networks
 % were collected for Bascompte's lab website <http://www.web-of-life.es/
-% The Web of Life>. We will explain the process of this king of analysis
+% The Web of Life>. We will explain the process of this kind of analysis
 % from the point in which the user have already a set of data sets, which
 % in these case correspond to bipartite matrices encoded in text files.
 % The data used in this example can be located inside the |examples/data/|

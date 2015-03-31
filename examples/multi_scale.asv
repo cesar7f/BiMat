@@ -20,12 +20,9 @@
 % that |BiMat| can make use of two kind of diversity indexes that can be applied to
 % row and/or column modules:
 %
-% * *Simpson's Index of Diversity* : @1 - \frac{\sum_{i=1}^c n_i (n_i -1)}{N (N-1)}@ 
-% * *Shannon's Index of Diversity*: @-\sum_{i=1}^c \frac{n_i}{N} \log \frac{n_i}{N}@
+% * *Simpson's Index of Diversity* : @D = \frac{\sum_{i=1}^c n_i (n_i -1)}{N (N-1)}@ 
+% * Shannon Indes: @D + (n*(n-1))/(N*(N-1))@
 %
-% where (assuming it will be used on the row species) @c@ is the number of modules,
-% @n_i@ the number of row species
-% belonging to module @i@, and @N@ the number of row species.
 %% Example: Moebus Meta-scale analysis
 % In this example we will describe how to perform this kind of statistical
 % analysis in a network that is large enough. This network is composed

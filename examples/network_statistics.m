@@ -1,15 +1,15 @@
 %% Network Statistics
 % As described in the null models section, modularity and nestedness values
-% lack of statistical significance if they are not compared with an
-% appropiate null model. Nor only that, an appropiate ensamble of those
+% lack statistical significance if they are not compared with an
+% appropiate null model. Further, an appropiate ensamble of those
 % random networks need to be created in order to analyze those networks.
 % Altought the user can use |BiMat| null models for designing his own
 % statistical tests, |BiMat| comes already with an |StatisticalTest| that
 % helps the user to perform such tests.
 % |BiMat| comes with statistical test for both modularity and nestedness.
 % These tests can be executed directly on an instance of the |Bipartite|
-% class directly (where the property |statistics| is an instance of the
-% |StatisticalTest| class.
+% class (where the property |statistics| is an instance of the
+% |StatisticalTest| class, or directly in the adjacency matrix.
 
 
 %% Example: Working directly on a |Bipartite| instance
@@ -37,18 +37,18 @@ subplot(1,3,2); bp.plotter.PlotNestedMatrix; title('Nested','FontSize',font_size
 subplot(1,3,3); bp.plotter.PlotModularMatrix; title('Modular','FontSize',font_size);
 
 %% 
-% By just looking at the last plots, we can infer that this matrix have a
+% By looking at the last plots, we can infer that this matrix have a
 % strong community structure pattern, while nestedness is not apparent. In
-% order to confirm these observations, we can finally perform a nested and
-% modular tests on this matrix (using default values):
+% order to confirm these observations, we can finally perform nestedness
+% and modularity tests on this matrix (using default values):
 bp.statistics.TestCommunityStructure();
 %%
 bp.statistics.TestNestedness();
 %%
-% As is possible to see, |BiMat| shows the status of the current
+% As we can see, |BiMat| shows the status of the current
 % evaluation, which in this case was performed using 100 random matrices
-% (the default value). In order to print the results, once again, the user
-% (as usual) only need to call the |Print| method:
+% (the default value). In order to print the results, the user
+% only need to call the |Print| method:
 bp.statistics.Print;
 %%
 % The output just shows the configuration of each evaluation, which in this

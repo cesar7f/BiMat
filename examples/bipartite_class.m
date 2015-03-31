@@ -2,7 +2,7 @@
 % The |Bipartite| is the fundamental class of the |BiMat| software. This
 % class works as an encapsulator of most of the available classes.
 % Altough it is possible to work with |BiMat| wihout using the |Bipartite|
-% class, it's use facilitates the access to most of the |BiMat| features.
+% class, its use facilitates the access to most of the |BiMat| features.
 %
 % The main input of the Bipartite class is a matlab matrix, where the rows
 % will represent the node set @R@ and the columns the node
@@ -17,8 +17,8 @@
 % |Bipartite| class has two different types of optional input. The first type is for
 % node labeling and the main use of it will be for labeling row and column
 % nodes during plotting. The input must be encoded in a cell of strings for
-% each set @V@ and @U@ nodes, such that each string in a cell corresponds
-% to the label of a node. The size of such cells must corresponds to the
+% each set @R@ and @C@ of nodes, such that each string in a cell corresponds
+% to the label of a node. The size of such cells must correspond to the
 % number of nodes.
 %
 % The second type of output consist of the type of node for either row and
@@ -33,12 +33,12 @@
 % 
 %% |Bipartite| object creation
 % There exist many ways of creating a |Bipartite| object. Either the user
-% can create it from scratch using |Matlab| commands matrices and cells, or
-% it can create it from text files.
+% can create it from scratch using |Matlab| commands matrices and cells, or it can be created from
+% text files.
 %
 % <html><h3>Creating it from scratch</h3></html>
 %
-% Here will show an example of the simplest way of creating Bipartite
+% Here, we will show an example of the simplest way of creating a Bipartite
 % object:
 %Creating the adjacency matrix
 matrix = [2 0 2 2;...
@@ -56,7 +56,7 @@ row_ids = [1 1 1 3 3];
 %class column ids (1 to flower, 5 to grass specie)
 col_ids = [1 1 5 5];
 %%
-% Using the data we just created we can now create or Bipartite object:
+% Using the data we just created we can now create our Bipartite object:
 bp = Bipartite(matrix);
 bp.row_labels = row_labels;
 bp.col_labels = col_labels;
@@ -74,11 +74,11 @@ bp.plotter.link_width = 2.0;
 bp.plotter.PlotGraph;
 %%
 % The colors in the matrix cells and graph links correspond to the
-% different values in the adjacency matrix input. As already mentionede,
+% different values in the adjacency matrix input. As already mentioned,
 % these values are only used for plotting, not for calculating modularity
 % or nestedness (in which the boolean version of the matrix is used).
 %
-% <html><h3>Creating it from text files</h3></html>
+% <html><h3>Creating Bipartite objects from text files</h3></html>
 %
 % An additional way of creating a |Bipartite| object is by using the static functions from
 % the |Reader.m| class. Currently two different formats are available.
@@ -100,7 +100,7 @@ bp.col_labels = col_labels;
 bp.row_class = row_ids;
 bp.col_class = col_ids;
 %%
-% The second input format consist on writing the adjacency list. This input
+% The second input format consists on writing the adjacency list. This input
 % format will read also the row and column node labels. The user still need to add
 % the classification ids if he needs it. An example of this kind of input
 % text fill will look like:
@@ -120,7 +120,7 @@ bp.col_class = col_ids;
 %  bird_2 1 grass_1
 %
 % The middle columns is optional. If it is not used, the reading function
-% will assume that is composed of ones only. We can now just call:
+% will assume that it is composed of ones only. We can now just call:
 bp = Reader.READ_ADJACENCY_LIST('input_adja.txt.');
 % Wee need to add classification ids by ourselves
 bp.row_class = row_ids;

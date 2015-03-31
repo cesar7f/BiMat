@@ -7,7 +7,6 @@
 %    matrix - Bipartite Adjacency Matrix
 %    n_rows - Number of row nodes
 %    n_cols - Number of column nodes
-%    independent_rows_cols - The nestedness algorithm can calculate nestedness for rows and columns independently
 %    done - Flag to indicate if the algorith has ben performed
 %    print_results - Flag to indicate if result output will be generated
 %
@@ -26,8 +25,8 @@ classdef Nestedness < handle
         matrix                = []    % Bipartite Adjacency Matrix
         n_rows                = 0;    % Number of row nodes
         n_cols                = 0;    % Number of column nodes
-        independent_rows_cols = false;% The nestedness algorithm can calculate nestedness for rows and columns independently
-        done                  = 0;    % Flag to indicate if the algorith has ben performed
+        %independent_rows_cols = false;% The nestedness algorithm can calculate nestedness for rows and columns independently
+        done                  = 0;    % Flag to indicate if the algorith has been performed
     end
     
     properties

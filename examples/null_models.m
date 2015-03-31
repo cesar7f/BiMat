@@ -1,7 +1,7 @@
 %% Null Models
 
 %% Description
-% In statistics, it a common task to analyze the statistical significance of a
+% In statistics, it is a common task to analyze the statistical significance of a
 % value in which we have interest. Most of the time this task is done by comparing the
 % value in question with a null model. In our case, to analyze the statistical
 % significance of the values of
@@ -21,7 +21,7 @@
 % * |NullModels.COLUMNS|: @P_{ij} = k_{i}/n@ -- the connectance, and the expected number of interactions of row nodes, are respected
 % * |NullModels.ROWS|: @P_{ij} = d_{j}/m@ -- the connectance, and the expected number of interactions of column nodes, are respected
 % 
-% An additional null model that can not be thought in terms of cell
+% An additional null model that cannot be expressed in terms of cell
 % probabilities and is included in |BiMat| is:
 %
 % * |NullModels.FIXED|: Under this null model the exact sum of rows and
@@ -97,5 +97,5 @@ subplot(2,5,10);
 PlotWebs.PLOT_MATRIX(modular_fixed, plot_format);
 
 %%
-% As it is possible to see (at least visually) the chosen null model will
+% As it is possible to see the chosen null model will
 % have a bigger effect in nested matrices than modular ones.

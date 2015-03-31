@@ -68,7 +68,7 @@ classdef NestednessNTC < Nestedness
         used_area           = 2;          % Chose a value in 1,2,3
         delta_x             = 0.001;      % X Increment in order to get the vector of the Isoclane values (obj.fxp)
         debug_messages      = 0;          % 1,0 Print Debug Messages
-        K                  = 2.4125e+003 % 100 / 0.04145;  %Value found in the literature
+        K                   = 2.4125e+003 % 100 / 0.04145;  %Value found in the literature
         break_random        = 20;         % How many initial random permutations in the matrix
     end
     
@@ -195,72 +195,39 @@ classdef NestednessNTC < Nestedness
             % will have the smaller possible value of temperature (and by
             % consequence the highest nestedness value)
             
-            globalMinimalT = 500;
-            matrixLocalMinima = [];
-            indexRowLocalMinima = [];
-            indexColLocalMinima = [];
-            indexRowGlobalMinima = [];
-            indexColGlobalMinima = [];
+            globalMinimalT = obj.T;
+            obj.matrix_minimal = obj.matrix;
+            indexRowGlobalMinima = obj.index_rows;
+            indexColGlobalMinima = obj.index_cols;
             
-            
-            failedtoincrease = 0; %Count if the next matrix randomization do an improvement
             % Do obj.trials initial random permutations of the
             % matrix to be tested
             for i = 1:obj.trials
-                
-                % If no increase is detected in obj.break_random continuos
-                % trials, no need for continue looking.
-                if(failedtoincrease > obj.break_random)
-                    %fprintf('Break on i = %i\n',i);
-                    break;
-                end
-                
-                
-                permutationMinimalT = 500; %temperature infinite
-                obj.T = 500;
                 
                 [matrix_permuted,new_row_index,new_col_index] = MatrixFunctions.RANDOM_SORT(obj.matrix);
                 obj.matrix = matrix_permuted;
                 obj.index_rows(new_row_index);
                 obj.index_cols(new_col_index);
-%                i = 1;
-                while(1)
-                    %display(i);
-                    %i = i+1;
-                    [sort_matrix, new_row_index, new_col_index] = MatrixFunctions.SORT_MATRIX(obj.matrix);
-                    obj.matrix = sort_matrix;
-                    obj.index_rows = obj.index_rows(new_row_index);
-                    obj.index_cols = obj.index_cols(new_col_index);
-                    
-                    obj.CalculateTemperature();
-                    
-                    if(obj.debug_messages == 1); fprintf('TLocal = %f T = %f\n', permutationMinimalT,obj.T); end;
-                    
-                    if(abs(permutationMinimalT - obj.T) <= 0.001 || obj.T > permutationMinimalT)
-                        break;
-                    end
-                        
-                    if(obj.T < permutationMinimalT)
-                        permutationMinimalT = obj.T;
-                        matrixLocalMinima = obj.matrix;
-                        indexRowLocalMinima = obj.index_rows;
-                        indexColLocalMinima = obj.index_cols;
-                    end
-                    
-                end
-                if(obj.debug_messages == 1); fprintf('finalizo ciclo\n'); end;
+
+                [sort_matrix, new_row_index, new_col_index] = MatrixFunctions.SORT_MATRIX(obj.matrix);
+                obj.matrix = sort_matrix;
+                obj.index_rows = obj.index_rows(new_row_index);
+                obj.index_cols = obj.index_cols(new_col_index);
+
+                obj.CalculateTemperature();
+
+                if(obj.debug_messages == 1); fprintf('T = %f Tglobal = %f\n', obj.T, globalMinimalT); end;
+
                 
                 %Save if permutation is smaller than the global minimal
-                if(permutationMinimalT < globalMinimalT)
+                if(obj.T < globalMinimalT)
                     %fprintf('TMinimalGlob = %f\n', permutationMinimalT);
-                    globalMinimalT = permutationMinimalT;
-                    obj.matrix_minimal = matrixLocalMinima;
-                    indexRowGlobalMinima = indexRowLocalMinima;
-                    indexColGlobalMinima = indexColLocalMinima;
-                    failedtoincrease = 0;
+                    globalMinimalT = obj.T;
+                    obj.matrix_minimal = obj.matrix;
+                    indexRowGlobalMinima = obj.index_rows;
+                    indexColGlobalMinima = obj.index_cols;
                 end
-                
-                failedtoincrease = failedtoincrease + 1;
+
             end
             
            %Keep the best sorting for NTC
@@ -548,3 +515,72 @@ classdef NestednessNTC < Nestedness
     
 
 end
+
+
+% globalMinimalT = 500;
+%             matrixLocalMinima = [];
+%             indexRowLocalMinima = [];
+%             indexColLocalMinima = [];
+%             indexRowGlobalMinima = [];
+%             indexColGlobalMinima = [];
+%             
+%             
+%             failedtoincrease = 0; %Count if the next matrix randomization do an improvement
+%             % Do obj.trials initial random permutations of the
+%             % matrix to be tested
+%             for i = 1:obj.trials
+%                 
+%                 % If no increase is detected in obj.break_random continuos
+%                 % trials, no need for continue looking.
+%                 if(failedtoincrease > obj.break_random)
+%                     %fprintf('Break on i = %i\n',i);
+%                     break;
+%                 end
+%                 
+%                 
+%                 permutationMinimalT = 500; %temperature infinite
+%                 obj.T = 500;
+%                 
+%                 [matrix_permuted,new_row_index,new_col_index] = MatrixFunctions.RANDOM_SORT(obj.matrix);
+%                 obj.matrix = matrix_permuted;
+%                 obj.index_rows(new_row_index);
+%                 obj.index_cols(new_col_index);
+% %                i = 1;
+%                 while(1)
+%                     %display(i);
+%                     %i = i+1;
+%                     [sort_matrix, new_row_index, new_col_index] = MatrixFunctions.SORT_MATRIX(obj.matrix);
+%                     obj.matrix = sort_matrix;
+%                     obj.index_rows = obj.index_rows(new_row_index);
+%                     obj.index_cols = obj.index_cols(new_col_index);
+%                     
+%                     obj.CalculateTemperature();
+%                     
+%                     if(obj.debug_messages == 1); fprintf('TLocal = %f T = %f\n', permutationMinimalT,obj.T); end;
+%                     
+%                     if(abs(permutationMinimalT - obj.T) <= 0.001 || obj.T > permutationMinimalT)
+%                         break;
+%                     end
+%                         
+%                     if(obj.T < permutationMinimalT)
+%                         permutationMinimalT = obj.T;
+%                         matrixLocalMinima = obj.matrix;
+%                         indexRowLocalMinima = obj.index_rows;
+%                         indexColLocalMinima = obj.index_cols;
+%                     end
+%                     
+%                 end
+%                 if(obj.debug_messages == 1); fprintf('finalizo ciclo\n'); end;
+%                 
+%                 %Save if permutation is smaller than the global minimal
+%                 if(permutationMinimalT < globalMinimalT)
+%                     %fprintf('TMinimalGlob = %f\n', permutationMinimalT);
+%                     globalMinimalT = permutationMinimalT;
+%                     obj.matrix_minimal = matrixLocalMinima;
+%                     indexRowGlobalMinima = indexRowLocalMinima;
+%                     indexColGlobalMinima = indexColLocalMinima;
+%                     failedtoincrease = 0;
+%                 end
+%                 
+%                 failedtoincrease = failedtoincrease + 1;
+%             end

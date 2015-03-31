@@ -7,7 +7,7 @@ comments: true
 <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
---><div class="content"><!--introduction--><p>Some times the user may be in need of not only evaluating nestedness and/or modularity in a single bipartite network, but in a set of related networks. There exist many examples in the literature of how these kind of analysis are perfored (i.e. see <a href="http://www.pnas.org/content/108/28/E288.abstract">Flores et al 2011</a> for Phage-bacteria and <a href="http://www.pnas.org/content/100/16/9383.full">Bascompte et al 2003</a> for plant-pollinator networks). <tt>BiMat</tt> comes with a couple of classes that the user can use in order to perform this kind of analysis. The name of these classes are <tt>MetaStatistics</tt> and <tt>MetaStatisticsPlotter</tt>. The main functionality of the first one is to take as inputo a entire set of bipartite networks and perform modularity and nested analysis among them. Finally, the second class is used in order to have a better visual understanding of the results.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example: Seed dispersal networks</a></li></ul></div><h2>Example: Seed dispersal networks<a name="1"></a></h2><p>This example will show how to perform this kind of analysis. In order to do that, we will use seed-dispersal bipartite networks. These networks were collected for Bascompte's lab website <a href="http://www.web-of-life.es/">The Web of Life</a>. We will explain the process of this king of analysis from the point in which the user have already a set of data sets, which in these case correspond to bipartite matrices encoded in text files. The data used in this example can be located inside the <tt>examples/data/</tt> directory.</p><pre class="codeinput"><span class="comment">%We will need first to read the data and create all the required matrices.</span>
+--><div class="content"><!--introduction--><p>Some times the user may be in need of not only evaluating nestedness and/or modularity in a single bipartite network, but in a set of related networks. There exists many examples in the literature of how these kinds of analysis are performed (i.e. see <a href="http://www.pnas.org/content/108/28/E288.abstract">Flores et al 2011</a> for Phage-bacteria and <a href="http://www.pnas.org/content/100/16/9383.full">Bascompte et al 2003</a> for plant-pollinator networks). <tt>BiMat</tt> comes with a couple of classes that the user can use in order to perform this kind of analysis. The name of these classes are <tt>MetaStatistics</tt> and <tt>MetaStatisticsPlotter</tt>. The main functionality of the first one is to take as input an entire set of bipartite networks and perform modularity and nested analysis among them. Finally, the second class is used in order to have a better visual understanding of the results.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example: Seed dispersal networks</a></li></ul></div><h2>Example: Seed dispersal networks<a name="1"></a></h2><p>This example will show how to perform this kind of analysis. In order to do that, we will use seed-dispersal bipartite networks. These networks were collected for Bascompte's lab website <a href="http://www.web-of-life.es/">The Web of Life</a>. We will explain the process of this kind of analysis from the point in which the user have already a set of data sets, which in these case correspond to bipartite matrices encoded in text files. The data used in this example can be located inside the <tt>examples/data/</tt> directory.</p><pre class="codeinput"><span class="comment">%We will need first to read the data and create all the required matrices.</span>
 <span class="comment">%This part of the code need to be executed inside examples directory</span>
 matrix_files = dir(<span class="string">'data/seed_dispersal_matrices/M_SD_*'</span>);
 n_files = length(matrix_files);
@@ -57,36 +57,36 @@ Testing Matrix: 30 . . .
 </pre><p>After performing the experiment we can print or plot the results:</p><pre class="codeinput"><span class="comment">%print results</span>
 meta_stat.Print;
 </pre><pre class="codeoutput">Network,      N,  N mean,N z-score,N percent
-      1, 0.5098, 0.33235,   4.8094,      100
-      2, 0.6766, 0.43183,    8.074,      100
-      3,0.44697, 0.17841,  13.4529,      100
-      4,0.43378, 0.14465,  23.4331,      100
-      5,0.29693, 0.14212,   8.3678,      100
-      6,0.34166, 0.16475,   8.7503,      100
-      7,0.51673, 0.26157,  19.0113,      100
-      8,0.74571, 0.63681,   2.6445,      100
-      9,0.34243, 0.29211,   1.3387,       92
-     10,0.48921, 0.35001,   7.9527,      100
-     11,0.45411, 0.32162,   3.4166,      100
-     12,0.35492, 0.15633,  15.7696,      100
-     13,0.37368, 0.30387,   4.7865,      100
-     14,0.78756, 0.44938,  11.7838,      100
-     15,0.67344, 0.57913,   2.4251,      100
-     16,0.58838, 0.35307,  25.1533,      100
-     17,0.60116, 0.54806,    1.147,       84
-     18,0.11206, 0.06873,   5.1445,      100
-     19,0.32872, 0.10731,  91.7237,      100
-     20,0.58978, 0.19544,   38.072,      100
-     21,0.61523, 0.27295,  19.3173,      100
-     22, 0.1681,0.054326,  85.9453,      100
-     23,0.66797,  0.3153,   8.2307,      100
-     24,0.56828, 0.47815,   1.5427,       93
-     25,0.66667, 0.52369,   1.6933,       93
-     26,      1,    0.65,  0.95074,       49
-     27,0.73611, 0.57332,   1.8407,      100
-     28,0.89474, 0.58855,   3.2983,      100
-     29, 0.8125,  0.4726,   2.5768,      100
-     30,0.66667, 0.52094,  0.97807,       78
+      1, 0.5098, 0.33283,    4.589,      100
+      2, 0.6766, 0.43341,   9.7262,      100
+      3,0.44697, 0.17637,  15.4343,      100
+      4,0.43378, 0.14771,  21.1109,      100
+      5,0.29693, 0.14376,   8.0789,      100
+      6,0.34166, 0.16448,   7.7461,      100
+      7,0.51673, 0.26043,  17.5021,      100
+      8,0.74571, 0.63873,    2.643,      100
+      9,0.34243, 0.28813,   1.4549,       90
+     10,0.48921, 0.35223,   7.8249,      100
+     11,0.45411, 0.32302,   3.3302,      100
+     12,0.35492, 0.15653,  19.5987,      100
+     13,0.37368, 0.30166,   4.3414,      100
+     14,0.78756, 0.45187,  11.1753,      100
+     15,0.67344, 0.57876,   2.1015,      100
+     16,0.58838, 0.35141,  22.5144,      100
+     17,0.60116, 0.54211,   1.2826,       91
+     18,0.11206,0.069077,   5.2553,      100
+     19,0.32872, 0.10718,  88.5133,      100
+     20,0.58978, 0.19722,  28.7301,      100
+     21,0.61523,  0.2726,  19.0869,      100
+     22, 0.1681,0.054065,  95.1701,      100
+     23,0.66797, 0.32743,   7.5743,      100
+     24,0.56828, 0.48159,   1.3735,       92
+     25,0.66667, 0.51419,   1.6249,       93
+     26,      1, 0.54667,   1.1912,       61
+     27,0.73611, 0.57125,   1.7715,       99
+     28,0.89474,  0.5925,   3.2936,      100
+     29, 0.8125, 0.46052,   2.0972,       98
+     30,0.66667, 0.53135,  0.94941,       84
 </pre><pre class="codeinput"><span class="comment">%The next value will be used for the error bars of the plot</span>
 meta_stat.plotter.p_value = 0.05; <span class="comment">%Default value</span>
 <span class="comment">%plot the results</span>
@@ -105,8 +105,8 @@ figure(4); meta_stat.plotter.PlotModularMatrices();
 %% Meta Statistics
 % Some times the user may be in need of not only evaluating nestedness and/or
 % modularity in a single bipartite network, but in a set of related
-% networks. There exist many examples in the literature of how these kind
-% of analysis are perfored 
+% networks. There exists many examples in the literature of how these kinds 
+% of analysis are performed 
 % (i.e. see <http://www.pnas.org/content/108/28/E288.abstract Flores et al
 % 2011> for Phage-bacteria and
 % <http://www.pnas.org/content/100/16/9383.full Bascompte et al 2003> for
@@ -114,7 +114,7 @@ figure(4); meta_stat.plotter.PlotModularMatrices();
 % |BiMat| comes with a couple of classes that the user can use in order to
 % perform this kind of analysis. The name of these classes are
 % |MetaStatistics| and |MetaStatisticsPlotter|. The main functionality of
-% the first one is to take as inputo a entire set of bipartite networks and
+% the first one is to take as input an entire set of bipartite networks and
 % perform modularity and nested analysis among them. Finally, the second
 % class is used in order to have a better visual understanding of the
 % results.
@@ -124,7 +124,7 @@ figure(4); meta_stat.plotter.PlotModularMatrices();
 % This example will show how to perform this kind of analysis. In order to
 % do that, we will use seed-dispersal bipartite networks. These networks
 % were collected for Bascompte's lab website <http://www.web-of-life.es/
-% The Web of Life>. We will explain the process of this king of analysis
+% The Web of Life>. We will explain the process of this kind of analysis
 % from the point in which the user have already a set of data sets, which
 % in these case correspond to bipartite matrices encoded in text files.
 % The data used in this example can be located inside the |examples/data/|

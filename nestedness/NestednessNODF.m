@@ -38,7 +38,7 @@ classdef NestednessNODF < Nestedness
             
             obj = obj@Nestedness(bipmatrix);
             
-            obj.independent_rows_cols = true;
+            %obj.independent_rows_cols = true;
         end
        
         
