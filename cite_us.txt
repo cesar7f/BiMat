@@ -1,3 +1,41 @@
 If  you use this software for scientific publications, please consider to cite the next paper:
 
-* TODO
+	Cesar O. Flores, Timothée Poisot, Sergi Valverde, and Joshua S. Weitz.
+	BiMat: a MATLAB(R) package to facilitate the analysis and visualization of bipartite networks
+
+Depending of the algorithms the user may use, he may also want to cite:
+
+	NODF algorithm:
+	Mario Almeida-Neto, Paulo Guimarães, Paulo R, Guimarães, Rafael D Loyola, and Werner Ulrich.
+	A consistent metric for nestedness analysis in ecological systems: reconciling concept and measurement.
+	Oikos, 117(8):1227-1239, 2008.
+	
+	NTC algorithm:
+	Wirt Atmar and Bruce D Patterson.
+	The measure of order and disorder in the distribution of species in fragmented habitat. 
+	Oecologia, 96:373-382, 1993.
+	
+	Adaptive Brim Algorithm:
+	Michael Barber. 
+	Modularity and community detection in bipartite networks.
+	Physical Review E, 76:066102, 2007.
+	
+	LP&Brim algorithm:
+	Xin Liu and Tsuyoshi Murata.
+	Community Detection in Large-Scale Bipartite Networks.
+	Proc 2009 IEEE/WIC/ACM Inte J Conf Web Intell Intell Agent Technol 1: 50–57.
+	
+	Leading Eigenvector Algorithm:
+	M. E. J. Newman.
+	(2006b). Modularity and community structure in networks. 
+	Proc Natl Acad Sci, 103: 8577–8582.
+	
+
+Finally, for the R ecologist, we recommend to check the bipartite package, which in part was the inspiration
+for creating something similar for Matlab ecologists:
+
+	Carsten F. Dormann, Bernd Gruber and Jochen Fründ.
+	Introducing the bipartite Package: Analysing Ecological Networks.
+    R News 8:8-11, 2008.
+   
+    

@@ -15,9 +15,14 @@ and nestedness in bipartite ecological networks. Its main features are:
 
 ### Authors
 
-This project has been developed by:
+This project has been developed and contributed by:
 
 * [César Flores](mailto:cesar.flores@gatech.edu)
+* [Timothée Poisot](http://timotheepoisot.fr/)
+* [Sergi Valverde](http://complex.upf.es/~sergi/Home.html)
+* [Joshua Weitz](http://ecotheory.biology.gatech.edu/)
 
-This project received contributions of Sergi Valverde, Joshua S Weitz & Timothée Poisot (http://timotheepoisot.fr/). For a Python version that contains
-some of the BiMat features you may want to check: https://github.com/tpoisot/BiWeb
+
+### Website
+
+Download and documentation can be found on: __http://bimat.github.io/__
