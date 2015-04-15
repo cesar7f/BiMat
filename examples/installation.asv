@@ -19,11 +19,6 @@ addpath(g);
 % Instructions about how to do that can be found on: 
 % <http://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html Matlab Search Path>
 %
-%% Configuration
-%
-% Before start using |BiMat| the user can check how to configure the
-% default values by consulting ...
-%
 %% Start Guide
 %
 % You can download the start guide in the link below. This document contains
@@ -32,13 +27,10 @@ addpath(g);
 %
 % * <https://github.com/cesar7f/BiMat/archive/master.zip Start Guide>
 %
-%% |Matlab| extensive documentation
+%% |Matlab| documentation
 %
 % |BiMat| comes extensively documented.
 % For accessing this documentation, the user can use directly inside |Matlab|
 % command prompt either |help| or |doc| functions following by the name of
-% the class of method the user is interested as in the next examples:
-doc Bipartite; %access class documentation
-doc BipartiteModularity.bb %accesing a class property documentation
-doc StatisticalTest.DoCompleteAnalysis; %assesing a method documentation
-%and so on...
+% the class of method the user is interested as in the next example:
+doc 
