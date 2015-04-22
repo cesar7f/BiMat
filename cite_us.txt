@@ -36,6 +36,6 @@ for creating something similar for Matlab ecologists:
 
 	Carsten F. Dormann, Bernd Gruber and Jochen Fruend.
 	Introducing the bipartite Package: Analysing Ecological Networks.
-    R News 8:8-11, 2008.
+	R News 8:8-11, 2008.
    
     
