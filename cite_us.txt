@@ -1,6 +1,6 @@
 Please cite the software and manuscript as follows:
 
-	Cesar O. Flores, Timothée Poisot, Sergi Valverde, and Joshua S. Weitz.
+	Cesar O. Flores, Timothee Poisot, Sergi Valverde, and Joshua S. Weitz.
 	BiMat: a MATLAB(R) package to facilitate the analysis of bipartite networks
 
 Algorithms in BiMat were first developed in the following publications:
@@ -23,12 +23,12 @@ Algorithms in BiMat were first developed in the following publications:
 	LP&Brim algorithm:
 	Xin Liu and Tsuyoshi Murata.
 	Community Detection in Large-Scale Bipartite Networks.
-	Proceedings of the International Conference on Web Intelligence and Intelligent Agent Technology, 1: 50–57, 2009.
+	Proceedings of the International Conference on Web Intelligence and Intelligent Agent Technology, 1: 50-57, 2009.
 	
 	Leading Eigenvector Algorithm:
 	M. E. J. Newman.
 	Modularity and community structure in networks. 
-	Proc Natl Acad Sci, 103: 8577–8582, 2006.
+	Proc Natl Acad Sci, 103: 8577-8582, 2006.
 	
 
 Finally, for the R ecologist, we recommend to check the bipartite package, which in part was the inspiration
