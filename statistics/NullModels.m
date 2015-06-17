@@ -246,10 +246,9 @@ classdef NullModels < handle
         %   cell of random matrices using adjmatrix as empirical matrix
         %   from which the required properties will be extracted. model is
         %   the name of the null model function that will be used and
-        %   replicates the number of random matrices that are required.
+        %   replicates the number of random matrices that are required. A random
+        %   seed is used using the clock time
         %
-            RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
-            
             adjmatrix = adjmatrix ~= 0;
             
             n_edges = sum(adjmatrix(:));
@@ -259,11 +258,11 @@ classdef NullModels < handle
             %p = n_edges / (n_rows * n_cols);
             
             nullmodel = 1;
-            if(strcmp(func2str(model),'NullModels.EQUIPROBABLE')); nullmodel = 1; end;
-            if(strcmp(func2str(model),'NullModels.AVERAGE')); nullmodel = 2; end;
-            if(strcmp(func2str(model),'NullModels.AVERAGE_ROWS')); nullmodel = 3; end;
-            if(strcmp(func2str(model),'NullModels.AVERAGE_COLS')); nullmodel = 4; end;
-            if(strcmp(func2str(model),'NullModels.FIXED')); nullmodel = 5; end;
+            if(strcmp(model,'NullModels.EQUIPROBABLE')); nullmodel = 1; end;
+            if(strcmp(model,'NullModels.AVERAGE')); nullmodel = 2; end;
+            if(strcmp(model,'NullModels.AVERAGE_ROWS')); nullmodel = 3; end;
+            if(strcmp(model,'NullModels.AVERAGE_COLS')); nullmodel = 4; end;
+            if(strcmp(model,'NullModels.FIXED')); nullmodel = 5; end;
             
             rmatrices = cell(1,replicates);
             

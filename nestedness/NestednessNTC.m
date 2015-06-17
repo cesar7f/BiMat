@@ -68,7 +68,7 @@ classdef NestednessNTC < Nestedness
         used_area           = 2;          % Chose a value in 1,2,3
         delta_x             = 0.001;      % X Increment in order to get the vector of the Isoclane values (obj.fxp)
         debug_messages      = 0;          % 1,0 Print Debug Messages
-        K                   = 2.4125e+003 % 100 / 0.04145;  %Value found in the literature
+        K                   = 2.4125e+003;% 100 / 0.04145;  %Value found in the literature
         break_random        = 20;         % How many initial random permutations in the matrix
     end
     

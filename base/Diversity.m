@@ -28,7 +28,7 @@ classdef Diversity
             for i = 1:ni
                
                 p = sum(species == un(i))/N;
-                H = H - p * log(p);
+                H = H - p * log2(p);
                 
             end
             

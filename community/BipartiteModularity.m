@@ -63,7 +63,7 @@ classdef BipartiteModularity < handle
         trials               = Options.TRIALS_MODULARITY; %Number of trials to find the best modularity configuration
         done                 = 0;   %The algorithm has been performed
         optimize_by_component= 0;   %Otimize modularity by component, nor by the entire network.
-        print_results        = Options.PRINT_RESULTS % Flag to indicate if result output will be generated
+        print_results        = Options.PRINT_RESULTS; % Flag to indicate if result output will be generated
     end
     
     properties(Access = protected) %Used for calculating modularity in a single graph component
@@ -84,12 +84,14 @@ classdef BipartiteModularity < handle
         N_component           = [];
     end
         
-    methods(Abstract, Access = 'protected')
+    methods(Access = 'protected')
         
         % DetectComponent - Abstract method to be implemented in all
         %    BipartiteModularity son classes
         % See AdaptiveBrim, LeadingEigenvector, and LPBrim
-        obj = DetectComponent(obj);
+        function obj = DetectComponent(obj)
+        
+        end
 
     end
     
@@ -102,6 +104,9 @@ classdef BipartiteModularity < handle
         %   constructors. Can be called only from a son class.
         %
         % See AdaptiveBrim, LeadingEigenvector, and LPBrim
+        
+            obj.trials = Options.TRIALS_MODULARITY;
+            obj.print_results = Options.PRINT_RESULTS;
         
             obj.webmatrix = bipmatrix;
             obj.matrix = bipmatrix > 0;
@@ -472,6 +477,7 @@ classdef BipartiteModularity < handle
             Qr = 0;
             n_modules = size(rr,2);
             m_edges = sum(matrix(:));
+
             for i = 1:n_modules
                 row_index = find(rr(:,i));
                 col_index = find(tt(:,i));
@@ -581,7 +587,7 @@ classdef BipartiteModularity < handle
         %   screen and return an AdaptiveBrim object that contains such
         %   information in modul.    
         
-            modul = AdaptiveBrim(matrix);
+            modul = LPBrim(matrix);
             modul.print_results = false;
             modul.Detect();
             modul.Print();

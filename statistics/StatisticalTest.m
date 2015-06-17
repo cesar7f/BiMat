@@ -10,7 +10,7 @@
 %     null_model - Null Model that will be used for creating the random networks nulls
 %     replicates - Number of random networks used for the null model
 %     community_done - The analysis in modularity was performed
-%     nested_done      = 0;   % The analysis in nestedness was performed
+%     nested_done - The analysis in nestedness was performed
 %     print_status - Print status of the statistical test (print the random matrix that is tested)
 %
 % StatisticalTest Methods:
@@ -25,7 +25,8 @@
 %     TEST_NESTEDNESS - Perform a test of the nestedness in a bipartite matrix
 %
 % See also:
-%     MetaStatistics, NullModels, BipartiteModularity, Nestedness
+%     MetaStatistics, NullModels, BipartiteModularity, Nestedness, 
+%     Options.REPLICATES, Options.DEFAULT_NULL_MODEL
 classdef StatisticalTest < handle
 
     properties(GetAccess = 'public', SetAccess = 'protected')
@@ -37,7 +38,7 @@ classdef StatisticalTest < handle
         null_model       = Options.DEFAULT_NULL_MODEL; % Null Model that will be used for creating the random networks nulls
         replicates       = Options.REPLICATES;    % Number of random networks used for the null model
         community_done   = 0;      % The analysis in modularity was performed
-        nested_done      = 0;   % The analysis in nestedness was performed
+        nested_done      = 0;      % The analysis in nestedness was performed
     end
     
     properties(Access = 'public')
@@ -50,36 +51,32 @@ classdef StatisticalTest < handle
         % StatisticalTest - Main Constructor
         %   obj = StatisticalTest(webbip) Create a StatisticalTest object that makes
         %   reference to the Bipartite object webbip
-        
+       
             obj.bipweb = webbip;
         end
         
 
         function obj = DoNulls(obj,replic,nullmodel)
         % DoNulls - Create random matrices for the statistical analysis
-        %   obj = DoNulls(obj) Create Options.REPLICATES random matrices using the
-        %   default null model (Options.DEFAULT_NULL_MODEL).
+        %   obj = DoNulls(obj) Create obj.replicates random matrices using the
+        %   obj.null_model as null model.
         %
         %   obj = DoNulls(obj,replic) Create replic random matrices using
-        %   the default null model (Options.DEFAULT_NULL_MODEL).
+        %   obj.null_model as null model.
         %
         %   obj = DoNulls(obj,replic,nullmodel) Create replic random
         %   matrices using the null model indicated in the variable
         %   nullmodel
         %
         % See also:
-        %   NullModels, Options.REPLICATES, Options.DEFAULT_NULL_MODEL
+        %   NullModels
         
             %obj.community_done = 0;
             %obj.nested_done = 0;
-            
-            if(nargin == 1)
-                obj.null_model = Options.DEFAULT_NULL_MODEL;
-                obj.replicates = Options.REPLICATES;
-            elseif(nargin == 2)
-                obj.null_model = Options.DEFAULT_NULL_MODEL;
+       
+            if(nargin == 2)
                 obj.replicates = replic;
-            else
+            elseif(nargin == 3)
                 obj.null_model = nullmodel;
                 obj.replicates = replic;
             end
@@ -100,27 +97,26 @@ classdef StatisticalTest < handle
         % DoCompleteAnalysis - Perform the entire modularity and nestedness analysis
         %
         %   obj = DoCompleteAnalysis(obj) Perform the entire analysis for
-        %   nestedness and modularity using default values for null model
-        %   and number of replicates (Options.REPLICATES,
-        %   Options.DEFAULT_NULL_MODEL).
+        %   nestedness and modularity using obj.null_model as null model
+        %   and obj.replicates for number of replicates.
         %
         %   obj = DoCompleteAnalysis(obj,replic) Perform the entire analysis for
-        %   nestedness and modularity using Options.DEFAULT_NULL_MODEL for
+        %   nestedness and modularity using obj.null_model as null model for
         %   creating replic random matrices
         %
         %   obj = DoCompleteAnalysis(obj,replic,nullmodel) Perform the entire analysis for
-        %   nestedness and modularity using the the specified Null model
+        %   nestedness and modularity using the specified Null model
         %   and a total of replic random matrices
         %
         % See also:
-        %   NullModels, Options.REPLICATES, Options.DEFAULT_NULL_MODEL
+        %   NullModels
         
             
             if(nargin == 1)
-                nullmodel = Options.DEFAULT_NULL_MODEL;
-                replic = Options.REPLICATES;
+                nullmodel = obj.null_model;
+                replic = obj.replicates;
             elseif(nargin == 2)
-                nullmodel = Options.DEFAULT_NULL_MODEL;
+                nullmodel = obj.null_model;
             end
             
             fprintf('Creating %i null random matrices...\n', replic);
@@ -137,7 +133,7 @@ classdef StatisticalTest < handle
         % TestNestedness - Perform the Nestedness Statistical Analysis
         %
         %   obj = TestNestedness(obj) Perform the Nestedness Statistical analsysis. Be
-        %   sure to create the random matrices before calling this
+        %   sure to call obj.DoNulls before calling this
         %   function. Otherwise Options.REPLICATES and Options.DEFAULT_NULL_MODEL
         %   will be used as number of rando matrices and null model.
         %
@@ -171,6 +167,11 @@ classdef StatisticalTest < handle
             for i = 1:n
                 if(obj.print_status && print_stat(jp)==i)
                     fprintf('Evaluating Nestedness in random matrices: %i - %i\n', print_stat(jp),print_stat(jp+1)-1);
+                    try
+                      fflush(stdout);
+                    catch
+                    
+                    end
                     jp = jp+1;
                 end
                 nested = feval(nested_class,obj.nulls{i});
@@ -193,7 +194,7 @@ classdef StatisticalTest < handle
         % TestCommunityStructure - Perform the Modularity Statistical Analysis
         %
         %   obj = TestCommunityStructure(obj) Perform the Modularity Statistical analsysis. Be
-        %   sure to create the random matrices before calling this
+        %   sure to call obj.DoNulls before calling this
         %   function. Otherwise Options.REPLICATES and Options.DEFAULT_NULL_MODEL
         %   will be used as number of rando matrices and null model.
         %
@@ -219,7 +220,7 @@ classdef StatisticalTest < handle
             Qb_random = zeros(n,1);
             Qr_random = zeros(n,1);
             
-            if(isprop(obj.bipweb.community,'DoKernighanLinTunning'))
+            if(strcmp(class(obj.bipweb.community),'LeadingEigenvector'))
                 exist_kernig = 1;
                 do_kernig = obj.bipweb.community.DoKernighanLinTunning;
             else
@@ -236,6 +237,11 @@ classdef StatisticalTest < handle
             for i = 1:n
                 if(obj.print_status && print_stat(jp)==i)
                     fprintf('Evaluating Modularity in random matrices: %i - %i\n', print_stat(jp),print_stat(jp+1)-1);
+                    try
+                      fflush(stdout);
+                    catch
+                    
+                    end
                     jp = jp+1;
                 end
                 modularity = feval(modul_class,obj.nulls{i});
@@ -280,7 +286,7 @@ classdef StatisticalTest < handle
             if(obj.community_done == 1)
                 str = 'Modularity\n';
                 str = [str, '\t Used algorithm:\t', sprintf('%30s',obj.Qb_values.algorithm), '\n'];
-                str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.Qb_values.null_model)), '\n'];
+                str = [str, '\t Null model:    \t', sprintf('%30s',obj.Qb_values.null_model), '\n'];
                 str = [str, '\t Replicates:    \t', sprintf('%30i',obj.Qb_values.replicates), '\n'];
                 str = [str, '\t Qb value:      \t', sprintf('%30.4f',obj.Qb_values.value), '\n'];
                 str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.Qb_values.mean), '\n'];
@@ -300,7 +306,7 @@ classdef StatisticalTest < handle
             if(obj.nested_done == 1)
                 str = [str, 'Nestedness\n'];
                 str = [str, '\t Used algorithm:\t', sprintf('%30s',obj.N_values.algorithm), '\n'];
-                str = [str, '\t Null model:    \t', sprintf('%30s',func2str(obj.N_values.null_model)), '\n'];
+                str = [str, '\t Null model:    \t', sprintf('%30s',obj.N_values.null_model), '\n'];
                 str = [str, '\t Replicates:    \t', sprintf('%30i',obj.N_values.replicates), '\n'];
                 str = [str, '\t Nestedness value:\t', sprintf('%30.4f',obj.N_values.value), '\n'];
                 str = [str, '\t     mean:      \t', sprintf('%30.4f',obj.N_values.mean), '\n'];
@@ -393,8 +399,10 @@ classdef StatisticalTest < handle
                 modul_algorithm = Options.MODULARITY_ALGORITHM;
             end
             
+            modul_func = str2func(modul_algorithm);
+            
             bp = Bipartite(matrix);
-            bp.community = modul_algorithm(bp.matrix);
+            bp.community = modul_func(bp.matrix);
             stest = StatisticalTest(bp);
             stest.DoNulls(replicates,null_model);
             stest.TestCommunityStructure();
@@ -435,8 +443,10 @@ classdef StatisticalTest < handle
                 nested_algorithm = Options.NESTEDNESS_ALGORITHM;
             end
             
+            nested_func = str2func(nested_algorithm);
+            
             bp = Bipartite(matrix);
-            bp.nestedness = nested_algorithm(matrix);
+            bp.nestedness = nested_func(matrix);
             stest = StatisticalTest(bp);
             stest.DoNulls(replicates,null_model);
             stest.TestNestedness();

@@ -16,13 +16,13 @@
 %    nestedness = NTC(matrix) Calculate the nestedness using the NTC metric.    
 %    nestedness = NODF(matrix) Calculate the nestedness using the NODF metric.    
 %
-% See also:
+% See also:s
 %    NestednessNODF, NestednessNTC
 classdef Nestedness < handle
     
     properties(GetAccess = 'public', SetAccess = 'protected')
         N                     = 0;    % Nestedness value
-        matrix                = []    % Bipartite Adjacency Matrix
+        matrix                = [];   % Bipartite Adjacency Matrix
         n_rows                = 0;    % Number of row nodes
         n_cols                = 0;    % Number of column nodes
         %independent_rows_cols = false;% The nestedness algorithm can calculate nestedness for rows and columns independently
@@ -30,15 +30,19 @@ classdef Nestedness < handle
     end
     
     properties
-        print_results         = Options.PRINT_RESULTS % Flag to indicate if result output will be generated
+        print_results         = Options.PRINT_RESULTS; % Flag to indicate if result output will be generated
     end
     
-    methods(Abstract, Access = 'protected')
+    methods(Access = 'protected')
         
         % RunNestedAlgorithm - Abstract method to be implemented in all
         %    Nestedness son classes
         % See NestednessNODF, NestednessNTC
-        obj = RunNestedAlgorithm(obj);
+        function obj = RunNestedAlgorithm(obj)
+        
+        end
+        
+        
 
     end
     

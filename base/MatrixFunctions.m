@@ -18,9 +18,7 @@
 %    GET_BIGGEST_EIGENVALUE - Get the biggest eigenvalue of a bipartite matrix
 %    RANDOM_SUBMATRIX - Get a random submatrix of the bipartite matrix
 %    MATRIX_UNION - Create a bipartite matrix by the union of two bipartite matrices.
-%    ISOLATED_COMPONENTS - Find the components of a bipartite adjacency matrix
-%
-   
+%    ISOLATED_COMPONENTS - Find the components of a bipartite adjacency matrix  GRE
 classdef MatrixFunctions < handle
     
     methods (Access = private)
@@ -158,8 +156,8 @@ classdef MatrixFunctions < handle
             [n_rows,n_cols] = size(matrix);
             ir = 1:n_rows; ic = 1:n_cols;
             
-            [matrix,ir_type,ic_type] = MatrixNull.TYPE_MATRIX(matrix, n_type);
-            [matrix,ir_zero,ic_zero] = MatrixNull.NON_ZERO_MATRIX(matrix);
+            [matrix,ir_type,ic_type] = MatrixFunctions.TYPE_MATRIX(matrix, n_type);
+            [matrix,ir_zero,ic_zero] = MatrixFunctions.NON_ZERO_MATRIX(matrix);
             
             ir = ir(ir_type(ir_zero));
             ic = ic(ic_type(ic_zero));
@@ -243,28 +241,12 @@ classdef MatrixFunctions < handle
             
         end
         
-        function matrix = NEGATE_MATRIX(matrix, prob)
-        % NEGATE_MATRIX - Negates a boolean matrix
-        %
-        %   matrix = NEGATE_MATRIX(MATRIX) Returns a matrix in which
-        %   each element of a boolean matrix is neggated 
-        %
-        %   matrix = NEGATE_MATRIX(MATRIX,prob) Returns a matrix in which
-        %   each element of a boolean matrix is neggated with probability prob 
-        
-            if(nargin == 1)
-                prob = 1.0;
-            end
-        
-            matrix = matrix - abs(rand(size(matrix) < prob));
-        end
-        
         function max_eig = GET_BIGGEST_EIGENVALUE(matrix)
         % GET_BIGGEST_EIGENVALUE - Get the biggest eigenvalue of a bipartite matrix
         %
         %   max_eig = GET_BIGGEST_EIGENVALUE(MATRIX)  Get the biggest eigenvalue of a bipartite matrix
         %
-            max_eig = max(eig(MatrixNull.BipartiteToUnipartite(matrix)));
+            max_eig = max(eig(MatrixFunctions.BIPARTITE_TO_UNIPARTITE(matrix)));
             
         end
         
@@ -291,7 +273,7 @@ classdef MatrixFunctions < handle
         %   new size of the composed matrix is the sum of the two original
         %   matrices.
         %
-            matrix = blkdiag(matrix_1,matrix_2);
+            matrix = blkdiag(1.0*matrix_1,1.0*matrix_2);
         end
         
         function [comp_row,comp_col,n_comp] = ISOLATED_COMPONENTS(matrix)
@@ -353,28 +335,6 @@ classdef MatrixFunctions < handle
             
         end
         
-        function matrix_categ = CONVERT_FROM_QUANTITATIVE_TO_CATEGORICAL(matrix,margs_or_ncategs)
-        % NOT TESTED FUNCTION
-        
-            min_value = min(matrix(:)); max_value = max(matrix(:));
-            
-            if(length(margs_or_ncategs) == 1)
-                n_categs = margs_or_ncategs;
-                margs = linspace(min_value,max_value,n_categs+1);
-            else
-                n_categs = length(margs_or_ncategs)-1;
-                margs = margs_or_ncategs;
-            end
-            
-            matrix_categ = zeros(size(matrix));
-            
-            for i = 1:n_categs
-                
-                matrix_categ = matrix_categ + i * MatrixFunctions.GET_FILTERED_MATRIX(matrix,margs(i),margs(i+1));
-                
-            end
-            
-        end
         
     end
 end

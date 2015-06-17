@@ -79,17 +79,18 @@ classdef InternalStatistics < handle
         %
         %  See also:
         %   Diversity.SHANNON_INDEX, Diversity.SIMPSON_INDEX
-            RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
-            
             
             if(nargin == 1)
                 n_trials = Options.REPLICATES;
                 row_class = obj.bipweb.row_class;
-                index_function = @Diversity.SIMPSON_INDEX;
+                index_function = 'Diversity.SIMPSON_INDEX';
             elseif(nargin==2)
                 row_class = obj.bipweb.row_class;
-                index_function = @Diversity.SIMPSON_INDEX;
+                index_function = 'Diversity.SIMPSON_INDEX';
             end
+            
+            if(strcmp(index_function,'Diversity.SIMPSON_INDEX')); index_id = 1; end;
+            if(strcmp(index_function,'Diversity.SHANNON_INDEX')); index_id = 2; end;
             
             assert(length(row_class)==obj.bipweb.community.n_rows);
             
@@ -101,16 +102,30 @@ classdef InternalStatistics < handle
             
             n = length(row_class);
             for i = 1:modul.N
+                real_value = 0;
+                switch index_id
+                    case 1
+                        real_value = Diversity.SIMPSON_INDEX(row_class(row_modules{i}));
+                    case 2
+                        real_value = Diversity.SHANNON_INDEX(row_class(row_modules{i}));
+                end
                 
-                real_value = index_function(row_class(row_modules{i}));
+                %real_value = index_function(row_class(row_modules{i}));
                 
                 nr = length(row_modules{i});
                 random_values = zeros(n_trials,1);
                 for j = 1:n_trials
                     row_idx_random = row_class(randperm(n));
                 
-                    random_values(j) = index_function(row_idx_random(1:nr));
+                    switch index_id
+                        case 1
+                            random_values(j) = Diversity.SIMPSON_INDEX(row_idx_random(1:nr));
+                        case 2
+                            random_values(j) = Diversity.SHANNON_INDEX(row_idx_random(1:nr));
+                    end
                 end
+                    %random_values(j) = index_function(row_idx_random(1:nr));
+                
                 sta_vals = StatisticalTest.GET_STATISTICAL_VALUES(real_value,random_values);
                 
                 diversity.value(i) = sta_vals.value;
@@ -156,17 +171,19 @@ classdef InternalStatistics < handle
         %  See also:
         %   Diversity.SHANNON_INDEX, Diversity.SIMPSON_INDEX
                     
-            RandStream.setGlobalStream(RandStream('mt19937ar','seed',sum(100*clock)));
             
             
             if(nargin == 1)
                 n_trials = Options.REPLICATES;
                 col_class = obj.bipweb.col_class;
-                index_function = @Diversity.SIMPSON_INDEX;
+                index_function = 'Diversity.SIMPSON_INDEX';
             elseif(nargin==2)
                 col_class = obj.bipweb.col_class;
-                index_function = @Diversity.SIMPSON_INDEX;
+                index_function = 'Diversity.SIMPSON_INDEX';
             end
+            
+            if(strcmp(index_function,'Diversity.SIMPSON_INDEX')); index_id = 1; end;
+            if(strcmp(index_function,'Diversity.SHANNON_INDEX')); index_id = 2; end;
             
             assert(length(col_class)==obj.bipweb.community.n_cols);
             
@@ -178,15 +195,27 @@ classdef InternalStatistics < handle
             
             n = length(col_class);
             for i = 1:modul.N
-                
-                real_value = index_function(col_class(col_modules{i}));
+                real_value = 0;
+                switch index_id
+                    case 1
+                        real_value = Diversity.SIMPSON_INDEX(col_class(col_modules{i}));
+                    case 2
+                        real_value = Diversity.SHANNON_INDEX(col_class(col_modules{i}));
+                end
+                %real_value = index_function(col_class(col_modules{i}));
                 %obj.realindex.cols(i) = index_function(cols_ids(col_modules{i}));
                 nr = length(col_modules{i});
                 random_values = zeros(n_trials,1);
                 for j = 1:n_trials
                     cols_idx_random = col_class(randperm(n));
                     %randomdata(j,i) = index_function(cols_idx_random(1:nr));
-                    random_values(j) = index_function(cols_idx_random(1:nr));
+                    switch index_id
+                        case 1
+                            random_values(j) = Diversity.SIMPSON_INDEX(cols_idx_random(1:nr));
+                        case 2
+                            random_values(j) = Diversity.SHANNON_INDEX(cols_idx_random(1:nr));
+                    end
+                    %random_values(j) = index_function(cols_idx_random(1:nr));
                 end
                 sta_vals = StatisticalTest.GET_STATISTICAL_VALUES(real_value,random_values);
                 
@@ -239,8 +268,8 @@ classdef InternalStatistics < handle
             gp = MetaStatistics(obj.module_networks);
             gp.replicates = n_trials;
             gp.null_model = null_model;
-            gp.modularity_algorithm = str2func(class(obj.bipweb.community));
-            gp.nestedness_algorithm = str2func(class(obj.bipweb.nestedness));
+            gp.modularity_algorithm = class(obj.bipweb.community);
+            gp.nestedness_algorithm = class(obj.bipweb.nestedness);
             
             gp.do_community = 1; % Perform Modularity analysis (default)
             gp.do_nestedness = 1; % Perform Nestedness analysis

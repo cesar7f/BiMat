@@ -36,10 +36,10 @@ classdef MetaStatistics < handle
         matrices             = {}; % The matrices that will be tested
         names                = {}; % The names of the matrix (no required)
         Qb_values            = []; % Statistics for the modularity values
-        Qr_values            = []  % Statistics for the modularity interactions ratio values
+        Qr_values            = []; % Statistics for the modularity interactions ratio values
         N_values             = []; % Statistics for the Nestedness values
         n_networks           = 0;  % Number of matrices (networks)
-        do_community             = 1;  % Flag to Perform the tests for modularity
+        do_community         = 1;  % Flag to Perform the tests for modularity
         do_nestedness        = 1;  % Flag to Perform the tests for nestedness
         modularity_algorithm = Options.MODULARITY_ALGORITHM; %Algorithm for modularity
         nestedness_algorithm = Options.NESTEDNESS_ALGORITHM; %Algorithm for modularity
@@ -136,7 +136,11 @@ classdef MetaStatistics < handle
             for i = 1:n
                 
                 fprintf('Testing Matrix: %i . . .\n', i);
-                
+                try
+                    fflush(stdout);
+                catch
+                    
+                end
                 %if(isempty(net{i}.webmatrix))
                 %    continue;
                 %end
@@ -145,7 +149,8 @@ classdef MetaStatistics < handle
                 net{i}.statistics.print_status = false;
                 
                 if(obj.do_nestedness == 1)
-                    net{i}.nestedness = obj.nestedness_algorithm(net{i}.matrix);
+                    nest_func = str2func(obj.nestedness_algorithm);
+                    net{i}.nestedness = nest_func(net{i}.matrix);
                     net{i}.nestedness.print_results = false;
                     net{i}.statistics.TestNestedness();
                     nest.value(i,1) = net{i}.statistics.N_values.value;
@@ -157,7 +162,8 @@ classdef MetaStatistics < handle
                 end
                     
                 if(obj.do_community == 1)
-                    net{i}.community = obj.modularity_algorithm(net{i}.matrix);
+                    modul_func = str2func(obj.modularity_algorithm);
+                    net{i}.community = modul_func(net{i}.matrix);
                     net{i}.community.print_results = false;
                     net{i}.statistics.TestCommunityStructure();
                     

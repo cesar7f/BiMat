@@ -54,7 +54,7 @@ classdef Bipartite < handle
         row_class             = []; % Id's of the row nodes
         col_class             = []; % Id's of the col nodes.
         internal_statistics   = {}; % Instance of the class InternalStatistics.m for multi-scale analysis.
-        print_results         = Options.PRINT_RESULTS % Flag to indicate if result output will be generated
+        print_results         = Options.PRINT_RESULTS; % Flag to indicate if result output will be generated
     end
     
     methods
@@ -65,6 +65,8 @@ classdef Bipartite < handle
             %   quatitative matrix web
             %   bp = BIPARTITE(web,namebip) Create a bipartite instance using a
             %   quatitative matrix web and name the object with namebip.
+            
+            obj.print_results = Options.PRINT_RESULTS;
             
             if(nargin == 0)
                error('You need to specify a double matrix or a txt file in matrix format');
@@ -102,10 +104,12 @@ classdef Bipartite < handle
             obj.col_degrees = sum(obj.matrix,1)';
             
             %Nestedness
-            obj.nestedness = Options.NESTEDNESS_ALGORITHM(obj.webmatrix);
+            nest_func = str2func(Options.NESTEDNESS_ALGORITHM);
+            obj.nestedness = nest_func(obj.webmatrix);
             
             %Modularity
-            obj.community = Options.MODULARITY_ALGORITHM(obj.webmatrix);
+            modul_funct = str2func(Options.MODULARITY_ALGORITHM);
+            obj.community = modul_funct(obj.webmatrix);
             
             %Statistical tests
             obj.statistics = StatisticalTest(obj);
