@@ -13,7 +13,7 @@ g = genpath('../'); addpath(g);
 close all; %close all open figures
 %%%
 % We need also to load the data from which we will be working on
-load phage_bacteria_matrices.mat;
+load data/phage_bacteria_matrices.mat;
 
 %% Creating a Group Testing object
 % If the number of random matrices and the null model are not assigned, 100 and
@@ -28,9 +28,9 @@ mstat = MetaStatistics(phage_bacteria_matrices.matrices);    % Create the main o
 % equiprobable model as null model in our random networks. The way to
 % perform this analysis is by running the next lines:
 mstat.replicates = 100; %How many random networks we want for each matrix
-mstat.null_model = @NullModels.EQUIPROBABLE; %Our Null model
-mstat.modularity_algorithm = @AdaptiveBrim; %Algorithm for modularity.
-mstat.nestedness_algorithm = @NestednessNTC; %Algorithm for nestedness.
+mstat.null_model = 'NullModels.EQUIPROBABLE'; %Our Null model
+mstat.modularity_algorithm = 'AdaptiveBrim'; %Algorithm for modularity.
+mstat.nestedness_algorithm = 'NestednessNTC'; %Algorithm for nestedness.
 mstat.do_community = 1; % Perform Modularity analysis (default)
 mstat.do_nestedness = 1; % Perform Nestedness analysis (default)
 mstat.names = phage_bacteria_matrices.name;

@@ -116,7 +116,7 @@ classdef MetaStatisticsPlotter < handle;
                 obj.PlotValues(obj.meta_statistics.N_values.value, obj.meta_statistics.N_values.random_values,pvalue);
             end
             %Labels in title, y-axis and legends
-            legend('Measured Nestedness','Random expectation',1,'Location','NorthWest');
+            legend('Measured Nestedness','Random expectation');%,1,'Location','NorthWest');
             legend('boxoff')
             ylabel('Nestedness (N)','fontsize',18);
 
@@ -140,7 +140,7 @@ classdef MetaStatisticsPlotter < handle;
             end
             
             %Labels in title, y-axis and legends
-            legend('Measured Modularity','Random expectation',1,'Location','NorthWest');
+            legend('Measured Modularity','Random expectation');%,1,'Location','NorthWest');
             legend('boxoff');
             ylabel('Modularity (Q)','fontsize',18);
         end
@@ -548,17 +548,21 @@ classdef MetaStatisticsPlotter < handle;
             names_matrix = obj.meta_statistics.names(sorted_indexes);
 
             %Find the limits of the error bars using two tail p-value=0.05
-            sup_bound = random_values(:,round(obj.meta_statistics.replicates * sup_limit));
-            low_bound = random_values(:,round(obj.meta_statistics.replicates * inf_limit));
+            sup_bound = random_values(:,ceil(obj.meta_statistics.replicates * sup_limit));
+            low_bound = random_values(:,ceil(obj.meta_statistics.replicates * inf_limit));
 
             %Plot the data of the real matrices
             cla;
             plot(1:obj.meta_statistics.n_networks, values,'o','MarkerFaceColor','red','MarkerEdgeColor','red');
             hold on;
             %Plot the data of the random values
-            errorbar(1:obj.meta_statistics.n_networks, mean_random_vals, ... 
-                mean_random_vals - low_bound, sup_bound - mean_random_vals, ...
-                'o','MarkerFaceColor','white','MarkerEdgeColor','black');
+            try
+              errorbar(1:obj.meta_statistics.n_networks, mean_random_vals, ... 
+                  mean_random_vals - low_bound, sup_bound - mean_random_vals, ...
+                  'o','MarkerFaceColor','white','MarkerEdgeColor','black');
+            catch
+            
+            end
             hold off;
 
             %Write the labels

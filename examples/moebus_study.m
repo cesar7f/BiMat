@@ -12,7 +12,7 @@ g = genpath('../'); addpath(g);
 close all; %Close any open figure
 %%%
 % We need also to load the data from which we will be working on
-load moebus_use_case.mat;
+load data/moebus_data.mat;
 %%
 % The loaded data contains the bipartite adjacency matrix of the Moebus and
 % Nattkemper study, where 1's and 2's in the matrix represent either clear
@@ -215,13 +215,15 @@ bp.plotter.PlotModularGraph();
 % we will specify directly those parameters.
 % Do an analysis of modularity and nestedness values using 100 random
 % matrices and the EQUIPROBABLE (Bernoulli) null model.
-bp.statistics.DoCompleteAnalysis(100, @NullModels.EQUIPROBABLE);
+% THIS PART TAKES A LOT OF TIME IN OCTAVE, THAT IS WHY WAS COMMENTED
+%max_recursion_depth(500);
+%bp.statistics.DoCompleteAnalysis(100, 'NullModels.EQUIPROBABLE');
 %%
 % The last function call will printed information about the current status of the
 % simulation. For printing the results we need to call any of the two next calls:
 % Both calls print the same information
-bp.printer.PrintStructureStatistics(); %Print the statistical values
-bp.statistics.Print(); %Print the statistical values
+%bp.printer.PrintStructureStatistics(); %Print the statistical values
+%bp.statistics.Print(); %Print the statistical values
 
 %%
 % All structure statistics calculate the next numbers:
@@ -248,7 +250,7 @@ bp.statistics.Print(); %Print the statistical values
 % |InternalStatistics.m|. For calculating the the statistical structure of the
 % internal modules we just need to call:
 % 100 random matrices using the EQUIPROBABLE null model.
-bp.internal_statistics.TestInternalModules(100,@NullModels.EQUIPROBABLE); 
+bp.internal_statistics.TestInternalModules(100,'NullModels.EQUIPROBABLE'); 
 %%
 % Finally, to print the results we just need to call.
 bp.printer.PrintStructureStatisticsOfModules(); % Print the results
@@ -267,6 +269,6 @@ bp.printer.PrintStructureStatisticsOfModules(); % Print the results
 bp.internal_statistics.TestDiversityRows(1000); 
 % Using specific labeling and Shannon index
 bp.internal_statistics.TestDiversityColumns( ...
-    1000,moebus.phage_stations,@Diversity.SHANNON_INDEX); 
+    1000,moebus.phage_stations,'Diversity.SHANNON_INDEX'); 
 %Print the information of column diversity
 bp.printer.PrintColumnModuleDiversity(); 

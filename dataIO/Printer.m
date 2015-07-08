@@ -259,7 +259,7 @@ classdef Printer < handle
             str = Printer.CREATE_FORMATED_STRING(headers,columns,',');
             
             str = ['Random permutations:\t', sprintf('%25i',obj.bipweb.internal_statistics.row_diversity.n_permutations), '\n', str];
-            str = ['Diversity index:    \t', sprintf('%25s',func2str(obj.bipweb.internal_statistics.row_diversity.diversity_index)), '\n', str];
+            str = ['Diversity index:    \t', sprintf('%25s',obj.bipweb.internal_statistics.row_diversity.diversity_index), '\n', str];
             
             fprintf(str);
             
@@ -295,7 +295,7 @@ classdef Printer < handle
             str = Printer.CREATE_FORMATED_STRING(headers,columns,',');
             
             str = ['Random permutations:\t', sprintf('%25i',obj.bipweb.internal_statistics.col_diversity.n_permutations), '\n', str];
-            str = ['Diversity index:    \t', sprintf('%25s',func2str(obj.bipweb.internal_statistics.col_diversity.diversity_index)), '\n', str];
+            str = ['Diversity index:    \t', sprintf('%25s',obj.bipweb.internal_statistics.col_diversity.diversity_index), '\n', str];
             
             fprintf(str);
             

@@ -285,7 +285,6 @@ classdef MatrixFunctions < handle
         %   the number of components in the variable c, and the
         %   corresponding component index for rows and column nodes in
         %   comp_row and comp_col, respectively.
-        
             [n_rows,n_cols] = size(matrix);
             
             uni_matrix = MatrixFunctions.BIPARTITE_TO_UNIPARTITE(matrix);

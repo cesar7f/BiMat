@@ -50,7 +50,7 @@ meta_stat = MetaStatistics(bip_networks);
 %Configure the meta-analysis experiment
 meta_stat.do_community = false;
 meta_stat.do_nestedness = true; %default value
-meta_stat.nestedness_algorithm = @NestednessNODF;
+meta_stat.nestedness_algorithm = 'NestednessNODF';
 meta_stat.replicates = 100;
 %%
 % After configuring the experiment, we can just launch it by typing:
@@ -86,7 +86,7 @@ figure(2); meta_stat.plotter.PlotNestedMatrices;
 %%
 % 
 %   meta_stat.do_community = true;
-%   meta_stat.modularity_algorithm = @AdaptiveBrim;
+%   meta_stat.modularity_algorithm = 'AdaptiveBrim';
 %   meta_stat.DoMetaAnalyisis();
 %   figure(3); meta_stat.plotter.PlotModularValues();
 %   figure(4); meta_stat.plotter.PlotModularMatrices();

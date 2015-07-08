@@ -41,7 +41,7 @@
 % <html><h3>Creating the Bipartite object</h3></html>
 %
 % We need to start by creating our |Bipartite| object
-load moebus_data.mat;
+load data/moebus_data.mat;
 %%
 % The loaded data contains the bipartite adjacency matrix of the Moebus and
 % Nattkemper study, where 1's and 2's in the matrix represent either clear
@@ -160,6 +160,6 @@ bp.internal_statistics.meta_statistics...
 % random permutations of the labeling across the matrix.
 %Using the labeling of bp and 1000 random permutations
 bp.internal_statistics.TestDiversityColumns( ...
-    1000,moebus.phage_stations,@Diversity.SHANNON_INDEX); 
+    1000,moebus.phage_stations,'Diversity.SHANNON_INDEX'); 
 %Print the information of column diversity
 bp.printer.PrintColumnModuleDiversity(); 

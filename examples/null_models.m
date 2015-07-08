@@ -42,7 +42,7 @@ nested_matrix = MatrixFunctions.NESTED_MATRIX(20);
 modular_matrix = MatrixFunctions.BLOCK_MATRIX(2,10);
 
 %Setting the seed for reproducibility:
-RandStream.setGlobalStream(RandStream('mt19937ar','seed',100));
+rand('seed',100);
 
 %Null models from the original nested matrix
 nested_equiprobable_matrix = NullModels.EQUIPROBABLE(nested_matrix);

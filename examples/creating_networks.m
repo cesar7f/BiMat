@@ -81,7 +81,7 @@ bp.col_class = col_ids;
 % 0 0 1 0
 %
 % The last format input can be called using:
-bp = Reader.READ_BIPARTITE_MATRIX('input_matrix.txt');
+bp = Reader.READ_BIPARTITE_MATRIX('data/input_matrix.txt');
 % We need to add labels and classification ids by ourselves
 bp.row_labels = row_labels;
 bp.col_labels = col_labels;
@@ -109,7 +109,7 @@ bp.col_class = col_ids;
 %
 % The middle columns is optional. If it is not used, the reading function
 % will assume that is composed of ones only. We can now just call:
-bp = Reader.READ_ADJACENCY_LIST('input_adja.txt.');
+bp = Reader.READ_ADJACENCY_LIST('data/input_adja.txt');
 % Wee need to add classification ids by ourselves
 bp.row_class = row_ids;
 bp.col_class = col_ids;

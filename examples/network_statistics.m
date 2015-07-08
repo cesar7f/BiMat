@@ -56,7 +56,7 @@ bp.statistics.Print;
 % statistical test. Let's repeat the experiment using a larger number of
 % random matrices and a different null model:
 %The null model will be the AVERAGE one with 1000 replicates:
-bp.statistics.DoNulls(1000, @NullModels.AVERAGE);
+bp.statistics.DoNulls(1000, 'NullModels.AVERAGE');
 bp.statistics.TestCommunityStructure();
 bp.statistics.TestNestedness();
 %%
@@ -70,6 +70,6 @@ bp.statistics.Print();
 % |StatisticalTest| class on a specific matrix. Using the previous matrix
 % as an example:
 matrix = phage_bacteria_matrices.matrices{38};
-stest_modul = StatisticalTest.TEST_COMMUNITY_STRUCTURE(matrix,200,@NullModels.AVERAGE,@LeadingEigenvector);
+stest_modul = StatisticalTest.TEST_COMMUNITY_STRUCTURE(matrix,200,'NullModels.AVERAGE','LeadingEigenvector');
 %%
-stest_nest = StatisticalTest.TEST_NESTEDNESS(matrix,200,@NullModels.EQUIPROBABLE,@NestednessNODF);
+stest_nest = StatisticalTest.TEST_NESTEDNESS(matrix,200,'NullModels.EQUIPROBABLE','NestednessNODF');
