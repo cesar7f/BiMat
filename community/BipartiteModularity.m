@@ -581,7 +581,7 @@ classdef BipartiteModularity < handle
         %   screen and return an AdaptiveBrim object that contains such
         %   information in modul.    
         
-            modul = AdaptiveBrim(matrix);
+            modul = LP_BRIM(matrix);
             modul.print_results = false;
             modul.Detect();
             modul.Print();

@@ -12,7 +12,7 @@ g = genpath('../'); addpath(g);
 close all; %Close any open figure
 %%%
 % We need also to load the data from which we will be working on
-load moebus_use_case.mat;
+load moebus_data.mat;
 %%
 % The loaded data contains the bipartite adjacency matrix of the Moebus and
 % Nattkemper study, where 1's and 2's in the matrix represent either clear
